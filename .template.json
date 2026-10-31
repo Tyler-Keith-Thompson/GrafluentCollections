@@ -1,0 +1,8 @@
+{
+  "commit": "de8dd7272e7f157bf2cce476670c3a1f3be7a853",
+  "name": "GrafluentCollections",
+  "type": "library",
+  "benchmarks": true,
+  "fly": false,
+  "database": false
+}

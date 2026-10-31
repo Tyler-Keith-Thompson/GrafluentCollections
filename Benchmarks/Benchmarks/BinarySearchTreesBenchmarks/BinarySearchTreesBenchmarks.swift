@@ -113,6 +113,62 @@ let benchmarks: @Sendable () -> Void = {
         }
     }
 
+    Benchmark("BinarySearchTrees: RedBlackTree.init(_:)") { benchmark in
+        for _ in benchmark.scaledIterations {
+            blackHole(RedBlackTree(keys))
+        }
+    }
+
+    Benchmark("BinarySearchTrees: RedBlackTree.contains(_:)") { benchmark in
+        let tree = RedBlackTree(keys)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            var found = 0
+            for probe in probes where tree.contains(probe) {
+                found &+= 1
+            }
+            blackHole(found)
+        }
+    }
+
+    Benchmark("BinarySearchTrees: RedBlackTree.insert(_:) one at a time") { benchmark in
+        for _ in benchmark.scaledIterations {
+            var tree = RedBlackTree<Int>()
+            for key in keys {
+                tree.insert(key)
+            }
+            blackHole(tree)
+        }
+    }
+
+    Benchmark("BinarySearchTrees: RedBlackTree.remove(_:) then insert(_:)") { benchmark in
+        var tree = RedBlackTree(keys)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            for probe in probes {
+                if tree.remove(probe) != nil {
+                    tree.insert(probe)
+                } else {
+                    tree.insert(probe)
+                    tree.remove(probe)
+                }
+            }
+        }
+        blackHole(tree)
+    }
+
+    Benchmark("BinarySearchTrees: RedBlackTree iteration") { benchmark in
+        let tree = RedBlackTree(keys)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            var sum = 0
+            for key in tree {
+                sum &+= key
+            }
+            blackHole(sum)
+        }
+    }
+
     Benchmark("BinarySearchTrees: AVLDictionary subscript stores one at a time") { benchmark in
         for _ in benchmark.scaledIterations {
             var dictionary = AVLDictionary<Int, Int>()

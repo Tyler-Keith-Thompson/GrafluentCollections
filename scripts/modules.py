@@ -41,7 +41,7 @@ MODULES = [
     # Shared
     ("CollectionErrors", "Shared", "The typed errors the collections' checked spellings throw: IndexOutOfRange, DuplicateKey.", []),
     # Search trees
-    ("BinarySearchTrees", "Search trees", "Balanced binary search trees as sorted sets and dictionaries: AVLTree, AVLDictionary.", ["CollectionErrors", "grafluent/Trees"]),
+    ("BinarySearchTrees", "Search trees", "Balanced binary search trees as sorted sets and dictionaries: AVLTree, AVLDictionary, RedBlackTree.", ["CollectionErrors", "grafluent/Trees"]),
     # Range and spatial trees
     ("RangeTrees", "Range and spatial trees", "Trees over a sequence that answer range queries: FenwickTree.", ["CollectionErrors", "grafluent/Trees"]),
 ]

@@ -3,7 +3,7 @@
 load("//tools:docc.bzl", "docc_archive")
 load("//tools:swift_rules.bzl", "swift_library")
 
-# Balanced binary search trees as sorted sets and dictionaries: AVLTree, AVLDictionary.
+# Balanced binary search trees as sorted sets and dictionaries: AVLTree, AVLDictionary, RedBlackTree.
 swift_library(
     name = "BinarySearchTrees",
     srcs = glob(["**/*.swift"]),

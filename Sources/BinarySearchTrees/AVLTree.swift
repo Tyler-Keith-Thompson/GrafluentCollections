@@ -22,17 +22,17 @@
 @frozen
 public struct AVLTree<Element: Comparable> {
     @usableFromInline
-    package var _core: _AVLCore<Element, Void>
+    package var _core: _TreeCore<Element, Void, _AVLBalancing>
 
     @inlinable
-    init(_core: _AVLCore<Element, Void>) {
+    init(_core: _TreeCore<Element, Void, _AVLBalancing>) {
         self._core = _core
     }
 
     /// An empty tree.
     @inlinable
     public init() {
-        _core = _AVLCore()
+        _core = _TreeCore()
     }
 
     /// The tree holding the distinct elements of `elements`; of equal elements, the first is
@@ -61,13 +61,13 @@ public struct AVLTree<Element: Comparable> {
                 keys.append(element)
             }
         }
-        _core = _AVLCore(sortedUniqueKeys: keys, values: ContiguousArray(repeating: (), count: keys.count))
+        _core = _TreeCore(sortedUniqueKeys: keys, values: ContiguousArray(repeating: (), count: keys.count))
     }
 
     /// The number of elements on the longest path from the root down: 0 when empty, 1 for one
     /// element, and below 1.4405 log₂(*n* + 2) − 0.3277 always. O(1).
     @inlinable
-    public var height: Int { _core.height }
+    public var height: Int { _AVLBalancing.height(_core.nodes, root: _core.root) }
 
     /// Whether the tree holds an element equal to `element`. O(log *n*).
     @inlinable
@@ -179,11 +179,11 @@ extension AVLTree: RandomAccessCollection {
     /// extra space.
     @frozen
     public struct Iterator: IteratorProtocol {
-        @usableFromInline var _slots: _AVLCore<Element, Void>.InorderSlots
+        @usableFromInline var _slots: _TreeCore<Element, Void, _AVLBalancing>.InorderSlots
 
         @inlinable
-        init(_ core: _AVLCore<Element, Void>) {
-            _slots = _AVLCore.InorderSlots(core)
+        init(_ core: _TreeCore<Element, Void, _AVLBalancing>) {
+            _slots = _TreeCore.InorderSlots(core)
         }
 
         @inlinable
@@ -334,7 +334,7 @@ extension AVLTree: SetAlgebra {
                 b = right.next()
             }
         }
-        return AVLTree(_core: _AVLCore(sortedUniqueKeys: keys, values: ContiguousArray(repeating: (), count: keys.count)))
+        return AVLTree(_core: _TreeCore(sortedUniqueKeys: keys, values: ContiguousArray(repeating: (), count: keys.count)))
     }
 }
 

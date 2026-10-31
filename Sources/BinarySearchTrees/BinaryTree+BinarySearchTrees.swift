@@ -10,7 +10,17 @@ extension BinaryTree where Vertex: Comparable {
     /// - Complexity: O(*n*).
     @inlinable
     public init?(_ tree: AVLTree<Vertex>) {
-        self.init(_avl: tree._core)
+        self.init(_tree: tree._core)
+    }
+
+    /// The shape of a red–black tree: its elements as vertices, each with the same left and right
+    /// children as in the tree; nil when the tree is empty. The colours are not part of the shape.
+    ///
+    /// - Parameter tree: The red–black tree whose shape is converted.
+    /// - Complexity: O(*n*).
+    @inlinable
+    public init?(_ tree: RedBlackTree<Vertex>) {
+        self.init(_tree: tree._core)
     }
 
     /// The shape of an AVL dictionary: its keys as vertices, each with the same left and right
@@ -22,14 +32,14 @@ extension BinaryTree where Vertex: Comparable {
     /// - Complexity: O(*n*).
     @inlinable
     public init?<Value>(_ dictionary: AVLDictionary<Vertex, Value>) {
-        self.init(_avl: dictionary._core)
+        self.init(_tree: dictionary._core)
     }
 
     /// `BinaryTree(root:children:)` asks for each vertex's children level by level, so the
     /// slots are queued in the same order and each answer is a lookup of the next one; a key
     /// asked out of that order is found by a search instead.
     @inlinable
-    init?<Value>(_avl core: _AVLCore<Vertex, Value>) {
+    init?<Value, Balancing>(_tree core: _TreeCore<Vertex, Value, Balancing>) {
         guard core.root >= 0 else { return nil }
         var queue = ContiguousArray<Int32>()
         queue.reserveCapacity(core.count)
@@ -48,7 +58,7 @@ extension BinaryTree where Vertex: Comparable {
             return (left >= 0 ? core.key(at: left) : nil, right >= 0 ? core.key(at: right) : nil)
         }
         guard let tree else {
-            preconditionFailure("An AVL tree's keys are distinct")
+            preconditionFailure("A search tree's keys are distinct")
         }
         self = tree
     }

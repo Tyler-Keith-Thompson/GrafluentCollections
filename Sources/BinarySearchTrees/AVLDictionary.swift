@@ -17,17 +17,17 @@
 @frozen
 public struct AVLDictionary<Key: Comparable, Value> {
     @usableFromInline
-    package var _core: _AVLCore<Key, Value>
+    package var _core: _TreeCore<Key, Value, _AVLBalancing>
 
     @inlinable
-    init(_core: _AVLCore<Key, Value>) {
+    init(_core: _TreeCore<Key, Value, _AVLBalancing>) {
         self._core = _core
     }
 
     /// An empty dictionary.
     @inlinable
     public init() {
-        _core = _AVLCore()
+        _core = _TreeCore()
     }
 
     /// The dictionary of `keysAndValues`, whose keys must be distinct.
@@ -72,7 +72,7 @@ public struct AVLDictionary<Key: Comparable, Value> {
     static func _sortedCore<E: Error>(
         _ keysAndValues: some Sequence<(Key, Value)>,
         combine: (Value, Value) throws(E) -> Value
-    ) throws(E) -> _AVLCore<Key, Value> {
+    ) throws(E) -> _TreeCore<Key, Value, _AVLBalancing> {
         var pairs = ContiguousArray(keysAndValues)
         var isStrictlyAscending = true
         var k = 1
@@ -106,13 +106,13 @@ public struct AVLDictionary<Key: Comparable, Value> {
             }
             pairs.removeAll()
         }
-        return _AVLCore(sortedUniqueKeys: keys, values: values)
+        return _TreeCore(sortedUniqueKeys: keys, values: values)
     }
 
     /// The number of pairs on the longest path from the root down: 0 when empty, 1 for one pair,
     /// and below 1.4405 log₂(*n* + 2) − 0.3277 always. O(1).
     @inlinable
-    public var height: Int { _core.height }
+    public var height: Int { _AVLBalancing.height(_core.nodes, root: _core.root) }
 
     /// The value for `key`, or nil when absent; setting nil removes the pair.
     ///
@@ -293,12 +293,12 @@ extension AVLDictionary: RandomAccessCollection {
     @frozen
     public struct Iterator: IteratorProtocol {
         @usableFromInline let _values: ContiguousArray<Value>
-        @usableFromInline var _slots: _AVLCore<Key, Value>.InorderSlots
+        @usableFromInline var _slots: _TreeCore<Key, Value, _AVLBalancing>.InorderSlots
 
         @inlinable
-        init(_ core: _AVLCore<Key, Value>) {
+        init(_ core: _TreeCore<Key, Value, _AVLBalancing>) {
             _values = core.values
-            _slots = _AVLCore.InorderSlots(core)
+            _slots = _TreeCore.InorderSlots(core)
         }
 
         @inlinable

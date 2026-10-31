@@ -7,7 +7,10 @@ Balanced binary search trees as sorted sets and sorted dictionaries.
 An ``AVLTree`` is a sorted set and an ``AVLDictionary`` a sorted dictionary, both kept in an AVL
 tree (Adelson-Velsky and Landis, 1962): the heights of every vertex's subtrees differ by at most
 one, so lookup, insertion and removal take O(log *n*) and the height stays below
-1.4405 log₂(*n* + 2) − 0.3277. Their elements are random-access collections in ascending order,
+1.4405 log₂(*n* + 2) − 0.3277. A ``RedBlackTree`` is the same sorted set kept in a red–black
+tree (Guibas and Sedgewick, 1978), whose height stays at most 2 log₂(*n* + 1) and whose
+insertions and removals rotate at most two and three times. The sets share one API, so either
+can stand in for the other. Their elements are random-access collections in ascending order,
 indexed by rank, with `lowerBound(_:)`, `upperBound(_:)` and `elements(in:)` for range queries.
 
 ```swift
@@ -33,6 +36,7 @@ one), so Grafluent's tree algorithms and drawings run over it.
 ### Sorted sets
 
 - ``AVLTree``
+- ``RedBlackTree``
 
 ### Sorted dictionaries
 

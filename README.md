@@ -82,15 +82,28 @@ stock["apple", default: 0] += 1
 print(stock.map(\.key))       // ["apple", "fig", "pear"]
 ```
 
+A `BTree` is the same sorted set with many elements to a node, so a lookup follows a few node
+references rather than one per level, and `BTreeDictionary` is its dictionary:
+
+```swift
+import GrafluentCollections
+
+var readings: BTree = [40, 10, 30, 20]
+readings.insert(25)
+print(Array(readings))        // [10, 20, 25, 30, 40]
+print(readings[2])            // 25
+print(readings.popFirst()!)   // 10
+```
+
 ## Modules
 
-One module per family of structures. `BinarySearchTrees` (`AVLTree`, `AVLDictionary`, `RedBlackTree`, `Treap`, `SplayTree`) and
-`RangeTrees` (`FenwickTree`) have shipped; the others are planned. The backlog tracks each planned structure, and `.kanban/triage.md` says what belongs
+One module per family of structures. `BinarySearchTrees` (`AVLTree`, `AVLDictionary`, `RedBlackTree`, `Treap`, `SplayTree`),
+`BTrees` (`BTree`, `BTreeDictionary`) and `RangeTrees` (`FenwickTree`) have shipped; the others are planned. The backlog tracks each planned structure, and `.kanban/triage.md` says what belongs
 here.
 
 | Group | Modules |
 |---|---|
-| Search trees | `BinarySearchTrees` (AVL, red–black and splay trees, treaps), `BTrees`, `SkipLists` |
+| Search trees | `BinarySearchTrees` (AVL, red–black and splay trees, treaps), `BTrees` (B-trees), `SkipLists` |
 | Tries | `Tries` (tries over any sequence of symbols, radix and Patricia trees, Aho–Corasick automata) |
 | Suffix structures | `SuffixStructures` (suffix arrays with LCP, suffix trees, suffix automata) |
 | Decision diagrams | `DecisionDiagrams` (reduced ordered BDDs, ZDDs) |

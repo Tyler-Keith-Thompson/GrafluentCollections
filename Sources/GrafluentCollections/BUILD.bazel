@@ -11,6 +11,7 @@ swift_library(
     deps = [
         "//Sources/CollectionErrors",
         "//Sources/BinarySearchTrees",
+        "//Sources/BTrees",
         "//Sources/RangeTrees",
     ],
     visibility = ["//visibility:public"],
@@ -24,6 +25,7 @@ docc_archive(
     deps = [
         "//Sources/CollectionErrors:CollectionErrorsDocumentation",
         "//Sources/BinarySearchTrees:BinarySearchTreesDocumentation",
+        "//Sources/BTrees:BTreesDocumentation",
         "//Sources/RangeTrees:RangeTreesDocumentation",
     ],
     tags = ["manual"],

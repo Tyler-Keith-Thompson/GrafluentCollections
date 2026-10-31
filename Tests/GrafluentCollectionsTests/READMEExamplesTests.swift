@@ -47,4 +47,16 @@ struct READMEExamplesTests {
         #expect(stock.map(\.key) == keys)
         #expect(stock["apple"] == apples)
     }
+
+    @Test("Usage: a B-tree sorted set")
+    func bTree() {
+        var readings: BTree = [40, 10, 30, 20]
+        readings.insert(25)
+        let sortedReadings: [Int] = [10, 20, 25, 30, 40]
+        let third: Int = 25
+        let first: Int? = 10
+        #expect(Array(readings) == sortedReadings)
+        #expect(readings[2] == third)
+        #expect(readings.popFirst() == first)
+    }
 }

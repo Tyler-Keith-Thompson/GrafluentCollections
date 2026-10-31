@@ -4,4 +4,5 @@
 
 @_exported import CollectionErrors
 @_exported import BinarySearchTrees
+@_exported import BTrees
 @_exported import RangeTrees

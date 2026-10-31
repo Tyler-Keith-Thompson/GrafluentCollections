@@ -129,7 +129,10 @@ of a hand-written loop over arrays.
   measurement.
 - D3. Elements are stored in flat arrays with index links (2026-10-31): one allocation per
   growth step rather than one per vertex, so copy-on-write copies a few arrays and iteration
-  reads contiguous memory. A per-vertex class is a bug, not a style choice.
+  reads contiguous memory. A per-vertex class is a bug, not a style choice. Amended for multiway
+  nodes (owner, 2026-10-31): a structure whose vertices hold many elements each (a B-tree)
+  stores each vertex as one `ManagedBuffer` of its elements, shared between copies, so a
+  mutation copies only the path it changes. A node per element is still a bug.
 - D4. Grafluent becomes a package dependency (`PACKAGES` in `scripts/modules.py`, pinned
   `from: "0.0.1"`) with the first module that converts to one of its types, and is followed as it
   releases; this library never vendors Grafluent code. A Grafluent gap found here (a missing tree initializer,
@@ -148,6 +151,9 @@ of a hand-written loop over arrays.
   `mutating func access(_:)` and the mutations (insert, remove, split, join) splay, and the
   amortized and working-set bounds are stated for those. Reads never splay behind a value's back
   through shared storage.
+- D8. A multiway tree converts to `RootedTree` with a node's elements, in order, as its vertex
+  (owner, 2026-10-31): `RootedTree<[Element]>` for a `BTree` and `RootedTree<[Key]>` for a
+  `BTreeDictionary`, so a vertex is what a node holds, not a key chosen to stand for it.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

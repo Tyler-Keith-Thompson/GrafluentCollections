@@ -39,9 +39,10 @@ MOCKING = "mockable/Mockable"
 # (name, group, description, dependencies)
 MODULES = [
     # Shared
-    ("CollectionErrors", "Shared", "The typed errors the collections' checked spellings throw: IndexOutOfRange, DuplicateKey.", []),
+    ("CollectionErrors", "Shared", "The typed errors the collections throw: IndexOutOfRange, DuplicateKey, OverlappingKeys.", []),
     # Search trees
     ("BinarySearchTrees", "Search trees", "Balanced binary search trees as sorted sets and dictionaries: AVLTree, AVLDictionary, RedBlackTree, Treap, SplayTree.", ["CollectionErrors", "grafluent/Trees"]),
+    ("BTrees", "Search trees", "B-trees as sorted sets and dictionaries with many elements per node: BTree, BTreeDictionary.", ["CollectionErrors", "grafluent/Trees"]),
     # Range and spatial trees
     ("RangeTrees", "Range and spatial trees", "Trees over a sequence that answer range queries: FenwickTree.", ["CollectionErrors", "grafluent/Trees"]),
 ]
@@ -56,6 +57,7 @@ EXECUTABLES = [
 # holds tests. (name, dependencies)
 TEST_TARGETS = [
     ("BinarySearchTreesTests", ["BinarySearchTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
+    ("BTreesTests", ["BTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     ("RangeTreesTests", ["RangeTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     (f"{PROJECT}Tests", [PROJECT, "grafluent/Trees"]),
 ]
@@ -80,6 +82,7 @@ TEST_SIZES = {name: "medium" for name in [
 # does not make a test speed-reliant.
 PERFORMANCE_TESTS = [
     "BinarySearchTreesTests",
+    "BTreesTests",
     "RangeTreesTests",
 ]
 

@@ -286,76 +286,12 @@ extension _TreeCore where Balancing == _TreapBalancing {
         let lowerCount = nodes.withUnsafeBufferPointer { nodes in Int(_Tree.size(nodes, sides.lower)) }
         if lowerCount <= count &- lowerCount {
             self.root = sides.upper
-            let lower = _extract(sides.lower)
+            let lower = _extract(sides.lower) { core, slot, hole in core._relink(slot, to: hole) }
             return (lower, self)
         }
         self.root = sides.lower
-        let upper = _extract(sides.upper)
+        let upper = _extract(sides.upper) { core, slot, hole in core._relink(slot, to: hole) }
         return (self, upper)
-    }
-
-    /// Copies the subtree rooted at `subtree`, which is no longer linked from the root, into a
-    /// core of its own, and removes its slots here. O(*k* log *n*) for *k* vertices.
-    @inlinable
-    mutating func _extract(_ subtree: Int32) -> _TreeCore {
-        var extracted = _TreeCore()
-        guard subtree >= 0 else { return extracted }
-        let size = Int(nodes[Int(subtree)].size)
-        extracted.nodes.reserveCapacity(size)
-        extracted.values.reserveCapacity(size)
-        var holes = ContiguousArray<Int32>()
-        holes.reserveCapacity(size)
-        var stack: ContiguousArray<(slot: Int32, parent: Int32, right: Bool)> = [(subtree, -1, false)]
-        while let (x, parent, right) = stack.popLast() {
-            let copy = Int32(truncatingIfNeeded: extracted.nodes.count)
-            var node = nodes[Int(x)]
-            if node.left >= 0 { stack.append((node.left, copy, false)) }
-            if node.right >= 0 { stack.append((node.right, copy, true)) }
-            node.left = -1
-            node.right = -1
-            extracted.nodes.append(node)
-            extracted.values.append(values[Int(x)])
-            if parent < 0 {
-                extracted.root = copy
-            } else if right {
-                extracted.nodes[Int(parent)].right = copy
-            } else {
-                extracted.nodes[Int(parent)].left = copy
-            }
-            holes.append(x)
-        }
-        _removeSlots(&holes)
-        return extracted
-    }
-
-    /// Removes the slots `holes`, which nothing links to, keeping the slots dense: each vertex
-    /// past the new end moves into a hole below it. O(*k* log *k* + *k* · depth) for *k* holes.
-    @inlinable
-    mutating func _removeSlots(_ holes: inout ContiguousArray<Int32>) {
-        holes.sort()
-        let newCount = nodes.count &- holes.count
-        // holes[fill...] below newCount take the vertices at or past it, in order; holes[skip...]
-        // at or past it are dropped.
-        var fill = 0
-        var skip = 0
-        while skip < holes.count && Int(holes[skip]) < newCount {
-            skip &+= 1
-        }
-        var s = newCount
-        while s < nodes.count {
-            if skip < holes.count && Int(holes[skip]) == s {
-                skip &+= 1
-            } else {
-                let hole = holes[fill]
-                fill &+= 1
-                _relink(Int32(truncatingIfNeeded: s), to: hole)
-                nodes[Int(hole)] = nodes[s]
-                values[Int(hole)] = values[s]
-            }
-            s &+= 1
-        }
-        nodes.removeLast(holes.count)
-        values.removeLast(holes.count)
     }
 
     /// Joins `other`'s vertices into this treap: every key of `other` is above every key here when
@@ -363,17 +299,8 @@ extension _TreeCore where Balancing == _TreapBalancing {
     /// *m* vertices of `other`, plus O(*n*) when the storage is shared or must grow.
     @inlinable
     mutating func join(_ other: _TreeCore, otherIsUpper: Bool) {
-        precondition(nodes.count &+ other.nodes.count < Int(Int32.max), "A balanced tree holds fewer than 2³¹ − 1 elements")
-        let offset = Int32(truncatingIfNeeded: nodes.count)
-        nodes.reserveCapacity(nodes.count &+ other.nodes.count)
-        for var node in other.nodes {
-            if node.left >= 0 { node.left &+= offset }
-            if node.right >= 0 { node.right &+= offset }
-            nodes.append(node)
-        }
-        values.append(contentsOf: other.values)
+        let otherRoot = _append(other)
         let root = self.root
-        let otherRoot = other.root < 0 ? -1 : other.root &+ offset
         self.root = nodes.withUnsafeMutableBufferPointer { nodes in
             otherIsUpper ? Self._join(nodes, root, otherRoot) : Self._join(nodes, otherRoot, root)
         }

@@ -13,7 +13,10 @@ insertions and removals rotate at most two and three times. A ``Treap`` (Seidel 
 1996) keeps a random priority on each vertex, so its shape is a random binary search tree's
 whatever order the elements came in: O(log *n*) expected for each operation, plus `split(at:)`
 and `join(_:)`, which cut a set at an element and put two sets that don't interleave back
-together. The sets share one API, so any of them can stand in for another. Their elements are random-access collections in ascending order,
+together. A ``SplayTree`` (Sleator and Tarjan, 1985) keeps no balance information: each
+mutation, and each `access(_:)`, rotates the element it reaches to the root, for O(log *n*)
+amortized per operation and fast repeated access to the elements in use. Its other reads leave
+the tree as it is. The sets share one API, so any of them can stand in for another. Their elements are random-access collections in ascending order,
 indexed by rank, with `lowerBound(_:)`, `upperBound(_:)` and `elements(in:)` for range queries.
 
 ```swift
@@ -41,6 +44,7 @@ one), so Grafluent's tree algorithms and drawings run over it.
 - ``AVLTree``
 - ``RedBlackTree``
 - ``Treap``
+- ``SplayTree``
 
 ### Sorted dictionaries
 

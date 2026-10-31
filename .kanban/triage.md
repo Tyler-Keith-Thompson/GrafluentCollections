@@ -142,6 +142,12 @@ of a hand-written loop over arrays.
 - D6. A collection re-exports nothing: a caller who wants the `BinaryTree` view imports
   Grafluent's `Trees` beside this library. Revisit if the owner answers the open question below
   the other way.
+- D7. A self-adjusting tree's reads don't adjust it (2026-10-31): a splay tree's `contains`,
+  bounds, subscripts and iteration leave the shape alone, so it keeps the non-mutating API of
+  the other sorted sets and their `SetAlgebra` and `RandomAccessCollection` conformances. A
+  `mutating func access(_:)` and the mutations (insert, remove, split, join) splay, and the
+  amortized and working-set bounds are stated for those. Reads never splay behind a value's back
+  through shared storage.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

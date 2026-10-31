@@ -33,6 +33,16 @@ extension BinaryTree where Vertex: Comparable {
         self.init(_tree: tree._core)
     }
 
+    /// The shape of a splay tree: its elements as vertices, each with the same left and right
+    /// children as in the tree; nil when the tree is empty. Reading the shape doesn't splay.
+    ///
+    /// - Parameter tree: The splay tree whose shape is converted.
+    /// - Complexity: O(*n*).
+    @inlinable
+    public init?(_ tree: SplayTree<Vertex>) {
+        self.init(_tree: tree._core)
+    }
+
     /// The shape of an AVL dictionary: its keys as vertices, each with the same left and right
     /// children as in the tree; nil when the dictionary is empty.
     ///

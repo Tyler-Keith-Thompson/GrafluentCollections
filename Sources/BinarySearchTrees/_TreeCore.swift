@@ -23,18 +23,22 @@ package struct _TreeNode<Key> {
 
 extension _TreeNode: Sendable where Key: Sendable {}
 
-/// How a balanced tree keeps its shape: the record a new leaf starts with, the records of a
-/// perfectly balanced tree, and the repairs after an insertion or removal. Each repair receives
-/// the path recorded on the way down (its vertices and the side taken at each), hangs the new or
-/// surviving child at its end, keeps the subtree sizes, and returns the new root.
+/// A scheme whose trees can start perfectly balanced: the record of each vertex of such a tree.
 @usableFromInline
-package protocol _TreeBalancing {
-    /// The record of a newly inserted leaf.
-    static var leafBalance: Int32 { get }
-
+package protocol _BalancedBuild {
     /// The record of a vertex of a perfectly balanced tree, given its subtree's height, its depth
     /// and the tree's height (all counted in vertices, the root at depth 0).
     static func balance(subtreeHeight: Int32, depth: Int32, treeHeight: Int32) -> Int32
+}
+
+/// How a balanced tree keeps its shape: the record a new leaf starts with, and the repairs after
+/// an insertion or removal. Each repair receives the path recorded on the way down (its vertices
+/// and the side taken at each), hangs the new or surviving child at its end, keeps the subtree
+/// sizes, and returns the new root.
+@usableFromInline
+package protocol _TreeBalancing: _BalancedBuild {
+    /// The record of a newly inserted leaf.
+    static var leafBalance: Int32 { get }
 
     /// Hangs the new leaf `slot` at the end of the path and restores the balance.
     static func afterInsert<Key>(
@@ -233,14 +237,9 @@ package struct _TreeCore<Key: Comparable, Value, Balancing> {
             }
         }
     }
-
 }
 
-extension _TreeCore where Balancing: _TreeBalancing {
-    /// The longest path a mutation records.
-    @inlinable
-    static var _pathCapacity: Int { 64 }
-
+extension _TreeCore where Balancing: _BalancedBuild {
     /// The perfectly balanced tree over keys sorted in strictly ascending order, and their values.
     /// Slot `k` holds the `k`-th key. O(*n*).
     @inlinable
@@ -283,6 +282,12 @@ extension _TreeCore where Balancing: _TreeBalancing {
         nodes[middle].balance = Balancing.balance(subtreeHeight: height, depth: depth, treeHeight: treeHeight)
         return (Int32(truncatingIfNeeded: middle), height)
     }
+}
+
+extension _TreeCore where Balancing: _TreeBalancing {
+    /// The longest path a mutation records.
+    @inlinable
+    static var _pathCapacity: Int { 64 }
 
     // MARK: Mutations
 
@@ -447,6 +452,96 @@ extension _TreeCore {
             values.swapAt(Int(target), Int(last))
         }
         return (nodes.removeLast().key, values.removeLast())
+    }
+
+    /// Copies the subtree rooted at `subtree`, which is no longer linked from the root, into a
+    /// core of its own, and removes its slots here, moving vertices with `move` as
+    /// `_removeSlots(_:move:)` does. O(*k* log *k*) for *k* vertices, plus the moves.
+    @inlinable
+    mutating func _extract(
+        _ subtree: Int32,
+        move: (inout _TreeCore, _ slot: Int32, _ hole: Int32) -> Void
+    ) -> _TreeCore {
+        var extracted = _TreeCore()
+        guard subtree >= 0 else { return extracted }
+        let size = Int(nodes[Int(subtree)].size)
+        extracted.nodes.reserveCapacity(size)
+        extracted.values.reserveCapacity(size)
+        var holes = ContiguousArray<Int32>()
+        holes.reserveCapacity(size)
+        var stack: ContiguousArray<(slot: Int32, parent: Int32, right: Bool)> = [(subtree, -1, false)]
+        while let (x, parent, right) = stack.popLast() {
+            let copy = Int32(truncatingIfNeeded: extracted.nodes.count)
+            var node = nodes[Int(x)]
+            if node.left >= 0 { stack.append((node.left, copy, false)) }
+            if node.right >= 0 { stack.append((node.right, copy, true)) }
+            node.left = -1
+            node.right = -1
+            extracted.nodes.append(node)
+            extracted.values.append(values[Int(x)])
+            if parent < 0 {
+                extracted.root = copy
+            } else if right {
+                extracted.nodes[Int(parent)].right = copy
+            } else {
+                extracted.nodes[Int(parent)].left = copy
+            }
+            holes.append(x)
+        }
+        _removeSlots(&holes, move: move)
+        return extracted
+    }
+
+    /// Removes the slots `holes`, which nothing links to, keeping the slots dense: each vertex
+    /// past the new end moves into a hole below it. `move` first points the link to that vertex
+    /// at the hole; the vertex is copied there after. O(*k* log *k*) for *k* holes, plus the
+    /// moves.
+    @inlinable
+    mutating func _removeSlots(
+        _ holes: inout ContiguousArray<Int32>,
+        move: (inout _TreeCore, _ slot: Int32, _ hole: Int32) -> Void
+    ) {
+        holes.sort()
+        let newCount = nodes.count &- holes.count
+        // holes[fill...] below newCount take the vertices at or past it, in order; holes[skip...]
+        // at or past it are dropped.
+        var fill = 0
+        var skip = 0
+        while skip < holes.count && Int(holes[skip]) < newCount {
+            skip &+= 1
+        }
+        var s = newCount
+        while s < nodes.count {
+            if skip < holes.count && Int(holes[skip]) == s {
+                skip &+= 1
+            } else {
+                let hole = holes[fill]
+                fill &+= 1
+                move(&self, Int32(truncatingIfNeeded: s), hole)
+                nodes[Int(hole)] = nodes[s]
+                values[Int(hole)] = values[s]
+            }
+            s &+= 1
+        }
+        nodes.removeLast(holes.count)
+        values.removeLast(holes.count)
+    }
+
+    /// Appends `other`'s vertices and values after these, unlinked from this root; returns the
+    /// slot of `other`'s root, or −1 when it is empty. O(*m*) for *m* vertices of `other`, plus
+    /// O(*n*) when the storage is shared or must grow.
+    @inlinable
+    mutating func _append(_ other: _TreeCore) -> Int32 {
+        precondition(nodes.count &+ other.nodes.count < Int(Int32.max), "A balanced tree holds fewer than 2³¹ − 1 elements")
+        let offset = Int32(truncatingIfNeeded: nodes.count)
+        nodes.reserveCapacity(nodes.count &+ other.nodes.count)
+        for var node in other.nodes {
+            if node.left >= 0 { node.left &+= offset }
+            if node.right >= 0 { node.right &+= offset }
+            nodes.append(node)
+        }
+        values.append(contentsOf: other.values)
+        return other.root < 0 ? -1 : other.root &+ offset
     }
 
     /// Points the link that leads to `slot` (from its parent, or the root) at `newSlot` instead.

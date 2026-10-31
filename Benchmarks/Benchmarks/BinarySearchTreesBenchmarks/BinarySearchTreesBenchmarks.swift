@@ -261,6 +261,111 @@ let benchmarks: @Sendable () -> Void = {
         blackHole(tree)
     }
 
+    // Skewed lookups: 10⁴ probes drawn from a Zipf distribution (exponent 1) over the sorted
+    // keys, so a few keys take most of the probes.
+    let zipfProbes: [Int] = {
+        var cumulative: [Double] = []
+        cumulative.reserveCapacity(sorted.count)
+        var total = 0.0
+        for rank in 1 ... sorted.count {
+            total += 1 / Double(rank)
+            cumulative.append(total)
+        }
+        // Rank r goes to a scattered key, so the popular keys aren't neighbours.
+        let stride = 7_919 % sorted.count
+        return (0 ..< 10_000).map { _ in
+            let target = Double(next(below: 1 << 30)) / Double(1 << 30) * total
+            var low = 0
+            var high = cumulative.count - 1
+            while low < high {
+                let middle = (low + high) / 2
+                if cumulative[middle] < target { low = middle + 1 } else { high = middle }
+            }
+            return sorted[(low * stride) % sorted.count]
+        }
+    }()
+    let lookupTable = Dictionary(uniqueKeysWithValues: sorted.map { ($0, ()) })
+
+    Benchmark("BinarySearchTrees: BASELINE Dictionary lookups, Zipf-skewed") { benchmark in
+        for _ in benchmark.scaledIterations {
+            var found = 0
+            for probe in zipfProbes where lookupTable[probe] != nil {
+                found &+= 1
+            }
+            blackHole(found)
+        }
+    }
+
+    Benchmark("BinarySearchTrees: AVLTree.contains(_:), Zipf-skewed") { benchmark in
+        let tree = AVLTree(keys)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            var found = 0
+            for probe in zipfProbes where tree.contains(probe) {
+                found &+= 1
+            }
+            blackHole(found)
+        }
+    }
+
+    Benchmark("BinarySearchTrees: SplayTree.access(_:), Zipf-skewed") { benchmark in
+        var tree = SplayTree(keys)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            var found = 0
+            for probe in zipfProbes where tree.access(probe) != nil {
+                found &+= 1
+            }
+            blackHole(found)
+        }
+        blackHole(tree)
+    }
+
+    Benchmark("BinarySearchTrees: SplayTree.init(_:)") { benchmark in
+        for _ in benchmark.scaledIterations {
+            blackHole(SplayTree(keys))
+        }
+    }
+
+    Benchmark("BinarySearchTrees: SplayTree.insert(_:) one at a time") { benchmark in
+        for _ in benchmark.scaledIterations {
+            var tree = SplayTree<Int>()
+            for key in keys {
+                tree.insert(key)
+            }
+            blackHole(tree)
+        }
+    }
+
+    Benchmark("BinarySearchTrees: SplayTree.remove(_:) then insert(_:)") { benchmark in
+        var tree = SplayTree(keys)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            for probe in probes {
+                if tree.remove(probe) != nil {
+                    tree.insert(probe)
+                } else {
+                    tree.insert(probe)
+                    tree.remove(probe)
+                }
+            }
+        }
+        blackHole(tree)
+    }
+
+    Benchmark("BinarySearchTrees: SplayTree.access(_:) in ascending order") { benchmark in
+        var tree = SplayTree(keys)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            var found = 0
+            for key in sorted where tree.access(key) != nil {
+                found &+= 1
+            }
+            blackHole(found)
+        }
+        blackHole(tree)
+    }
+
     Benchmark("BinarySearchTrees: AVLDictionary subscript stores one at a time") { benchmark in
         for _ in benchmark.scaledIterations {
             var dictionary = AVLDictionary<Int, Int>()

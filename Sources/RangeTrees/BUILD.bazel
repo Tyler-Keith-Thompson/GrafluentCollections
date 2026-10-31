@@ -3,18 +3,21 @@
 load("//tools:docc.bzl", "docc_archive")
 load("//tools:swift_rules.bzl", "swift_library")
 
-# Greeting: a greeting composed from a name and modifiers. Replace with the first real module.
+# Trees over a sequence that answer range queries: FenwickTree.
 swift_library(
-    name = "Greetings",
+    name = "RangeTrees",
     srcs = glob(["**/*.swift"]),
-    module_name = "Greetings",
+    module_name = "RangeTrees",
+    deps = [
+        "@swiftpkg_grafluent//:Trees",
+    ],
     visibility = ["//visibility:public"],
 )
 
 # The module's DocC archive, merged into //:docs. `manual` keeps it out of `bazel build //...`.
 docc_archive(
-    name = "GreetingsDocumentation",
-    module = ":Greetings",
+    name = "RangeTreesDocumentation",
+    module = ":RangeTrees",
     catalog = glob(["*.docc/**"], allow_empty = True),
     tags = ["manual"],
     visibility = ["//visibility:public"],

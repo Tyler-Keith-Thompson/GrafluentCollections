@@ -19,6 +19,7 @@ swift_library(
     visibility = ["//:__pkg__"],
     deps = [
         "//Sources/GrafluentCollections",
+        "@swiftpkg_grafluent//:Trees",
     ],
 )
 

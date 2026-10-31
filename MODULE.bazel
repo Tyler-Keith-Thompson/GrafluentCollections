@@ -37,5 +37,6 @@ use_repo(
     swift_deps,
     "swift_deps_info",
     "swift_package",
+    "swiftpkg_grafluent",
     "swiftpkg_swift_property_based",
 )

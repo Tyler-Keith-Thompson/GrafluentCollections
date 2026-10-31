@@ -13,25 +13,29 @@ let bazelFiles = ["BUILD.bazel"]
 // the type checker.
 let products: [Product] = [
     .library(name: "GrafluentCollections", targets: ["GrafluentCollections"]),
-    .library(name: "Greetings", targets: ["Greetings"]),
+    .library(name: "RangeTrees", targets: ["RangeTrees"]),
 ]
 
 let dependencies: [Package.Dependency] = [
+    .package(url: "https://github.com/Tyler-Keith-Thompson/Grafluent", from: "0.0.1"),
     .package(url: "https://github.com/x-sheep/swift-property-based", from: "2.0.1"),
 ]
 
 let targets: [Target] = [
-    // Example
-    .target(name: "Greetings", exclude: bazelFiles),
+    // Range and spatial trees
+    .target(name: "RangeTrees", dependencies: [.product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
 
     // Umbrella: `import GrafluentCollections` imports every module.
-    .target(name: "GrafluentCollections", dependencies: ["Greetings"], exclude: bazelFiles),
+    .target(name: "GrafluentCollections", dependencies: ["RangeTrees"], exclude: bazelFiles),
 
     // Shared fixtures (data only) for every test target.
     .target(name: "GrafluentCollectionsTestSupport", path: "Tests/GrafluentCollectionsTestSupport", exclude: bazelFiles),
 
-    .testTarget(name: "GreetingsTests", dependencies: ["Greetings", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based")], exclude: bazelFiles),
-    .testTarget(name: "GrafluentCollectionsTests", dependencies: ["GrafluentCollections"], exclude: bazelFiles),
+    .testTarget(name: "RangeTreesTests", dependencies: ["RangeTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], exclude: ["BUILD.bazel", "Performance"]),
+    .testTarget(name: "GrafluentCollectionsTests", dependencies: ["GrafluentCollections", .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
+
+    // Speed-reliant tests, split from the target of the same module (PERFORMANCE_TESTS in scripts/modules.py).
+    .testTarget(name: "RangeTreesPerformanceTests", dependencies: ["RangeTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], path: "Tests/RangeTreesTests/Performance"),
 ]
 
 let package = Package(

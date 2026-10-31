@@ -8,6 +8,7 @@ let package = Package(
     name: "GrafluentCollectionsDependencies",
     platforms: [.macOS("15.0")],
     dependencies: [
+        .package(url: "https://github.com/Tyler-Keith-Thompson/Grafluent", from: "0.0.1"),
         .package(url: "https://github.com/x-sheep/swift-property-based", from: "2.0.1"),
     ]
 )

@@ -11,18 +11,18 @@ Grafluent type of that shape (`BinaryTree`, `Arborescence`, `RootedTree`), so Gr
 algorithms and drawings run over it.
 
 `import GrafluentCollections` imports every module. Each module also has its own documentation and
-can be imported on its own. No structure has landed yet; `Greetings` is the template's placeholder
-module.
+can be imported on its own.
 
 ```swift
 import GrafluentCollections
 
-let greeting = Greeting(name: "Ada").formal().punctuated(with: "!")
-print(greeting.text)  // Good day, Ada!
+var scores: FenwickTree = [3, 1, 4, 1, 5, 9, 2, 6]
+print(scores.prefixSum(through: 3))  // 9
+print(scores.sum(in: 2 ..< 6))       // 19
 ```
 
 ## Topics
 
 ### Modules
 
-- ``Greetings``
+- ``RangeTrees``

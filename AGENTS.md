@@ -8,8 +8,8 @@ structs) and the API shape of the standard library and Swift Collections. Its us
 developers on Apple platforms, Linux and WebAssembly who need a sorted set, a trie or a suffix
 structure, and Grafluent users who want to run graph algorithms over one. The charter in
 `.kanban/triage.md` says what is in and out of scope; the backlog holds the planned structures.
-No structure has landed yet: `Greetings` is the template's placeholder module, to be replaced by
-the first real one (add Grafluent to `PACKAGES` with it). Swift 6.3 (minimum).
+`RangeTrees` (`FenwickTree`) is the first module to land, and the pattern for the rest: a
+structure, its `Arborescence` conversion, tests, a ratio test and benchmarks. Swift 6.3 (minimum).
 Bazel is the development build; SwiftPM is the published package. `README.md` is the user-facing
 overview.
 

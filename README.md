@@ -26,38 +26,55 @@ Then add a product to your target, either the umbrella or individual modules:
 .target(name: "MyApp", dependencies: [
     .product(name: "GrafluentCollections", package: "GrafluentCollections"),
     // or, for example:
-    // .product(name: "BinarySearchTrees", package: "GrafluentCollections"),
+    // .product(name: "RangeTrees", package: "GrafluentCollections"),
 ]),
 ```
 
 ## Usage
 
 Every example here is a test in `Tests/GrafluentCollectionsTests`, so it cannot drift from the code.
-No collection has landed yet; the package holds the project template's placeholder module,
-`Greetings`, until the first one does:
+
+A `FenwickTree` answers prefix and range sums over a sequence of values, and takes point updates,
+in O(log *n*) each:
 
 ```swift
 import GrafluentCollections
 
-let greeting = Greeting(name: "Ada").formal().punctuated(with: "!")
-print(greeting.text)  // Good day, Ada!
+var scores: FenwickTree = [3, 1, 4, 1, 5, 9, 2, 6]
+print(scores.prefixSum(through: 3))  // 9
+print(scores.sum(in: 2 ..< 6))       // 19
+scores.add(10, at: 1)
+print(scores.prefixSum(through: 3))  // 19
+print(scores.lowerBound(ofPrefixSum: 15))  // 2
+```
+
+Its shape converts to Grafluent's `Arborescence`, so Grafluent's tree algorithms and drawings run
+over it:
+
+```swift
+import GrafluentCollections
+import Trees
+
+let updates = Arborescence(FenwickTree([1, 2, 3, 4, 5, 6, 7, 8]))
+print(updates.root)              // 8
+print(updates.parent(of: 2)!)    // 3
 ```
 
 ## Modules
 
-The planned modules, one per family of structures. None has shipped yet; the backlog tracks each
-structure, and `.kanban/triage.md` says what belongs here.
+One module per family of structures. `RangeTrees` has shipped, holding `FenwickTree`; the others
+are planned. The backlog tracks each planned structure, and `.kanban/triage.md` says what belongs
+here.
 
-| Group | Modules (planned) |
+| Group | Modules |
 |---|---|
 | Search trees | `BinarySearchTrees` (AVL, red–black, treap, splay), `BTrees`, `SkipLists` |
 | Tries | `Tries` (tries over any sequence of symbols, radix and Patricia trees, Aho–Corasick automata) |
 | Suffix structures | `SuffixStructures` (suffix arrays with LCP, suffix trees, suffix automata) |
 | Decision diagrams | `DecisionDiagrams` (reduced ordered BDDs, ZDDs) |
-| Range and spatial trees | `RangeTrees` (Fenwick and segment trees, interval trees), `SpatialTrees` (k-d trees, quadtrees, octrees) |
+| Range and spatial trees | `RangeTrees` (Fenwick trees; segment and interval trees planned), `SpatialTrees` (k-d trees, quadtrees, octrees) |
 | Sequences and persistence | `Ropes`, `PersistentTrees` (path-copying balanced trees) |
 | Caches | `Caches` (LRU structures) |
-| Placeholder | `Greetings`: the template's example module, replaced by the first real one |
 
 ## Development
 

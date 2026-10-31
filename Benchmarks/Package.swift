@@ -14,12 +14,12 @@ let package = Package(
     ],
     targets: [
         .executableTarget(
-            name: "GreetingsBenchmarks",
+            name: "RangeTreesBenchmarks",
             dependencies: [
                 .product(name: "Benchmark", package: "benchmark"),
-                .product(name: "Greetings", package: "GrafluentCollections"),
+                .product(name: "RangeTrees", package: "GrafluentCollections"),
             ],
-            path: "Benchmarks/GreetingsBenchmarks",
+            path: "Benchmarks/RangeTreesBenchmarks",
             plugins: [.plugin(name: "BenchmarkPlugin", package: "benchmark")]
         ),
     ]

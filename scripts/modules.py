@@ -21,6 +21,8 @@ TEST_SUPPORT = f"{PROJECT}TestSupport"
 # in the tables below refers to a product of one of these. After adding one: `just modules`,
 # add `swiftpkg_<identity>` (hyphens as underscores) to use_repo in MODULE.bazel, `just resolve`.
 PACKAGES = [
+    # The graph library whose tree types the collections convert to (triage charter D1, D4).
+    ("grafluent", "https://github.com/Tyler-Keith-Thompson/Grafluent", "0.0.1"),
     # Tests only: property checks with shrinking, for Swift Testing.
     ("swift-property-based", "https://github.com/x-sheep/swift-property-based", "2.0.1"),
     # Mocks generated from protocols (`@Mockable`). Uncomment when a module first needs one; see
@@ -36,8 +38,8 @@ MOCKING = "mockable/Mockable"
 
 # (name, group, description, dependencies)
 MODULES = [
-    # Example
-    ("Greetings", "Example", "Greeting: a greeting composed from a name and modifiers. Replace with the first real module.", []),
+    # Range and spatial trees
+    ("RangeTrees", "Range and spatial trees", "Trees over a sequence that answer range queries: FenwickTree.", ["grafluent/Trees"]),
 ]
 
 # Executables: (name, description, dependencies). Each is an `.executableTarget` and product in
@@ -49,8 +51,8 @@ EXECUTABLES = [
 # Test targets. SwiftPM rejects a target with no sources, so list a target only once its directory
 # holds tests. (name, dependencies)
 TEST_TARGETS = [
-    ("GreetingsTests", ["Greetings", TEST_SUPPORT, "swift-property-based/PropertyBased"]),
-    (f"{PROJECT}Tests", [PROJECT]),
+    ("RangeTreesTests", ["RangeTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
+    (f"{PROJECT}Tests", [PROJECT, "grafluent/Trees"]),
 ]
 
 # The modules the test-support target depends on (fixtures are usually written against the
@@ -72,6 +74,7 @@ TEST_SIZES = {name: "medium" for name in [
 # out under release. Debug runs both. A `.timeLimit` that only guards a small input against a hang
 # does not make a test speed-reliant.
 PERFORMANCE_TESTS = [
+    "RangeTreesTests",
 ]
 
 # Performance tests run up to their one-minute limits each, so their targets get "medium" (300 s).

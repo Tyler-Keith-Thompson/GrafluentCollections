@@ -2,4 +2,4 @@
 //
 // Umbrella: `import GrafluentCollections` imports every module.
 
-@_exported import Greetings
+@_exported import RangeTrees

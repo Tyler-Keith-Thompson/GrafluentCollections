@@ -38,8 +38,10 @@ MOCKING = "mockable/Mockable"
 
 # (name, group, description, dependencies)
 MODULES = [
+    # Shared
+    ("CollectionErrors", "Shared", "The typed errors the collections' checked spellings throw: IndexOutOfRange.", []),
     # Range and spatial trees
-    ("RangeTrees", "Range and spatial trees", "Trees over a sequence that answer range queries: FenwickTree.", ["grafluent/Trees"]),
+    ("RangeTrees", "Range and spatial trees", "Trees over a sequence that answer range queries: FenwickTree.", ["CollectionErrors", "grafluent/Trees"]),
 ]
 
 # Executables: (name, description, dependencies). Each is an `.executableTarget` and product in

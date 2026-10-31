@@ -9,6 +9,7 @@ swift_library(
     srcs = glob(["**/*.swift"]),
     module_name = "RangeTrees",
     deps = [
+        "//Sources/CollectionErrors",
         "@swiftpkg_grafluent//:Trees",
     ],
     visibility = ["//visibility:public"],
@@ -19,6 +20,9 @@ docc_archive(
     name = "RangeTreesDocumentation",
     module = ":RangeTrees",
     catalog = glob(["*.docc/**"], allow_empty = True),
+    deps = [
+        "//Sources/CollectionErrors:CollectionErrorsDocumentation",
+    ],
     tags = ["manual"],
     visibility = ["//visibility:public"],
 )

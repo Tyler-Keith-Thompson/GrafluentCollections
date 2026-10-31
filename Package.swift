@@ -13,6 +13,7 @@ let bazelFiles = ["BUILD.bazel"]
 // the type checker.
 let products: [Product] = [
     .library(name: "GrafluentCollections", targets: ["GrafluentCollections"]),
+    .library(name: "CollectionErrors", targets: ["CollectionErrors"]),
     .library(name: "RangeTrees", targets: ["RangeTrees"]),
 ]
 
@@ -22,11 +23,13 @@ let dependencies: [Package.Dependency] = [
 ]
 
 let targets: [Target] = [
+    // Shared
+    .target(name: "CollectionErrors", exclude: bazelFiles),
     // Range and spatial trees
-    .target(name: "RangeTrees", dependencies: [.product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
+    .target(name: "RangeTrees", dependencies: ["CollectionErrors", .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
 
     // Umbrella: `import GrafluentCollections` imports every module.
-    .target(name: "GrafluentCollections", dependencies: ["RangeTrees"], exclude: bazelFiles),
+    .target(name: "GrafluentCollections", dependencies: ["CollectionErrors", "RangeTrees"], exclude: bazelFiles),
 
     // Shared fixtures (data only) for every test target.
     .target(name: "GrafluentCollectionsTestSupport", path: "Tests/GrafluentCollectionsTestSupport", exclude: bazelFiles),

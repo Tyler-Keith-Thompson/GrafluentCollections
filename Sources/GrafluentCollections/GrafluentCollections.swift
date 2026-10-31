@@ -2,4 +2,5 @@
 //
 // Umbrella: `import GrafluentCollections` imports every module.
 
+@_exported import CollectionErrors
 @_exported import RangeTrees

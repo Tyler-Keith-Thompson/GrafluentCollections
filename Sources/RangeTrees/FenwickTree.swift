@@ -1,3 +1,5 @@
+@_exported import CollectionErrors
+
 /// A Fenwick tree (binary indexed tree): a sequence of values that answers prefix sums and takes
 /// point updates in O(log *n*) each.
 ///
@@ -326,11 +328,4 @@ extension FenwickTree: CustomStringConvertible {
     public var description: String {
         Array(self).description
     }
-}
-
-/// The error a `checked:` spelling throws for an index or range that lies outside the collection.
-@frozen
-public struct IndexOutOfRange: Error, Hashable, Sendable {
-    @inlinable
-    public init() {}
 }

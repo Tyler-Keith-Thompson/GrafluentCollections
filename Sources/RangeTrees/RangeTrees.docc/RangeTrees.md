@@ -28,4 +28,3 @@ module beside this one), so Grafluent's tree algorithms and drawings run over it
 ### Fenwick trees
 
 - ``FenwickTree``
-- ``IndexOutOfRange``

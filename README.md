@@ -75,6 +75,7 @@ here.
 | Range and spatial trees | `RangeTrees` (Fenwick trees; segment and interval trees planned), `SpatialTrees` (k-d trees, quadtrees, octrees) |
 | Sequences and persistence | `Ropes`, `PersistentTrees` (path-copying balanced trees) |
 | Caches | `Caches` (LRU structures) |
+| Shared | `CollectionErrors`: the errors the `checked:` spellings throw, re-exported by every module that throws them |
 
 ## Development
 

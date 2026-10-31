@@ -173,7 +173,8 @@ public struct AVLDictionary<Key: Comparable, Value> {
     /// The index of the pair for `key`, or nil when absent. O(log *n*).
     @inlinable
     public func index(forKey key: Key) -> Index? {
-        _core.rank(of: key).map(Index.init(_rank:))
+        guard let rank = _core.rank(of: key) else { return nil }
+        return Index(_rank: rank)
     }
 
     /// The index of the first pair whose key is not less than `key`, or `endIndex` when every key

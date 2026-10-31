@@ -28,4 +28,23 @@ struct READMEExamplesTests {
         #expect(updates.root == root)
         #expect(updates.parent(of: 2)! == parent)
     }
+
+    @Test("Usage: a sorted set and a sorted dictionary")
+    func sortedSetAndDictionary() {
+        var primes: AVLTree = [7, 2, 11, 3, 5]
+        primes.insert(13)
+        let sortedPrimes: [Int] = [2, 3, 5, 7, 11, 13]
+        let indexOfSeven: Int = 3
+        #expect(!primes.contains(4))
+        #expect(Array(primes) == sortedPrimes)
+        #expect(primes.lowerBound(6) == indexOfSeven)
+
+        var stock: AVLDictionary = ["pear": 4, "apple": 7]
+        stock["fig"] = 2
+        stock["apple", default: 0] += 1
+        let keys: [String] = ["apple", "fig", "pear"]
+        let apples: Int? = 8
+        #expect(stock.map(\.key) == keys)
+        #expect(stock["apple"] == apples)
+    }
 }

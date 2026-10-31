@@ -39,7 +39,9 @@ MOCKING = "mockable/Mockable"
 # (name, group, description, dependencies)
 MODULES = [
     # Shared
-    ("CollectionErrors", "Shared", "The typed errors the collections' checked spellings throw: IndexOutOfRange.", []),
+    ("CollectionErrors", "Shared", "The typed errors the collections' checked spellings throw: IndexOutOfRange, DuplicateKey.", []),
+    # Search trees
+    ("BinarySearchTrees", "Search trees", "Balanced binary search trees as sorted sets and dictionaries: AVLTree, AVLDictionary.", ["CollectionErrors", "grafluent/Trees"]),
     # Range and spatial trees
     ("RangeTrees", "Range and spatial trees", "Trees over a sequence that answer range queries: FenwickTree.", ["CollectionErrors", "grafluent/Trees"]),
 ]
@@ -53,6 +55,7 @@ EXECUTABLES = [
 # Test targets. SwiftPM rejects a target with no sources, so list a target only once its directory
 # holds tests. (name, dependencies)
 TEST_TARGETS = [
+    ("BinarySearchTreesTests", ["BinarySearchTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     ("RangeTreesTests", ["RangeTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     (f"{PROJECT}Tests", [PROJECT, "grafluent/Trees"]),
 ]
@@ -76,6 +79,7 @@ TEST_SIZES = {name: "medium" for name in [
 # out under release. Debug runs both. A `.timeLimit` that only guards a small input against a hang
 # does not make a test speed-reliant.
 PERFORMANCE_TESTS = [
+    "BinarySearchTreesTests",
     "RangeTreesTests",
 ]
 

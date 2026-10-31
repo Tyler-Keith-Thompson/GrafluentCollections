@@ -3,7 +3,7 @@
 load("//tools:docc.bzl", "docc_archive")
 load("//tools:swift_rules.bzl", "swift_library")
 
-# The typed errors the collections' checked spellings throw: IndexOutOfRange.
+# The typed errors the collections' checked spellings throw: IndexOutOfRange, DuplicateKey.
 swift_library(
     name = "CollectionErrors",
     srcs = glob(["**/*.swift"]),

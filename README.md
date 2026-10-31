@@ -60,15 +60,33 @@ print(updates.root)              // 8
 print(updates.parent(of: 2)!)    // 3
 ```
 
+An `AVLTree` is a sorted set and an `AVLDictionary` a sorted dictionary, each a balanced binary
+search tree with O(log *n*) lookup, insertion and removal, indexed by rank:
+
+```swift
+import GrafluentCollections
+
+var primes: AVLTree = [7, 2, 11, 3, 5]
+primes.insert(13)
+print(primes.contains(4))     // false
+print(Array(primes))          // [2, 3, 5, 7, 11, 13]
+print(primes.lowerBound(6))   // 3, the index of 7
+
+var stock: AVLDictionary = ["pear": 4, "apple": 7]
+stock["fig"] = 2
+stock["apple", default: 0] += 1
+print(stock.map(\.key))       // ["apple", "fig", "pear"]
+```
+
 ## Modules
 
-One module per family of structures. `RangeTrees` has shipped, holding `FenwickTree`; the others
-are planned. The backlog tracks each planned structure, and `.kanban/triage.md` says what belongs
+One module per family of structures. `BinarySearchTrees` (`AVLTree`, `AVLDictionary`) and `RangeTrees`
+(`FenwickTree`) have shipped; the others are planned. The backlog tracks each planned structure, and `.kanban/triage.md` says what belongs
 here.
 
 | Group | Modules |
 |---|---|
-| Search trees | `BinarySearchTrees` (AVL, red–black, treap, splay), `BTrees`, `SkipLists` |
+| Search trees | `BinarySearchTrees` (AVL trees; red–black, treap and splay planned), `BTrees`, `SkipLists` |
 | Tries | `Tries` (tries over any sequence of symbols, radix and Patricia trees, Aho–Corasick automata) |
 | Suffix structures | `SuffixStructures` (suffix arrays with LCP, suffix trees, suffix automata) |
 | Decision diagrams | `DecisionDiagrams` (reduced ordered BDDs, ZDDs) |

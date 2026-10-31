@@ -10,6 +10,7 @@ swift_library(
     module_name = "GrafluentCollections",
     deps = [
         "//Sources/CollectionErrors",
+        "//Sources/BinarySearchTrees",
         "//Sources/RangeTrees",
     ],
     visibility = ["//visibility:public"],
@@ -22,6 +23,7 @@ docc_archive(
     catalog = glob(["*.docc/**"], allow_empty = True),
     deps = [
         "//Sources/CollectionErrors:CollectionErrorsDocumentation",
+        "//Sources/BinarySearchTrees:BinarySearchTreesDocumentation",
         "//Sources/RangeTrees:RangeTreesDocumentation",
     ],
     tags = ["manual"],

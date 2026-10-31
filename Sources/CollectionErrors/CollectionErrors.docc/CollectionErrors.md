@@ -13,3 +13,4 @@ throw it.
 ### Errors
 
 - ``IndexOutOfRange``
+- ``DuplicateKey``

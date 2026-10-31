@@ -14,6 +14,7 @@ let bazelFiles = ["BUILD.bazel"]
 let products: [Product] = [
     .library(name: "GrafluentCollections", targets: ["GrafluentCollections"]),
     .library(name: "CollectionErrors", targets: ["CollectionErrors"]),
+    .library(name: "BinarySearchTrees", targets: ["BinarySearchTrees"]),
     .library(name: "RangeTrees", targets: ["RangeTrees"]),
 ]
 
@@ -25,19 +26,23 @@ let dependencies: [Package.Dependency] = [
 let targets: [Target] = [
     // Shared
     .target(name: "CollectionErrors", exclude: bazelFiles),
+    // Search trees
+    .target(name: "BinarySearchTrees", dependencies: ["CollectionErrors", .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
     // Range and spatial trees
     .target(name: "RangeTrees", dependencies: ["CollectionErrors", .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
 
     // Umbrella: `import GrafluentCollections` imports every module.
-    .target(name: "GrafluentCollections", dependencies: ["CollectionErrors", "RangeTrees"], exclude: bazelFiles),
+    .target(name: "GrafluentCollections", dependencies: ["CollectionErrors", "BinarySearchTrees", "RangeTrees"], exclude: bazelFiles),
 
     // Shared fixtures (data only) for every test target.
     .target(name: "GrafluentCollectionsTestSupport", path: "Tests/GrafluentCollectionsTestSupport", exclude: bazelFiles),
 
+    .testTarget(name: "BinarySearchTreesTests", dependencies: ["BinarySearchTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], exclude: ["BUILD.bazel", "Performance"]),
     .testTarget(name: "RangeTreesTests", dependencies: ["RangeTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], exclude: ["BUILD.bazel", "Performance"]),
     .testTarget(name: "GrafluentCollectionsTests", dependencies: ["GrafluentCollections", .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
 
     // Speed-reliant tests, split from the target of the same module (PERFORMANCE_TESTS in scripts/modules.py).
+    .testTarget(name: "BinarySearchTreesPerformanceTests", dependencies: ["BinarySearchTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], path: "Tests/BinarySearchTreesTests/Performance"),
     .testTarget(name: "RangeTreesPerformanceTests", dependencies: ["RangeTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], path: "Tests/RangeTreesTests/Performance"),
 ]
 

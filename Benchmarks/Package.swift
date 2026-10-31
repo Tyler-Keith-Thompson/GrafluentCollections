@@ -14,6 +14,15 @@ let package = Package(
     ],
     targets: [
         .executableTarget(
+            name: "BinarySearchTreesBenchmarks",
+            dependencies: [
+                .product(name: "Benchmark", package: "benchmark"),
+                .product(name: "BinarySearchTrees", package: "GrafluentCollections"),
+            ],
+            path: "Benchmarks/BinarySearchTreesBenchmarks",
+            plugins: [.plugin(name: "BenchmarkPlugin", package: "benchmark")]
+        ),
+        .executableTarget(
             name: "RangeTreesBenchmarks",
             dependencies: [
                 .product(name: "Benchmark", package: "benchmark"),

@@ -23,6 +23,16 @@ extension BinaryTree where Vertex: Comparable {
         self.init(_tree: tree._core)
     }
 
+    /// The shape of a treap: its elements as vertices, each with the same left and right children
+    /// as in the treap; nil when the treap is empty. The priorities are not part of the shape.
+    ///
+    /// - Parameter tree: The treap whose shape is converted.
+    /// - Complexity: O(*n*).
+    @inlinable
+    public init?(_ tree: Treap<Vertex>) {
+        self.init(_tree: tree._core)
+    }
+
     /// The shape of an AVL dictionary: its keys as vertices, each with the same left and right
     /// children as in the tree; nil when the dictionary is empty.
     ///

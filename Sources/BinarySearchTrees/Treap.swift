@@ -1,0 +1,522 @@
+@_exported import CollectionErrors
+
+/// A sorted set kept in a treap: a binary search tree whose vertices also carry random
+/// priorities, with no vertex of higher priority than its parent (Seidel and Aragon, 1996).
+///
+/// The random priorities make the shape that of a random binary search tree, whatever order the
+/// elements arrive in, so lookup, insertion and removal take O(log *n*) expected time. A treap
+/// also splits at an element into the elements below it and the rest, and joins two treaps whose
+/// elements don't interleave. The elements are a random-access collection in ascending order,
+/// indexed by rank like an array: `treap[0]` is the smallest element. Reading an element by index
+/// costs O(log *n*) expected, and a pass through the whole collection costs O(*n*).
+///
+/// ```swift
+/// var numbers: Treap = [8, 3, 5, 1, 9]
+/// let parts = numbers.split(at: 5)
+/// Array(parts.lower)            // [1, 3]
+/// Array(parts.upper)            // [5, 8, 9]
+/// var rejoined = parts.lower
+/// try rejoined.join(parts.upper)
+/// rejoined == numbers           // true
+/// ```
+///
+/// The priorities come from a random number generator given at creation,
+/// `SystemRandomNumberGenerator` by default; a seeded generator makes every shape reproducible.
+/// The treap draws one seed from it and keeps its own generator state, so a copy draws the same
+/// priorities as its original.
+///
+/// The vertices live in flat arrays with `Int32` links, so the treap holds fewer than 2³¹ − 1
+/// elements, and copying it copies a few arrays only when one copy is mutated.
+@frozen
+public struct Treap<Element: Comparable> {
+    @usableFromInline
+    package var _core: _TreeCore<Element, Void, _TreapBalancing>
+
+    @usableFromInline
+    var _priorities: _TreapPriorities
+
+    @inlinable
+    init(_core: _TreeCore<Element, Void, _TreapBalancing>, priorities: _TreapPriorities) {
+        self._core = _core
+        self._priorities = priorities
+    }
+
+    /// An empty treap whose priorities come from `SystemRandomNumberGenerator`.
+    @inlinable
+    public init() {
+        var generator = SystemRandomNumberGenerator()
+        self.init(using: &generator)
+    }
+
+    /// An empty treap whose priorities come from `generator`.
+    ///
+    /// - Parameter generator: The generator the treap draws its seed from.
+    @inlinable
+    public init(using generator: inout some RandomNumberGenerator) {
+        _core = _TreeCore()
+        _priorities = _TreapPriorities(using: &generator)
+    }
+
+    /// The treap holding the distinct elements of `elements`, with priorities from
+    /// `SystemRandomNumberGenerator`; of equal elements, the first is kept.
+    ///
+    /// - Parameter elements: The elements, in any order.
+    /// - Complexity: O(*n* log *n*) to sort them, then O(*n*) to build the treap.
+    @inlinable
+    public init(_ elements: some Sequence<Element>) {
+        var generator = SystemRandomNumberGenerator()
+        self.init(elements, using: &generator)
+    }
+
+    /// The treap holding the distinct elements of `elements`, with priorities from `generator`;
+    /// of equal elements, the first is kept.
+    ///
+    /// - Parameters:
+    ///   - elements: The elements, in any order.
+    ///   - generator: The generator the treap draws its seed from.
+    /// - Complexity: O(*n* log *n*) to sort them, then O(*n*) to build the treap.
+    @inlinable
+    public init(_ elements: some Sequence<Element>, using generator: inout some RandomNumberGenerator) {
+        var keys = ContiguousArray(elements)
+        var isStrictlyAscending = true
+        var k = 1
+        while k < keys.count {
+            if !(keys[k &- 1] < keys[k]) {
+                isStrictlyAscending = false
+                break
+            }
+            k &+= 1
+        }
+        if !isStrictlyAscending {
+            // Sorted with each element's position as the tie-break, so the first of equal ones leads.
+            var ordered = ContiguousArray(zip(keys, 0 ..< keys.count))
+            ordered.sort { a, b in a.0 < b.0 || (!(b.0 < a.0) && a.1 < b.1) }
+            keys.removeAll(keepingCapacity: true)
+            for (element, _) in ordered where keys.isEmpty || keys[keys.count &- 1] < element {
+                keys.append(element)
+            }
+        }
+        var priorities = _TreapPriorities(using: &generator)
+        _core = _TreeCore(
+            sortedUniqueKeys: keys,
+            values: ContiguousArray(repeating: (), count: keys.count),
+            priorities: &priorities
+        )
+        _priorities = priorities
+    }
+
+    /// The number of elements on the longest path from the root down: 0 when empty, 1 for one
+    /// element, and O(log *n*) expected. The treap does not record it, so reading it walks every
+    /// vertex. O(*n*).
+    @inlinable
+    public var height: Int { _core.measuredHeight() }
+
+    /// Whether the treap holds an element equal to `element`. O(log *n*) expected.
+    @inlinable
+    public func contains(_ element: Element) -> Bool {
+        _core.slot(of: element) >= 0
+    }
+
+    /// The index of the first element not less than `element`, or `endIndex` when every element
+    /// is less. O(log *n*) expected.
+    @inlinable
+    public func lowerBound(_ element: Element) -> Int {
+        _core.countBelow(element, orEqual: false)
+    }
+
+    /// The index of the first element greater than `element`, or `endIndex` when none is.
+    /// O(log *n*) expected.
+    @inlinable
+    public func upperBound(_ element: Element) -> Int {
+        _core.countBelow(element, orEqual: true)
+    }
+
+    /// The elements in `range`, in ascending order. O(log *n*) expected.
+    @inlinable
+    public func elements(in range: Range<Element>) -> Slice<Treap> {
+        self[lowerBound(range.lowerBound) ..< lowerBound(range.upperBound)]
+    }
+
+    /// The elements in `range`, in ascending order. O(log *n*) expected.
+    @inlinable
+    public func elements(in range: ClosedRange<Element>) -> Slice<Treap> {
+        self[lowerBound(range.lowerBound) ..< upperBound(range.upperBound)]
+    }
+
+    /// The smallest element, or nil when empty. O(log *n*) expected.
+    @inlinable
+    public func min() -> Element? {
+        let slot = _core.extremeSlot(last: false)
+        return slot < 0 ? nil : _core.key(at: slot)
+    }
+
+    /// The largest element, or nil when empty. O(log *n*) expected.
+    @inlinable
+    public func max() -> Element? {
+        let slot = _core.extremeSlot(last: true)
+        return slot < 0 ? nil : _core.key(at: slot)
+    }
+
+    /// Removes and returns the element at `index`.
+    ///
+    /// - Parameter index: The index of the element. Traps unless it is a valid index; use
+    ///   ``remove(checkedAt:)`` to throw instead.
+    /// - Complexity: O(log *n*) expected, plus O(*n*) when the storage is shared with another copy.
+    @inlinable
+    @discardableResult
+    public mutating func remove(at index: Int) -> Element {
+        precondition(index >= 0 && index < _core.count, "Index out of range")
+        return _core.remove(atRank: index).key
+    }
+
+    /// Removes and returns the element at `index`, throwing instead of trapping on an invalid
+    /// index.
+    ///
+    /// - Parameter index: The index of the element.
+    /// - Throws: `IndexOutOfRange` unless `index` is a valid index; the treap is unchanged.
+    /// - Complexity: O(log *n*) expected, plus O(*n*) when the storage is shared with another copy.
+    @inlinable
+    @discardableResult
+    public mutating func remove(checkedAt index: Int) throws(IndexOutOfRange) -> Element {
+        guard index >= 0 && index < _core.count else { throw IndexOutOfRange() }
+        return _core.remove(atRank: index).key
+    }
+
+    /// The element at `position`, throwing instead of trapping on an invalid index.
+    ///
+    /// - Parameter position: The index of the element.
+    /// - Throws: `IndexOutOfRange` unless `position` is a valid index.
+    /// - Complexity: O(log *n*) expected.
+    @inlinable
+    public subscript(checked position: Int) -> Element {
+        get throws(IndexOutOfRange) {
+            guard position >= 0 && position < _core.count else { throw IndexOutOfRange() }
+            return _core.key(at: _core.slot(atRank: position))
+        }
+    }
+}
+
+extension Treap {
+    /// The two treaps a split produces: the elements below the split point, and the rest.
+    @frozen
+    public struct Split {
+        /// The elements below the split point.
+        public var lower: Treap
+
+        /// The elements not below the split point.
+        public var upper: Treap
+
+        /// The parts of a split.
+        ///
+        /// - Parameters:
+        ///   - lower: The elements below the split point.
+        ///   - upper: The elements not below the split point.
+        @inlinable
+        public init(lower: Treap, upper: Treap) {
+            self.lower = lower
+            self.upper = upper
+        }
+    }
+
+    /// Splits the treap into the elements below `element` and the rest.
+    ///
+    /// The lower part keeps this treap's priorities; the upper one draws a new seed from them.
+    ///
+    /// - Parameter element: The split point. It goes to the upper part when the treap holds it.
+    /// - Returns: The lower part, whose elements are all less than `element`, and the upper part.
+    /// - Complexity: O(*k* log *n*) expected, where *k* is the smaller part's count, plus O(*n*)
+    ///   when the storage is shared with another copy.
+    @inlinable
+    public consuming func split(at element: Element) -> Split {
+        var priorities = _priorities
+        let upperPriorities = _TreapPriorities(using: &priorities)
+        // Moved out, so the split mutates storage this treap no longer shares.
+        let core = _core
+        _core = _TreeCore()
+        let parts = core.split(at: element)
+        return Split(
+            lower: Treap(_core: parts.lower, priorities: priorities),
+            upper: Treap(_core: parts.upper, priorities: upperPriorities)
+        )
+    }
+
+    /// Adds the elements of `other`, all of which lie above this treap's elements or all below
+    /// them.
+    ///
+    /// - Parameter other: The treap joined in.
+    /// - Throws: `OverlappingKeys` when neither treap's elements all lie below the other's; the
+    ///   treap is unchanged.
+    /// - Complexity: O(*m* + log *n*) expected, where *m* is `other.count`, plus O(*n*) when the
+    ///   storage is shared with another copy.
+    @inlinable
+    public mutating func join(_ other: Treap) throws(OverlappingKeys) {
+        guard let otherMin = other.min(), let otherMax = other.max() else { return }
+        guard let selfMin = min(), let selfMax = max() else {
+            _core = other._core
+            return
+        }
+        if selfMax < otherMin {
+            _core.join(other._core, otherIsUpper: true)
+        } else if otherMax < selfMin {
+            _core.join(other._core, otherIsUpper: false)
+        } else {
+            throw OverlappingKeys()
+        }
+    }
+}
+
+extension Treap: RandomAccessCollection {
+    public typealias Index = Int
+    public typealias Indices = Range<Int>
+    public typealias SubSequence = Slice<Treap>
+
+    @inlinable public var startIndex: Int { 0 }
+    @inlinable public var endIndex: Int { _core.count }
+    @inlinable public var count: Int { _core.count }
+    @inlinable public var isEmpty: Bool { _core.count == 0 }
+
+    /// The element at `position`, the `position`-th smallest.
+    ///
+    /// - Parameter position: The index of the element. Traps unless it is a valid index; use
+    ///   ``subscript(checked:)`` to throw instead.
+    /// - Complexity: O(log *n*) expected.
+    @inlinable
+    public subscript(position: Int) -> Element {
+        precondition(position >= 0 && position < _core.count, "Index out of range")
+        return _core.key(at: _core.slot(atRank: position))
+    }
+
+    /// An iterator over the elements in ascending order: O(*n*) for the whole pass, O(log *n*)
+    /// expected extra space.
+    @frozen
+    public struct Iterator: IteratorProtocol {
+        @usableFromInline var _slots: _TreeCore<Element, Void, _TreapBalancing>.InorderSlots
+
+        @inlinable
+        init(_ core: _TreeCore<Element, Void, _TreapBalancing>) {
+            _slots = _TreeCore.InorderSlots(core)
+        }
+
+        @inlinable
+        public mutating func next() -> Element? {
+            guard let slot = _slots.next() else { return nil }
+            return _slots.nodes[Int(slot)].key
+        }
+    }
+
+    @inlinable
+    public func makeIterator() -> Iterator {
+        Iterator(_core)
+    }
+
+    @inlinable
+    public func _customContainsEquatableElement(_ element: Element) -> Bool? {
+        contains(element)
+    }
+
+    /// Finds `element` by descending the treap, so `firstIndex(of:)` costs O(log *n*) expected.
+    @inlinable
+    public func _customIndexOfEquatableElement(_ element: Element) -> Int?? {
+        .some(_core.rank(of: element))
+    }
+
+    /// Finds `element` by descending the treap, so `lastIndex(of:)` costs O(log *n*) expected.
+    @inlinable
+    public func _customLastIndexOfEquatableElement(_ element: Element) -> Int?? {
+        .some(_core.rank(of: element))
+    }
+}
+
+extension Treap: SetAlgebra {
+    /// Inserts `newMember` unless an equal element is present.
+    ///
+    /// - Returns: Whether it was inserted, and the member equal to `newMember` afterwards.
+    /// - Complexity: O(log *n*) expected, plus O(*n*) when the storage is shared with another copy.
+    @inlinable
+    @discardableResult
+    public mutating func insert(_ newMember: Element) -> (inserted: Bool, memberAfterInsert: Element) {
+        let (inserted, slot) = _core.insert(newMember, (), priority: _priorities.nextPriority())
+        return (inserted, inserted ? newMember : _core.key(at: slot))
+    }
+
+    /// Inserts `newMember`, replacing an equal element if present.
+    ///
+    /// - Returns: The element replaced, or nil when none was equal.
+    /// - Complexity: O(log *n*) expected, plus O(*n*) when the storage is shared with another copy.
+    @inlinable
+    @discardableResult
+    public mutating func update(with newMember: Element) -> Element? {
+        let (inserted, slot) = _core.insert(newMember, (), priority: _priorities.nextPriority())
+        guard !inserted else { return nil }
+        let old = _core.key(at: slot)
+        _core.nodes[Int(slot)].key = newMember
+        return old
+    }
+
+    /// Removes the element equal to `member`.
+    ///
+    /// - Returns: The element removed, or nil when none was equal.
+    /// - Complexity: O(log *n*) expected, plus O(*n*) when the storage is shared with another copy.
+    @inlinable
+    @discardableResult
+    public mutating func remove(_ member: Element) -> Element? {
+        _core.remove(member)?.key
+    }
+
+    /// The elements of either treap; of equal elements, this treap's. O(*n* + *m*).
+    @inlinable
+    public func union(_ other: Treap) -> Treap {
+        _merge(other, keepOnlyLeft: true, keepOnlyRight: true, keepBoth: true)
+    }
+
+    /// The elements of both treaps, as this treap holds them. O(*n* + *m*).
+    @inlinable
+    public func intersection(_ other: Treap) -> Treap {
+        _merge(other, keepOnlyLeft: false, keepOnlyRight: false, keepBoth: true)
+    }
+
+    /// The elements of exactly one of the treaps. O(*n* + *m*).
+    @inlinable
+    public func symmetricDifference(_ other: Treap) -> Treap {
+        _merge(other, keepOnlyLeft: true, keepOnlyRight: true, keepBoth: false)
+    }
+
+    /// The elements of this treap that are not in `other`. O(*n* + *m*).
+    @inlinable
+    public func subtracting(_ other: Treap) -> Treap {
+        _merge(other, keepOnlyLeft: true, keepOnlyRight: false, keepBoth: false)
+    }
+
+    /// Adds the elements of `other`, keeping this treap's of equal ones. O(*n* + *m*).
+    @inlinable
+    public mutating func formUnion(_ other: Treap) {
+        self = union(other)
+    }
+
+    /// Keeps only the elements also in `other`. O(*n* + *m*).
+    @inlinable
+    public mutating func formIntersection(_ other: Treap) {
+        self = intersection(other)
+    }
+
+    /// Keeps the elements of exactly one of the treaps. O(*n* + *m*).
+    @inlinable
+    public mutating func formSymmetricDifference(_ other: Treap) {
+        self = symmetricDifference(other)
+    }
+
+    /// Removes the elements also in `other`. O(*n* + *m*).
+    @inlinable
+    public mutating func subtract(_ other: Treap) {
+        self = subtracting(other)
+    }
+
+    /// Merges both treaps' elements in order and builds a treap of those kept, with this one's
+    /// priorities.
+    @inlinable
+    func _merge(_ other: Treap, keepOnlyLeft: Bool, keepOnlyRight: Bool, keepBoth: Bool) -> Treap {
+        var keys = ContiguousArray<Element>()
+        keys.reserveCapacity(_core.count &+ other._core.count)
+        var left = makeIterator()
+        var right = other.makeIterator()
+        var a = left.next()
+        var b = right.next()
+        while let x = a, let y = b {
+            if x < y {
+                if keepOnlyLeft { keys.append(x) }
+                a = left.next()
+            } else if y < x {
+                if keepOnlyRight { keys.append(y) }
+                b = right.next()
+            } else {
+                if keepBoth { keys.append(x) }
+                a = left.next()
+                b = right.next()
+            }
+        }
+        if keepOnlyLeft {
+            while let x = a {
+                keys.append(x)
+                a = left.next()
+            }
+        }
+        if keepOnlyRight {
+            while let y = b {
+                keys.append(y)
+                b = right.next()
+            }
+        }
+        var priorities = _priorities
+        let core = _TreeCore<Element, Void, _TreapBalancing>(
+            sortedUniqueKeys: keys,
+            values: ContiguousArray(repeating: (), count: keys.count),
+            priorities: &priorities
+        )
+        return Treap(_core: core, priorities: priorities)
+    }
+}
+
+extension Treap: ExpressibleByArrayLiteral {
+    /// The treap holding the literal's distinct elements. O(*n* log *n*).
+    @inlinable
+    public init(arrayLiteral elements: Element...) {
+        self.init(elements)
+    }
+}
+
+extension Treap: Equatable {
+    /// Whether two treaps hold equal elements, whatever their shapes. O(*n*).
+    @inlinable
+    public static func == (lhs: Treap, rhs: Treap) -> Bool {
+        lhs._core.count == rhs._core.count && lhs.elementsEqual(rhs)
+    }
+}
+
+extension Treap: Hashable where Element: Hashable {
+    /// Hashes the count and the elements in ascending order. O(*n*).
+    @inlinable
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(_core.count)
+        for element in self {
+            hasher.combine(element)
+        }
+    }
+}
+
+extension Treap: Encodable where Element: Encodable {
+    /// Encodes the elements in ascending order as an unkeyed container. O(*n*).
+    @inlinable
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.unkeyedContainer()
+        for element in self {
+            try container.encode(element)
+        }
+    }
+}
+
+extension Treap: Decodable where Element: Decodable {
+    /// Decodes the elements from an unkeyed container, in any order; of equal elements, the first
+    /// is kept. O(*n* log *n*).
+    @inlinable
+    public init(from decoder: any Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+        var elements: [Element] = []
+        if let count = container.count {
+            elements.reserveCapacity(count)
+        }
+        while !container.isAtEnd {
+            elements.append(try container.decode(Element.self))
+        }
+        self.init(elements)
+    }
+}
+
+extension Treap: Sendable where Element: Sendable {}
+extension Treap.Iterator: Sendable where Element: Sendable {}
+
+extension Treap: CustomStringConvertible {
+    /// The elements in ascending order, written as an array literal.
+    public var description: String {
+        Array(self).description
+    }
+}

@@ -9,8 +9,11 @@ tree (Adelson-Velsky and Landis, 1962): the heights of every vertex's subtrees d
 one, so lookup, insertion and removal take O(log *n*) and the height stays below
 1.4405 log₂(*n* + 2) − 0.3277. A ``RedBlackTree`` is the same sorted set kept in a red–black
 tree (Guibas and Sedgewick, 1978), whose height stays at most 2 log₂(*n* + 1) and whose
-insertions and removals rotate at most two and three times. The sets share one API, so either
-can stand in for the other. Their elements are random-access collections in ascending order,
+insertions and removals rotate at most two and three times. A ``Treap`` (Seidel and Aragon,
+1996) keeps a random priority on each vertex, so its shape is a random binary search tree's
+whatever order the elements came in: O(log *n*) expected for each operation, plus `split(at:)`
+and `join(_:)`, which cut a set at an element and put two sets that don't interleave back
+together. The sets share one API, so any of them can stand in for another. Their elements are random-access collections in ascending order,
 indexed by rank, with `lowerBound(_:)`, `upperBound(_:)` and `elements(in:)` for range queries.
 
 ```swift
@@ -37,6 +40,7 @@ one), so Grafluent's tree algorithms and drawings run over it.
 
 - ``AVLTree``
 - ``RedBlackTree``
+- ``Treap``
 
 ### Sorted dictionaries
 

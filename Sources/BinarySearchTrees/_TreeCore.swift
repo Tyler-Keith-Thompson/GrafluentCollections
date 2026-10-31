@@ -93,68 +93,22 @@ enum _Tree {
 ///
 /// The slots are always `0 ..< count`: a removal moves the last slot into the hole, so the arrays
 /// stay dense. Every subtree records its size, so a vertex's in-order rank is found from the
-/// root in O(log *n*). Mutations walk down once, recording the path (at most 64 vertices: an AVL
-/// tree of fewer than 2³¹ vertices is at most 45 high, a red–black tree at most 62), and
-/// rebalance back up it.
+/// root in O(log *n*). Under a `_TreeBalancing` scheme, mutations walk down once, recording the
+/// path (at most 64 vertices: an AVL tree of fewer than 2³¹ vertices is at most 45 high, a
+/// red–black tree at most 62), and rebalance back up it. A treap (`_TreapBalancing`) has no height
+/// bound, so its mutations work top-down and record no path.
 @frozen
 @usableFromInline
-package struct _TreeCore<Key: Comparable, Value, Balancing: _TreeBalancing> {
+package struct _TreeCore<Key: Comparable, Value, Balancing> {
     @usableFromInline package var nodes: ContiguousArray<_TreeNode<Key>>
     @usableFromInline package var values: ContiguousArray<Value>
     @usableFromInline package var root: Int32
-
-    /// The longest path a mutation records.
-    @inlinable
-    static var _pathCapacity: Int { 64 }
 
     @inlinable
     init() {
         values = []
         nodes = []
         root = -1
-    }
-
-    /// The perfectly balanced tree over keys sorted in strictly ascending order, and their values.
-    /// Slot `k` holds the `k`-th key. O(*n*).
-    @inlinable
-    init(sortedUniqueKeys keys: ContiguousArray<Key>, values: ContiguousArray<Value>) {
-        precondition(keys.count < Int(Int32.max), "A balanced tree holds fewer than 2³¹ − 1 elements")
-        self.values = values
-        let count = keys.count
-        var nodes = ContiguousArray<_TreeNode<Key>>()
-        nodes.reserveCapacity(count)
-        for key in keys {
-            nodes.append(_TreeNode(key: key, left: -1, right: -1, size: 1, balance: 0))
-        }
-        // The middle-split tree of `count` vertices is as high as `count` has bits.
-        let treeHeight = Int32(truncatingIfNeeded: Int.bitWidth &- count.leadingZeroBitCount)
-        root = nodes.withUnsafeMutableBufferPointer { nodes in
-            Self._build(nodes, 0, count, depth: 0, treeHeight: treeHeight).slot
-        }
-        self.nodes = nodes
-    }
-
-    /// Links `lo ..< hi` into a balanced subtree rooted at its middle slot, whose sides differ in
-    /// size by at most one, so every empty link lies on the last two levels. Recurses to the
-    /// height.
-    @inlinable
-    static func _build(
-        _ nodes: UnsafeMutableBufferPointer<_TreeNode<Key>>,
-        _ lo: Int,
-        _ hi: Int,
-        depth: Int32,
-        treeHeight: Int32
-    ) -> (slot: Int32, height: Int32) {
-        guard lo < hi else { return (-1, 0) }
-        let middle = lo &+ (hi &- lo) / 2
-        let left = _build(nodes, lo, middle, depth: depth &+ 1, treeHeight: treeHeight)
-        let right = _build(nodes, middle &+ 1, hi, depth: depth &+ 1, treeHeight: treeHeight)
-        let height = Swift.max(left.height, right.height) &+ 1
-        nodes[middle].left = left.slot
-        nodes[middle].right = right.slot
-        nodes[middle].size = Int32(truncatingIfNeeded: hi &- lo)
-        nodes[middle].balance = Balancing.balance(subtreeHeight: height, depth: depth, treeHeight: treeHeight)
-        return (Int32(truncatingIfNeeded: middle), height)
     }
 
     @inlinable
@@ -278,6 +232,56 @@ package struct _TreeCore<Key: Comparable, Value, Balancing: _TreeBalancing> {
                 x = next
             }
         }
+    }
+
+}
+
+extension _TreeCore where Balancing: _TreeBalancing {
+    /// The longest path a mutation records.
+    @inlinable
+    static var _pathCapacity: Int { 64 }
+
+    /// The perfectly balanced tree over keys sorted in strictly ascending order, and their values.
+    /// Slot `k` holds the `k`-th key. O(*n*).
+    @inlinable
+    init(sortedUniqueKeys keys: ContiguousArray<Key>, values: ContiguousArray<Value>) {
+        precondition(keys.count < Int(Int32.max), "A balanced tree holds fewer than 2³¹ − 1 elements")
+        self.values = values
+        let count = keys.count
+        var nodes = ContiguousArray<_TreeNode<Key>>()
+        nodes.reserveCapacity(count)
+        for key in keys {
+            nodes.append(_TreeNode(key: key, left: -1, right: -1, size: 1, balance: 0))
+        }
+        // The middle-split tree of `count` vertices is as high as `count` has bits.
+        let treeHeight = Int32(truncatingIfNeeded: Int.bitWidth &- count.leadingZeroBitCount)
+        root = nodes.withUnsafeMutableBufferPointer { nodes in
+            Self._build(nodes, 0, count, depth: 0, treeHeight: treeHeight).slot
+        }
+        self.nodes = nodes
+    }
+
+    /// Links `lo ..< hi` into a balanced subtree rooted at its middle slot, whose sides differ in
+    /// size by at most one, so every empty link lies on the last two levels. Recurses to the
+    /// height.
+    @inlinable
+    static func _build(
+        _ nodes: UnsafeMutableBufferPointer<_TreeNode<Key>>,
+        _ lo: Int,
+        _ hi: Int,
+        depth: Int32,
+        treeHeight: Int32
+    ) -> (slot: Int32, height: Int32) {
+        guard lo < hi else { return (-1, 0) }
+        let middle = lo &+ (hi &- lo) / 2
+        let left = _build(nodes, lo, middle, depth: depth &+ 1, treeHeight: treeHeight)
+        let right = _build(nodes, middle &+ 1, hi, depth: depth &+ 1, treeHeight: treeHeight)
+        let height = Swift.max(left.height, right.height) &+ 1
+        nodes[middle].left = left.slot
+        nodes[middle].right = right.slot
+        nodes[middle].size = Int32(truncatingIfNeeded: hi &- lo)
+        nodes[middle].balance = Balancing.balance(subtreeHeight: height, depth: depth, treeHeight: treeHeight)
+        return (Int32(truncatingIfNeeded: middle), height)
     }
 
     // MARK: Mutations
@@ -427,6 +431,15 @@ package struct _TreeCore<Key: Comparable, Value, Balancing: _TreeBalancing> {
             let only = nodes[Int(unlinked)].left >= 0 ? nodes[Int(unlinked)].left : nodes[Int(unlinked)].right
             return Balancing.afterRemove(nodes, path, wentRight, finalDepth, child: only, removed: unlinked)
         }
+        return _discard(target)
+    }
+}
+
+extension _TreeCore {
+    /// Moves the last slot into the unlinked slot `target`, then removes and returns the last
+    /// slot's key and value: those `target` held.
+    @inlinable
+    mutating func _discard(_ target: Int32) -> (key: Key, value: Value) {
         let last = Int32(truncatingIfNeeded: nodes.count &- 1)
         if target != last {
             _relink(last, to: target)
@@ -473,7 +486,8 @@ package struct _TreeCore<Key: Comparable, Value, Balancing: _TreeBalancing> {
         init(_ core: _TreeCore) {
             nodes = core.nodes
             stack = []
-            // No balanced tree here is higher than twice the bits of its count.
+            // No AVL or red–black tree is higher than twice the bits of its count; a higher treap
+            // grows the stack.
             stack.reserveCapacity(2 &* (Int.bitWidth &- core.count.leadingZeroBitCount))
             var x = core.root
             while x >= 0 {

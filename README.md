@@ -62,7 +62,8 @@ print(updates.parent(of: 2)!)    // 3
 
 An `AVLTree` is a sorted set and an `AVLDictionary` a sorted dictionary, each a balanced binary
 search tree with O(log *n*) lookup, insertion and removal, indexed by rank. `RedBlackTree` is the
-same sorted set balanced by colours instead of heights:
+same sorted set balanced by colours instead of heights, and `Treap` the same again balanced by
+random priorities, which also splits at an element and joins two sets that don't interleave:
 
 ```swift
 import GrafluentCollections
@@ -81,13 +82,13 @@ print(stock.map(\.key))       // ["apple", "fig", "pear"]
 
 ## Modules
 
-One module per family of structures. `BinarySearchTrees` (`AVLTree`, `AVLDictionary`, `RedBlackTree`) and
+One module per family of structures. `BinarySearchTrees` (`AVLTree`, `AVLDictionary`, `RedBlackTree`, `Treap`) and
 `RangeTrees` (`FenwickTree`) have shipped; the others are planned. The backlog tracks each planned structure, and `.kanban/triage.md` says what belongs
 here.
 
 | Group | Modules |
 |---|---|
-| Search trees | `BinarySearchTrees` (AVL and red–black trees; treap and splay planned), `BTrees`, `SkipLists` |
+| Search trees | `BinarySearchTrees` (AVL and red–black trees, treaps; splay trees planned), `BTrees`, `SkipLists` |
 | Tries | `Tries` (tries over any sequence of symbols, radix and Patricia trees, Aho–Corasick automata) |
 | Suffix structures | `SuffixStructures` (suffix arrays with LCP, suffix trees, suffix automata) |
 | Decision diagrams | `DecisionDiagrams` (reduced ordered BDDs, ZDDs) |

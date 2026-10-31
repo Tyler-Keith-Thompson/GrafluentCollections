@@ -1,6 +1,7 @@
 # ``CollectionErrors``
 
-The typed errors that the collections' `checked:` spellings throw.
+The typed errors that the collections' `checked:` spellings, and their invariant-keeping
+mutations, throw.
 
 ## Overview
 
@@ -14,3 +15,4 @@ throw it.
 
 - ``IndexOutOfRange``
 - ``DuplicateKey``
+- ``OverlappingKeys``

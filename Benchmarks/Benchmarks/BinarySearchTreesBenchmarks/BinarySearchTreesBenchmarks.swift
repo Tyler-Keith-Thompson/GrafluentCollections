@@ -169,6 +169,98 @@ let benchmarks: @Sendable () -> Void = {
         }
     }
 
+    // Two halves of the keys, for the set operations, and a seeded generator for the treaps'
+    // priorities.
+    let firstHalf = Array(keys[..<(n / 2)])
+    let secondHalf = Array(keys[(n / 2)...])
+    let firstSet = Set(firstHalf)
+    let secondSet = Set(secondHalf)
+    struct LinearCongruential: RandomNumberGenerator {
+        var state: UInt64
+        mutating func next() -> UInt64 {
+            state = state &* 6_364_136_223_846_793_005 &+ 1_442_695_040_888_963_407
+            return state
+        }
+    }
+
+    Benchmark("BinarySearchTrees: BASELINE Array(Set.union(_:)).sorted()") { benchmark in
+        for _ in benchmark.scaledIterations {
+            blackHole(Array(firstSet.union(secondSet)).sorted())
+        }
+    }
+
+    Benchmark("BinarySearchTrees: Treap.union(_:)") { benchmark in
+        var generator = LinearCongruential(state: 2)
+        let first = Treap(firstHalf, using: &generator)
+        let second = Treap(secondHalf, using: &generator)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            blackHole(first.union(second))
+        }
+    }
+
+    Benchmark("BinarySearchTrees: Treap.init(_:)") { benchmark in
+        var generator = LinearCongruential(state: 3)
+        for _ in benchmark.scaledIterations {
+            blackHole(Treap(keys, using: &generator))
+        }
+    }
+
+    Benchmark("BinarySearchTrees: Treap.contains(_:)") { benchmark in
+        var generator = LinearCongruential(state: 4)
+        let tree = Treap(keys, using: &generator)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            var found = 0
+            for probe in probes where tree.contains(probe) {
+                found &+= 1
+            }
+            blackHole(found)
+        }
+    }
+
+    Benchmark("BinarySearchTrees: Treap.insert(_:) one at a time") { benchmark in
+        var generator = LinearCongruential(state: 5)
+        for _ in benchmark.scaledIterations {
+            var tree = Treap<Int>(using: &generator)
+            for key in keys {
+                tree.insert(key)
+            }
+            blackHole(tree)
+        }
+    }
+
+    Benchmark("BinarySearchTrees: Treap.remove(_:) then insert(_:)") { benchmark in
+        var generator = LinearCongruential(state: 6)
+        var tree = Treap(keys, using: &generator)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            for probe in probes {
+                if tree.remove(probe) != nil {
+                    tree.insert(probe)
+                } else {
+                    tree.insert(probe)
+                    tree.remove(probe)
+                }
+            }
+        }
+        blackHole(tree)
+    }
+
+    Benchmark("BinarySearchTrees: Treap.split(at:) then join(_:)") { benchmark in
+        var generator = LinearCongruential(state: 7)
+        var tree = Treap(keys, using: &generator)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            for probe in probes.prefix(100) {
+                var parts = tree.split(at: probe)
+                try? parts.lower.join(parts.upper)
+                tree = parts.lower
+            }
+        }
+        blackHole(tree)
+    }
+
     Benchmark("BinarySearchTrees: AVLDictionary subscript stores one at a time") { benchmark in
         for _ in benchmark.scaledIterations {
             var dictionary = AVLDictionary<Int, Int>()

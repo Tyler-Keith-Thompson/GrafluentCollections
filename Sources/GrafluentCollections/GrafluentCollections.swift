@@ -7,4 +7,5 @@
 @_exported import BTrees
 @_exported import SkipLists
 @_exported import Tries
+@_exported import SuffixStructures
 @_exported import RangeTrees

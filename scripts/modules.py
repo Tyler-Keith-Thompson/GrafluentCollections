@@ -46,6 +46,8 @@ MODULES = [
     ("SkipLists", "Search trees", "Skip lists as sorted sets, with their levels as a directed graph: SkipList.", ["CollectionErrors", "grafluent/GraphProtocols"]),
     # Tries
     ("Tries", "Tries", "Tries over sequences of any Hashable symbols, with prefix queries, and multi-pattern matching: Trie, TrieDictionary, RadixTree, RadixTreeDictionary, AhoCorasickAutomaton.", ["CollectionErrors", "grafluent/GraphProtocols", "grafluent/Trees"]),
+    # Suffix structures
+    ("SuffixStructures", "Suffix structures", "Structures over a text's suffixes that answer substring queries: SuffixArray.", []),
     # Range and spatial trees
     ("RangeTrees", "Range and spatial trees", "Trees over a sequence that answer range queries: FenwickTree.", ["CollectionErrors", "grafluent/Trees"]),
 ]
@@ -63,6 +65,7 @@ TEST_TARGETS = [
     ("BTreesTests", ["BTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     ("SkipListsTests", ["SkipLists", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/GraphProtocols"]),
     ("TriesTests", ["Tries", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/GraphProtocols", "grafluent/Trees"]),
+    ("SuffixStructuresTests", ["SuffixStructures", TEST_SUPPORT, "swift-property-based/PropertyBased"]),
     ("RangeTreesTests", ["RangeTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     (f"{PROJECT}Tests", [PROJECT, "grafluent/Trees"]),
 ]
@@ -90,6 +93,7 @@ PERFORMANCE_TESTS = [
     "BTreesTests",
     "RangeTreesTests",
     "SkipListsTests",
+    "SuffixStructuresTests",
 ]
 
 # Performance tests run up to their one-minute limits each, so their targets get "medium" (300 s).

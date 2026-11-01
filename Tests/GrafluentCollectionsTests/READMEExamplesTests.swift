@@ -78,6 +78,17 @@ struct READMEExamplesTests {
         #expect(automaton.matches(in: "ushers").map(\.patternIndex) == found)
     }
 
+    @Test("Usage: a suffix array's substring queries")
+    func suffixArray() {
+        let banana = SuffixArray("banana")
+        let positions: [Int] = [3, 1]
+        let repeated: Range<Int>? = 1 ..< 4
+        let distinct: Int64 = 15
+        #expect(banana.occurrences(of: "ana").map { banana.positions[$0] } == positions)
+        #expect(banana.longestRepeatedSubstring == repeated)
+        #expect(banana.distinctSubstringCount == distinct)
+    }
+
     @Test("Usage: a skip list and its levels")
     func skipList() {
         var queue: SkipList = [30, 10, 20]

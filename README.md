@@ -128,18 +128,29 @@ let automaton = AhoCorasickAutomaton(patterns: ["he", "she", "his", "hers"])
 print(automaton.matches(in: "ushers").map(\.patternIndex))     // [1, 0, 3]
 ```
 
+A `SuffixArray` sorts a text's suffixes, so every occurrence of a pattern is one run of them:
+
+```swift
+import GrafluentCollections
+
+let banana = SuffixArray("banana")
+print(banana.occurrences(of: "ana").map { banana.positions[$0] })  // [3, 1]
+print(banana.longestRepeatedSubstring!)                              // 1..<4, "ana"
+print(banana.distinctSubstringCount)                                 // 15
+```
+
 ## Modules
 
 One module per family of structures. `BinarySearchTrees` (`AVLTree`, `AVLDictionary`, `RedBlackTree`, `Treap`, `SplayTree`),
 `BTrees` (`BTree`, `BTreeDictionary`), `SkipLists` (`SkipList`),
-`Tries` (`Trie`, `TrieDictionary`, `RadixTree`, `RadixTreeDictionary`, `AhoCorasickAutomaton`) and `RangeTrees` (`FenwickTree`) have shipped; the others are planned. The backlog tracks each planned structure, and `.kanban/triage.md` says what belongs
+`Tries` (`Trie`, `TrieDictionary`, `RadixTree`, `RadixTreeDictionary`, `AhoCorasickAutomaton`), `SuffixStructures` (`SuffixArray`) and `RangeTrees` (`FenwickTree`) have shipped; the others are planned. The backlog tracks each planned structure, and `.kanban/triage.md` says what belongs
 here.
 
 | Group | Modules |
 |---|---|
 | Search trees | `BinarySearchTrees` (AVL, red–black and splay trees, treaps), `BTrees` (B-trees), `SkipLists` (skip lists) |
 | Tries | `Tries` (tries over any sequence of symbols, radix and Patricia trees, Aho–Corasick automata) |
-| Suffix structures | `SuffixStructures` (suffix arrays with LCP, suffix trees, suffix automata) |
+| Suffix structures | `SuffixStructures` (suffix arrays with LCP; suffix trees and suffix automata planned) |
 | Decision diagrams | `DecisionDiagrams` (reduced ordered BDDs, ZDDs) |
 | Range and spatial trees | `RangeTrees` (Fenwick trees; segment and interval trees planned), `SpatialTrees` (k-d trees, quadtrees, octrees) |
 | Sequences and persistence | `Ropes`, `PersistentTrees` (path-copying balanced trees) |

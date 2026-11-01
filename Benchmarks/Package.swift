@@ -52,6 +52,15 @@ let package = Package(
             plugins: [.plugin(name: "BenchmarkPlugin", package: "benchmark")]
         ),
         .executableTarget(
+            name: "SuffixStructuresBenchmarks",
+            dependencies: [
+                .product(name: "Benchmark", package: "benchmark"),
+                .product(name: "SuffixStructures", package: "GrafluentCollections"),
+            ],
+            path: "Benchmarks/SuffixStructuresBenchmarks",
+            plugins: [.plugin(name: "BenchmarkPlugin", package: "benchmark")]
+        ),
+        .executableTarget(
             name: "RangeTreesBenchmarks",
             dependencies: [
                 .product(name: "Benchmark", package: "benchmark"),

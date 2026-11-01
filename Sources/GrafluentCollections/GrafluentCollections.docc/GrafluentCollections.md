@@ -29,5 +29,6 @@ print(scores.sum(in: 2 ..< 6))       // 19
 - ``BTrees``
 - ``SkipLists``
 - ``Tries``
+- ``SuffixStructures``
 - ``RangeTrees``
 - ``CollectionErrors``

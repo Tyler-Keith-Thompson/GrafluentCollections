@@ -168,6 +168,13 @@ of a hand-written loop over arrays.
   index that leads to the root, and builds a states × alphabet table when it fits in 2²² entries,
   following failure links otherwise. Matches are a lazy `MatchesView`, reported by where they
   end and longest first, with ranges as symbol offsets.
+- D12. A structure over a whole text stores its indices in 32 bits while they fit (2026-11-01):
+  `SuffixArray` keeps positions and prefix lengths as `Int32` when the text has at most
+  `Int32.max` symbols and as `Int` beyond, exposed as `Int` collections either way, and counts
+  substrings in `Int64`, which holds *n*(*n* + 1)/2 for any text that fits in memory on wasm32.
+  A byte text is sorted as bytes; any other `Comparable` symbol type is replaced by its rank,
+  so construction needs no `Hashable`. Names are spelled out (`longestCommonPrefixes`, not
+  `lcp`).
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

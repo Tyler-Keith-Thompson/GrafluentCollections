@@ -7,4 +7,5 @@ PERFORMANCE_TEST_PACKAGES = [
     "Tests/BTreesTests",
     "Tests/RangeTreesTests",
     "Tests/SkipListsTests",
+    "Tests/SuffixStructuresTests",
 ]

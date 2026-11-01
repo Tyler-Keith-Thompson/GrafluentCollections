@@ -47,7 +47,7 @@ MODULES = [
     # Tries
     ("Tries", "Tries", "Tries over sequences of any Hashable symbols, with prefix queries, and multi-pattern matching: Trie, TrieDictionary, RadixTree, RadixTreeDictionary, AhoCorasickAutomaton.", ["CollectionErrors", "grafluent/GraphProtocols", "grafluent/Trees"]),
     # Suffix structures
-    ("SuffixStructures", "Suffix structures", "Structures over a text's suffixes that answer substring queries: SuffixArray, SuffixTree.", ["grafluent/GraphProtocols", "grafluent/Trees"]),
+    ("SuffixStructures", "Suffix structures", "Structures over a text's suffixes that answer substring queries: SuffixArray, SuffixTree, SuffixAutomaton.", ["grafluent/GraphProtocols", "grafluent/Trees"]),
     # Range and spatial trees
     ("RangeTrees", "Range and spatial trees", "Trees over a sequence that answer range queries: FenwickTree.", ["CollectionErrors", "grafluent/Trees"]),
 ]

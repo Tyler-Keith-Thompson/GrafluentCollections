@@ -3,7 +3,7 @@
 load("//tools:docc.bzl", "docc_archive")
 load("//tools:swift_rules.bzl", "swift_library")
 
-# Structures over a text's suffixes that answer substring queries: SuffixArray, SuffixTree.
+# Structures over a text's suffixes that answer substring queries: SuffixArray, SuffixTree, SuffixAutomaton.
 swift_library(
     name = "SuffixStructures",
     srcs = glob(["**/*.swift"]),

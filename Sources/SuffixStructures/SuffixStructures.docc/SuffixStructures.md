@@ -36,6 +36,19 @@ both.longestCommonSubstring?.range.count   // 4, "abxa"
 both.occurrences(of: "ab").count           // 4
 ```
 
+A ``SuffixAutomaton`` is the smallest automaton whose paths from its start state spell the
+text's substrings (Blumer et al., 1985), built one symbol at a time with at most 2*n* − 1
+states. It answers membership, occurrence counts and first occurrences in O(*m*) transitions, and
+finds the longest substring another text shares by walking that text over it. Its transitions
+are a `DirectedGraph`, ``SuffixAutomaton/transitionsView``, and its suffix links convert to
+Grafluent's `Arborescence` with `Arborescence(_:)`.
+
+```swift
+let automaton = SuffixAutomaton("abcbc")
+automaton.occurrenceCount(of: "bc")                         // 2
+automaton.longestCommonSubstring(with: "xbcbz")?.textRange  // 1 ..< 4, "bcb"
+```
+
 ## Topics
 
 ### Suffix arrays
@@ -45,3 +58,7 @@ both.occurrences(of: "ab").count           // 4
 ### Suffix trees
 
 - ``SuffixTree``
+
+### Suffix automata
+
+- ``SuffixAutomaton``

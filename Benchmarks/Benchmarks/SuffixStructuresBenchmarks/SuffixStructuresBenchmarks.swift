@@ -126,4 +126,85 @@ let benchmarks: @Sendable () -> Void = {
         }
         benchmark.stopMeasurement()
     }
+
+    // Every substring of a short text in a hash set: the quadratic form a suffix automaton
+    // replaces, for building and for membership.
+    let tiny = Array(bytes.prefix(500))
+    let tinyPatterns: [[UInt8]] = (0 ..< 1_000).map { k in
+        if k % 2 == 0 {
+            let start = next(below: tiny.count - 8)
+            return Array(tiny[start ..< start + 8])
+        }
+        return (0 ..< 8).map { _ in letters[next(below: 4)] }
+    }
+    Benchmark("SuffixStructures: BASELINE Set of every substring of 500 symbols") { benchmark in
+        for _ in benchmark.scaledIterations {
+            var substrings = Set<ArraySlice<UInt8>>()
+            for start in tiny.indices {
+                for end in start + 1 ... tiny.count {
+                    substrings.insert(tiny[start ..< end])
+                }
+            }
+            blackHole(substrings.count)
+        }
+    }
+
+    Benchmark("SuffixStructures: BASELINE Set membership in every substring of 500 symbols") { benchmark in
+        var substrings = Set<ArraySlice<UInt8>>()
+        for start in tiny.indices {
+            for end in start + 1 ... tiny.count {
+                substrings.insert(tiny[start ..< end])
+            }
+        }
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            var found = 0
+            for pattern in tinyPatterns where substrings.contains(pattern[...]) {
+                found &+= 1
+            }
+            blackHole(found)
+        }
+        benchmark.stopMeasurement()
+    }
+
+    Benchmark("SuffixStructures: SuffixAutomaton<UInt8>.init(_:) on 500 symbols") { benchmark in
+        for _ in benchmark.scaledIterations {
+            blackHole(SuffixAutomaton(tiny))
+        }
+    }
+
+    Benchmark("SuffixStructures: SuffixAutomaton<UInt8>.contains(_:) on 500 symbols") { benchmark in
+        let automaton = SuffixAutomaton(tiny)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            var found = 0
+            for pattern in tinyPatterns where automaton.contains(pattern) {
+                found &+= 1
+            }
+            blackHole(found)
+        }
+        benchmark.stopMeasurement()
+    }
+
+    Benchmark(
+        "SuffixStructures: SuffixAutomaton<UInt8>.init(_:)",
+        configuration: .init(metrics: [.wallClock, .mallocCountTotal, .instructions, .peakMemoryResident])
+    ) { benchmark in
+        for _ in benchmark.scaledIterations {
+            blackHole(SuffixAutomaton(bytes))
+        }
+    }
+
+    Benchmark("SuffixStructures: SuffixAutomaton<UInt8>.contains(_:)") { benchmark in
+        let automaton = SuffixAutomaton(bytes)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            var found = 0
+            for pattern in patterns where automaton.contains(pattern) {
+                found &+= 1
+            }
+            blackHole(found)
+        }
+        benchmark.stopMeasurement()
+    }
 }

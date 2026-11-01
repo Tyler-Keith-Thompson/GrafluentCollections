@@ -183,6 +183,11 @@ of a hand-written loop over arrays.
   values (a text index and a range in that text) rather than symbols. Nodes are `Int32`, so the
   texts' total length traps at `Int32.max / 2`. The generalized tree is `init(texts:)`, labelled
   apart from `init(_:)` so a collection of strings is never read as one text.
+- D14. A suffix automaton keeps its transitions in sorted rows, not a dense table (2026-11-01):
+  `SuffixAutomaton` uses D13's codes, grows each state's transitions in a chain and compacts
+  them into rows sorted by code; a 256-wide table for `UInt8` would take 1 KB per state, about
+  2 GB for 10⁶ symbols. Its suffix-link tree is a conversion on the Grafluent type,
+  `Arborescence(_:)`, as every other conversion is, rather than a property.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

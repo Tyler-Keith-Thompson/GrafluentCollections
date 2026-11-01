@@ -261,6 +261,21 @@ of a hand-written loop over arrays.
   slice must match its base. Removals do not merge small neighbouring chunks yet, and the
   summary-monoid hook (BigString-style metrics) is left for a later item. swift-collections'
   `_RopeModule` is not public API, so it could not be used.
+- D22. Persistent trees are weight-balanced trees of immutable reference-counted vertices
+  (2026-11-01): `PersistentTreeSet<Element>` and `PersistentTreeDictionary<Key, Value>` in module
+  `PersistentTrees` share one `_PersistentNode<Key, Value>` final class with `let` key, value,
+  children and subtree size. This departs from D3's flat arrays on purpose: versions are
+  independent values that share vertices, so a shared append-only arena would be mutable state
+  reached from many values (a lock on every read and write, or a data race), and it could never
+  free a vertex without tracing every live version; reference counting frees exactly the
+  vertices no version reaches. Balance is Adams' weight balance with (Δ, Γ) = (3, 2), proved by
+  Hirai and Yamamoto, because sizes give ranks and O(1) `count` and make join simple. Set
+  operations are Blelloch–Ferizovic–Sun split and join, and return a shared subtree whole when
+  both operands hold the same vertex. Non-mutating `inserting(_:)`/`removing(_:)` (sets) and
+  `updatingValue(_:forKey:)`/`removingValue(forKey:)` (dictionaries) sit beside the
+  `SetAlgebra` and `Dictionary` mutating spellings, which path-copy too; in-place mutation of
+  uniquely referenced vertices is left for later. Iteration holds unretained references under
+  the root it keeps alive.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

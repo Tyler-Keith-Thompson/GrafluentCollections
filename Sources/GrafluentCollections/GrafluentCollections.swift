@@ -12,3 +12,4 @@
 @_exported import RangeTrees
 @_exported import SpatialTrees
 @_exported import Ropes
+@_exported import PersistentTrees

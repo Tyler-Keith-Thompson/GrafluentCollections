@@ -34,4 +34,5 @@ print(scores.sum(in: 2 ..< 6))       // 19
 - ``RangeTrees``
 - ``SpatialTrees``
 - ``Ropes``
+- ``PersistentTrees``
 - ``CollectionErrors``

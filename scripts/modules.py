@@ -55,6 +55,7 @@ MODULES = [
     ("SpatialTrees", "Range and spatial trees", "Trees over points in space that answer nearest-neighbour and range searches: KDTree, Quadtree, Octree.", ["CollectionErrors", "grafluent/Trees"]),
     # Sequences and persistence
     ("Ropes", "Sequences and persistence", "Sequences stored as balanced trees of chunks, with edits anywhere in O(log n): Rope.", ["CollectionErrors", "grafluent/Trees"]),
+    ("PersistentTrees", "Sequences and persistence", "Balanced search trees that keep every version, sharing structure between them: PersistentTreeSet, PersistentTreeDictionary.", ["CollectionErrors", "grafluent/Trees"]),
 ]
 
 # Executables: (name, description, dependencies). Each is an `.executableTarget` and product in
@@ -75,6 +76,7 @@ TEST_TARGETS = [
     ("RangeTreesTests", ["RangeTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     ("SpatialTreesTests", ["SpatialTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     ("RopesTests", ["Ropes", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
+    ("PersistentTreesTests", ["PersistentTrees", "BinarySearchTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     (f"{PROJECT}Tests", [PROJECT, "grafluent/Trees"]),
 ]
 
@@ -100,6 +102,7 @@ PERFORMANCE_TESTS = [
     "BinarySearchTreesTests",
     "BTreesTests",
     "DecisionDiagramsTests",
+    "PersistentTreesTests",
     "RangeTreesTests",
     "RopesTests",
     "SkipListsTests",

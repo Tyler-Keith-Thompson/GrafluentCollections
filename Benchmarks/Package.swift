@@ -96,5 +96,15 @@ let package = Package(
             path: "Benchmarks/RopesBenchmarks",
             plugins: [.plugin(name: "BenchmarkPlugin", package: "benchmark")]
         ),
+        .executableTarget(
+            name: "PersistentTreesBenchmarks",
+            dependencies: [
+                .product(name: "Benchmark", package: "benchmark"),
+                .product(name: "BinarySearchTrees", package: "GrafluentCollections"),
+                .product(name: "PersistentTrees", package: "GrafluentCollections"),
+            ],
+            path: "Benchmarks/PersistentTreesBenchmarks",
+            plugins: [.plugin(name: "BenchmarkPlugin", package: "benchmark")]
+        ),
     ]
 )

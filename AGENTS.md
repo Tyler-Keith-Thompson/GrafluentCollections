@@ -9,7 +9,7 @@ developers on Apple platforms, Linux and WebAssembly who need a sorted set, a tr
 structure, and Grafluent users who want to run graph algorithms over one. The charter in
 `.kanban/triage.md` says what is in and out of scope; the backlog holds the planned structures.
 `BinarySearchTrees` (`AVLTree`, `AVLDictionary`, `RedBlackTree`, `Treap`, `SplayTree`), `BTrees`
-(`BTree`, `BTreeDictionary`) and `RangeTrees` (`FenwickTree`) have landed and set the pattern for the rest: a structure, its Grafluent conversion, tests, a
+(`BTree`, `BTreeDictionary`), `SkipLists` (`SkipList`) and `RangeTrees` (`FenwickTree`) have landed and set the pattern for the rest: a structure, its Grafluent conversion, tests, a
 ratio test and benchmarks. Swift 6.3 (minimum).
 Bazel is the development build; SwiftPM is the published package. `README.md` is the user-facing
 overview.

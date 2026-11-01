@@ -43,6 +43,7 @@ MODULES = [
     # Search trees
     ("BinarySearchTrees", "Search trees", "Balanced binary search trees as sorted sets and dictionaries: AVLTree, AVLDictionary, RedBlackTree, Treap, SplayTree.", ["CollectionErrors", "grafluent/Trees"]),
     ("BTrees", "Search trees", "B-trees as sorted sets and dictionaries with many elements per node: BTree, BTreeDictionary.", ["CollectionErrors", "grafluent/Trees"]),
+    ("SkipLists", "Search trees", "Skip lists as sorted sets, with their levels as a directed graph: SkipList.", ["CollectionErrors", "grafluent/GraphProtocols"]),
     # Range and spatial trees
     ("RangeTrees", "Range and spatial trees", "Trees over a sequence that answer range queries: FenwickTree.", ["CollectionErrors", "grafluent/Trees"]),
 ]
@@ -58,6 +59,7 @@ EXECUTABLES = [
 TEST_TARGETS = [
     ("BinarySearchTreesTests", ["BinarySearchTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     ("BTreesTests", ["BTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
+    ("SkipListsTests", ["SkipLists", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/GraphProtocols"]),
     ("RangeTreesTests", ["RangeTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     (f"{PROJECT}Tests", [PROJECT, "grafluent/Trees"]),
 ]
@@ -84,6 +86,7 @@ PERFORMANCE_TESTS = [
     "BinarySearchTreesTests",
     "BTreesTests",
     "RangeTreesTests",
+    "SkipListsTests",
 ]
 
 # Performance tests run up to their one-minute limits each, so their targets get "medium" (300 s).

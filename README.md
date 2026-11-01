@@ -95,15 +95,28 @@ print(readings[2])            // 25
 print(readings.popFirst()!)   // 10
 ```
 
+A `SkipList` is the same sorted set kept in levels of sorted linked lists, each a random sample of
+the one below, with no rebalancing; its levels are a Grafluent `DirectedGraph`:
+
+```swift
+import GrafluentCollections
+
+var queue: SkipList = [30, 10, 20]
+queue.insert(15)
+print(Array(queue))           // [10, 15, 20, 30]
+print(queue.lowerBound(20))   // 2
+print(queue.layersView.vertices.filter { $0.level == 0 }.map(\.element))  // [10, 15, 20, 30]
+```
+
 ## Modules
 
 One module per family of structures. `BinarySearchTrees` (`AVLTree`, `AVLDictionary`, `RedBlackTree`, `Treap`, `SplayTree`),
-`BTrees` (`BTree`, `BTreeDictionary`) and `RangeTrees` (`FenwickTree`) have shipped; the others are planned. The backlog tracks each planned structure, and `.kanban/triage.md` says what belongs
+`BTrees` (`BTree`, `BTreeDictionary`), `SkipLists` (`SkipList`) and `RangeTrees` (`FenwickTree`) have shipped; the others are planned. The backlog tracks each planned structure, and `.kanban/triage.md` says what belongs
 here.
 
 | Group | Modules |
 |---|---|
-| Search trees | `BinarySearchTrees` (AVL, red–black and splay trees, treaps), `BTrees` (B-trees), `SkipLists` |
+| Search trees | `BinarySearchTrees` (AVL, red–black and splay trees, treaps), `BTrees` (B-trees), `SkipLists` (skip lists) |
 | Tries | `Tries` (tries over any sequence of symbols, radix and Patricia trees, Aho–Corasick automata) |
 | Suffix structures | `SuffixStructures` (suffix arrays with LCP, suffix trees, suffix automata) |
 | Decision diagrams | `DecisionDiagrams` (reduced ordered BDDs, ZDDs) |

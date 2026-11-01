@@ -33,6 +33,16 @@ let package = Package(
             plugins: [.plugin(name: "BenchmarkPlugin", package: "benchmark")]
         ),
         .executableTarget(
+            name: "SkipListsBenchmarks",
+            dependencies: [
+                .product(name: "Benchmark", package: "benchmark"),
+                .product(name: "SkipLists", package: "GrafluentCollections"),
+                .product(name: "BinarySearchTrees", package: "GrafluentCollections"),
+            ],
+            path: "Benchmarks/SkipListsBenchmarks",
+            plugins: [.plugin(name: "BenchmarkPlugin", package: "benchmark")]
+        ),
+        .executableTarget(
             name: "RangeTreesBenchmarks",
             dependencies: [
                 .product(name: "Benchmark", package: "benchmark"),

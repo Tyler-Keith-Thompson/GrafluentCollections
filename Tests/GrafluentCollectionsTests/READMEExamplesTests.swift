@@ -59,4 +59,15 @@ struct READMEExamplesTests {
         #expect(readings[2] == third)
         #expect(readings.popFirst() == first)
     }
+
+    @Test("Usage: a skip list and its levels")
+    func skipList() {
+        var queue: SkipList = [30, 10, 20]
+        queue.insert(15)
+        let sorted: [Int] = [10, 15, 20, 30]
+        let indexOfTwenty: Int = 2
+        #expect(Array(queue) == sorted)
+        #expect(queue.lowerBound(20) == indexOfTwenty)
+        #expect(queue.layersView.vertices.filter { $0.level == 0 }.map(\.element) == sorted)
+    }
 }

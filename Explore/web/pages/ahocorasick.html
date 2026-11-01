@@ -1,0 +1,28 @@
+<!-- title: Aho–Corasick · Explore GrafluentCollections -->
+<!-- description: Build a real AhoCorasickAutomaton from your patterns and step through a text letter by letter, following goto edges and failure links to every match. -->
+<header class="sign">
+  <h1>Aho–Corasick</h1>
+  <p class="question">How do you find many patterns in a text while reading it only once?</p>
+</header>
+<p class="example lead">Example: search “ushers” for he, she, his and hers. After reading “ushe” the automaton is in the state for “she”, so she ends here, and so does he, the end of “she”. Reading “r” next, “she” has no way on, so its failure link drops to “he”, which continues to “her” and then “hers”.</p>
+
+<div id="app"></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>Many patterns, one pass</h2>
+  <p>An Aho–Corasick automaton finds every occurrence of every pattern in a text in one pass, in time proportional to the text’s length plus the number of matches, however many patterns there are. It suits scanning for a list of keywords, banned words, signatures or dictionary terms, where searching for each pattern in turn would read the text once per pattern.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>A trie that knows where to fall back</h2>
+  <p>The goto edges are a trie of the patterns: each state spells a prefix of some pattern. Each state also has a failure link to the state for the longest proper ending of its letters that is itself a prefix of a pattern. Reading a letter, the scan follows the goto edge for it if there is one; if not, it follows failure links until a state has one, or it reaches the root. The text pointer never moves back.</p>
+  <p>A match is reported wherever a pattern ends at the current state, or at any state its failure links reach, since those spell endings of what was just read. Aho and Corasick described the automaton in 1975 for searching bibliographies.</p>
+
+  <h2><small>Where it breaks</small>A fixed set of patterns</h2>
+  <p>The automaton is built for one set of patterns; adding a pattern means building it again. For a single pattern, a simpler search such as Knuth–Morris–Pratt or the standard library’s does the same with less setup. When the text is fixed and the patterns change, index the text instead, with a suffix array or a suffix tree.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The operations above, in GrafluentCollections</h2>
+  <pre id="code" aria-label="Swift code"></pre>
+</section>

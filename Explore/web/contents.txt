@@ -7,8 +7,8 @@ treap|Treaps|Search trees|A search tree shaped by random priorities, split and j
 splay|Splay trees|Search trees|Recently used keys move to the top.|page
 btree|B-trees|Search trees|Many keys per node, so the tree stays shallow.|page
 skiplist|Skip lists|Search trees|Express lanes over a sorted list.|page
-trie|Tries and radix trees|Strings|Keys spelled out one character at a time, shared prefixes once.|soon
-ahocorasick|Aho–Corasick|Strings|Every pattern found in one pass over the text.|soon
+trie|Tries and radix trees|Strings|Keys spelled out one character at a time, shared prefixes once.|page
+ahocorasick|Aho–Corasick|Strings|Every pattern found in one pass over the text.|page
 suffix|Suffix arrays and trees|Strings|Every substring of a text, indexed.|soon
 decisiondiagrams|Decision diagrams|Logic|A Boolean function as a shared graph of choices.|soon
 fenwick|Fenwick trees|Ranges|Running totals that update in a few steps.|soon

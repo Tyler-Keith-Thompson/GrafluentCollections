@@ -15,6 +15,8 @@ func mountPage(_ page: String) -> Bool {
     case "splay": SplayPage.mount()
     case "btree": BTreePage.mount()
     case "skiplist": SkipListPage.mount()
+    case "trie": TriePage.mount()
+    case "ahocorasick": AhoCorasickPage.mount()
     default: return false
     }
     return true

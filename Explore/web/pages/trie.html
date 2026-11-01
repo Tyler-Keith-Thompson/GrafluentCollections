@@ -1,0 +1,28 @@
+<!-- title: Tries and radix trees · Explore GrafluentCollections -->
+<!-- description: Insert words into a real Trie and RadixTree side by side, and ask each for the words with a prefix and the longest word a text starts with. -->
+<header class="sign">
+  <h1>Tries and radix trees</h1>
+  <p class="question">How do you find every word that starts with “rom” without looking at the others?</p>
+</header>
+<p class="example lead">Example: romane, romanus and romulus all start with “rom”, so a trie spells r, o, m once and branches after it, and every word under that branch starts with “rom”. A radix tree puts “om” on a single edge, since no word parts between the o and the m.</p>
+
+<div id="app"></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>Questions about prefixes</h2>
+  <p>A trie keeps a set of sequences, such as words, so that looking one up costs one step per symbol, however many words there are. It answers the questions a hash set can’t: every word that starts with a prefix, and the longest word that a text starts with, the question a router asks of a path or a tokenizer of its input. A radix tree answers the same questions with fewer vertices.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>Spell the words down a tree</h2>
+  <p>Each edge of a trie appends one symbol, so each vertex spells a prefix, and words that start alike share the vertices of their common start. A vertex is marked where a word ends. To find the words with a prefix, walk down the prefix’s letters; every marked vertex below is an answer. To find the longest word a text starts with, walk down the text’s letters and remember the last marked vertex passed.</p>
+  <p>Long words make long chains of vertices with a single child. A radix tree merges each such chain into one edge that holds a run of symbols, so it has a vertex only where words part or end. Inserting a word that leaves an edge partway splits the edge there. Fredkin named the trie in 1960; Morrison’s PATRICIA (1968) is the radix tree’s ancestor.</p>
+
+  <h2><small>Where it breaks</small>Many small vertices</h2>
+  <p>A trie spends a vertex per symbol of every word not shared with another, and a lookup follows a link per symbol, which costs more memory and more scattered reads than hashing the whole word once. When only exact lookups matter, a hash set is faster. When the words share little, a radix tree saves most of the vertices; when the alphabet is large, each vertex’s choice among its children costs more.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The operations above, in GrafluentCollections</h2>
+  <pre id="code" aria-label="Swift code"></pre>
+</section>

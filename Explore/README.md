@@ -22,6 +22,8 @@ contents and the menu without a link.
 | `splay` | `SplayTree`: `insert(_:)`, `remove(_:)`, `access(_:)`, `split(at:)`, `join(_:)`, `height`; `BinaryTree(_:)` for the shape |
 | `btree` | `BTreeDictionary`: subscript stores, `removeValue(forKey:)`, `height`; `RootedTree(_:)` for the nodes, with `preorder`, `postorder`, `children(of:)`, `depth(of:)` |
 | `skiplist` | `SkipList`: `init(using:)` with a seeded generator, `insert(_:)`, `remove(_:)`, `contains(_:)`; `layersView` for the towers |
+| `trie` | `Trie` and `RadixTree`: `insert(_:)`, `elements(withPrefix:)`, `longestPrefix(of:)`; `PrefixTree(_:)` and `Arborescence(_:)` for the shapes |
+| `ahocorasick` | `AhoCorasickAutomaton`: `init(patterns:)`, `stateCount`, `matches(in:)`; `statesView` for the goto edges and failure links, with `patternIndices(endingAt:)` |
 
 ## Requirements
 

@@ -85,6 +85,38 @@ let benchmarks: @Sendable () -> Void = {
         benchmark.stopMeasurement()
     }
 
+    // The least a compaction does: copy a table's three arrays of vertex fields, here as many
+    // vertices as the 8-queens table holds before it is collected.
+    Benchmark("DecisionDiagrams: BASELINE copying an 8-queens table's vertex arrays") { benchmark in
+        let (diagram, _) = queens(8)
+        let count = diagram.tableVertexCount
+        let variables = [Int32](repeating: 1, count: count)
+        let lows = [Int32](repeating: 0, count: count)
+        let highs = [Int32](repeating: 1, count: count)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            var copied = [Int32]()
+            copied.reserveCapacity(3 * count)
+            for v in 0 ..< count {
+                copied.append(variables[v])
+                copied.append(lows[v])
+                copied.append(highs[v])
+            }
+            blackHole(copied)
+        }
+        benchmark.stopMeasurement()
+    }
+
+    Benchmark("DecisionDiagrams: BinaryDecisionDiagram.collectGarbage(keeping:) after 8 queens") { benchmark in
+        let (diagram, board) = queens(8)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            var collected = diagram
+            blackHole(collected.collectGarbage(keeping: [board]))
+        }
+        benchmark.stopMeasurement()
+    }
+
     // The independent sets of a path of n vertices: every subset, less those holding both ends of
     // an edge.
     func pathIndependentSets(_ n: Int) -> (ZeroSuppressedDecisionDiagram, ZeroSuppressedDecisionDiagram.Family) {

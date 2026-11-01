@@ -133,10 +133,17 @@ struct _DecisionTable: Sendable {
             }
             v &-= 1
         }
+        var keptCount = 0
+        for v in 0 ..< n where kept[v] {
+            keptCount &+= 1
+        }
         var renumbered = ContiguousArray<Int32>(repeating: -1, count: n)
         var newVariables = ContiguousArray<Int32>()
         var newLows = ContiguousArray<Int32>()
         var newHighs = ContiguousArray<Int32>()
+        newVariables.reserveCapacity(keptCount)
+        newLows.reserveCapacity(keptCount)
+        newHighs.reserveCapacity(keptCount)
         for v in 0 ..< n where kept[v] {
             renumbered[v] = Int32(truncatingIfNeeded: newVariables.count)
             newVariables.append(variables[v])

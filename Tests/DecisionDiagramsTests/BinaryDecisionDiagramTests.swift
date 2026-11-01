@@ -207,9 +207,9 @@ struct BinaryDecisionDiagramTests {
         }
     }
 
-    @Test("Collecting garbage after six queens keeps only the board's vertices, and the board still counts four")
+    @Test("Collecting garbage after eight queens keeps only the board's vertices, and the board still counts 92")
     func collectGarbageAfterQueens() {
-        let n = 6
+        let n = 8
         func attacks(_ i: Int, _ j: Int, _ k: Int, _ l: Int) -> Bool {
             i == k || j == l || i - j == k - l || i + j == k + l
         }
@@ -236,15 +236,15 @@ struct BinaryDecisionDiagramTests {
         let boardVertices = diagram.vertexCount(of: board)
         #expect(diagram.tableVertexCount > boardVertices)
         let kept = diagram.collectGarbage(keeping: [board])
-        let four: Double = 4
+        let solutions: Double = 92
         #expect(diagram.tableVertexCount == boardVertices)
         #expect(diagram.vertexCount(of: kept[0]) == boardVertices)
-        #expect(diagram.satisfyingAssignmentCount(of: kept[0]) == four)
-        // No solution puts a queen in the corner, so fixing it empty keeps all four; the result
-        // no longer depends on that square, so the count over all 36 squares doubles.
+        #expect(diagram.satisfyingAssignmentCount(of: kept[0]) == solutions)
+        // Four of the 92 solutions put a queen in the corner, so fixing it empty keeps 88; the
+        // result no longer depends on that square, so the count over all 64 squares doubles.
         let cornerFree = diagram.restrict(kept[0], variable: 0, to: false)
-        let eight: Double = 8
-        #expect(diagram.satisfyingAssignmentCount(of: cornerFree) == eight)
+        let cornerFreeCount: Double = 176
+        #expect(diagram.satisfyingAssignmentCount(of: cornerFree) == cornerFreeCount)
     }
 
     @Test("Kept functions come back in the order given, and building one again finds its kept root")
@@ -273,8 +273,17 @@ struct BinaryDecisionDiagramTests {
         #expect(diagram.tableVertexCount == size)
     }
 
-    @Test("Collecting garbage keeping nothing leaves the two constants")
+    @Test("Collecting garbage keeping nothing leaves the two constants, and an empty table is unchanged")
     func collectGarbageKeepingNothing() {
+        var fresh = BinaryDecisionDiagram(variableCount: 2)
+        let noFunctions: [BinaryDecisionDiagram.Function] = []
+        let freshKept = fresh.collectGarbage(keeping: noFunctions)
+        let constantCount = 2
+        #expect(freshKept.isEmpty)
+        #expect(fresh.tableVertexCount == constantCount)
+        let freshTruth = fresh.constant(true), freshFalsity = fresh.constant(false)
+        #expect(fresh.evaluate(freshTruth, at: [true, true]))
+        #expect(!fresh.evaluate(freshFalsity, at: [true, true]))
         var diagram = BinaryDecisionDiagram(variableCount: 2)
         _ = diagram.and(diagram.variable(0), diagram.variable(1))
         let none: [BinaryDecisionDiagram.Function] = []

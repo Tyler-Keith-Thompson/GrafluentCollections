@@ -505,3 +505,13 @@ figure.fig { margin: 0; }
 .node.red.selected circle, .node.black.selected circle { stroke: var(--signal); stroke-width: 6; }
 .dot.red { background: var(--danger); border-color: var(--danger); }
 .dot.black { background: #1c1c1e; border-color: var(--ink); }
+
+/* B-trees: each node a box of keys in a row; skip lists: the head drawn as a small dot. */
+.btree .box { fill: var(--sheet); stroke: var(--ink); stroke-width: 2; }
+.btree .divider { stroke: var(--rule); stroke-width: 1.5; }
+.btree .blink { stroke: var(--road); stroke-width: 2.5; }
+.btree .bkey { font-family: var(--display); font-weight: 800; font-size: 14px; fill: var(--ink); }
+.btree .bkey.current { fill: var(--danger); }
+.btree .bkey.selected { fill: var(--sign); text-decoration: underline; }
+.node.head circle { fill: var(--muted); stroke: var(--muted); }
+.dot.head { background: var(--muted); border-color: var(--muted); }

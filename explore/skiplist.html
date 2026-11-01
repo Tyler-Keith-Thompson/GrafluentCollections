@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skip lists · Explore GrafluentCollections</title>
+<meta name="description" content="Insert, look up and remove keys in a real SkipList and watch each search ride the upper levels before dropping down.">
+<script>
+  // The theme the reader picked last time, before anything is drawn.
+  try { const t = localStorage.getItem("explore-theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+  // A new page opens at its top, even where the host keeps the previous page's scroll position.
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%231d4f9c%22/%3E%3Cpath d=%22M9 22L16 9l7 13z%22 fill=%22none%22 stroke=%22white%22 stroke-width=%222.5%22/%3E%3Ccircle cx=%229%22 cy=%2222%22 r=%223.5%22 fill=%22white%22/%3E%3Ccircle cx=%2216%22 cy=%229%22 r=%223.5%22 fill=%22white%22/%3E%3Ccircle cx=%2223%22 cy=%2222%22 r=%223.5%22 fill=%22white%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="explore.css">
+<link rel="modulepreload" href="index.js">
+<link rel="preload" href="Explore.wasm" as="fetch" type="application/wasm" crossorigin>
+</head>
+<body data-page="skiplist">
+<div class="wrap">
+  <nav class="topbar" aria-label="Site">
+    <a class="home" href="./">Explore <b>GrafluentCollections</b></a>
+    <span class="spacer"></span>
+    <details class="menu"><summary><span class="burger" aria-hidden="true"></span><span class="mlabel">All pages</span></summary>
+      <nav class="mpanel" aria-label="All pages"><a class="mhome" href="./">Contents</a>
+        <div class="mgroup"><span>Search trees</span><a href="avl.html">AVL trees</a><a href="redblack.html">Red–black trees</a><a href="treap.html">Treaps</a><a href="splay.html">Splay trees</a><a href="btree.html">B-trees</a><a href="skiplist.html" aria-current="page">Skip lists</a></div>
+        <div class="mgroup"><span>Strings</span><i>Tries and radix trees (soon)</i><i>Aho–Corasick (soon)</i><i>Suffix arrays and trees (soon)</i></div>
+        <div class="mgroup"><span>Logic</span><i>Decision diagrams (soon)</i></div>
+        <div class="mgroup"><span>Ranges</span><i>Fenwick trees (soon)</i><i>Segment trees (soon)</i><i>Interval trees (soon)</i></div>
+        <div class="mgroup"><span>Space</span><i>k-d trees and quadtrees (soon)</i></div>
+        <div class="mgroup"><span>Text</span><i>Ropes (soon)</i></div>
+        <div class="mgroup"><span>History</span><i>Persistent trees (soon)</i><i>LRU caches (soon)</i></div>
+      </nav>
+    </details>
+    <a href="../documentation/">Docs</a>
+    <button type="button" class="theme" id="theme" aria-label="Switch between light and dark">◐<span class="tlabel"> Theme</span></button>
+  </nav>
+<header class="sign">
+  <h1>Skip lists</h1>
+  <p class="question">Can a sorted linked list be searched as fast as a balanced tree?</p>
+</header>
+<p class="example lead">Example: look up 60. The search starts on the top level, takes long strides while the next key is smaller, and drops a level each time the next key would overshoot, reaching 60 without walking the bottom list.</p>
+
+<div id="app" data-loading aria-busy="true"><div><section class="panel controls" aria-label="Your operations"><label class="field" for="skiplist-text">Keys to insert, ? to look up, a minus sign to remove <input id="skiplist-text" type="text" value="30 10 50 20 40 70 60 80 90 15 35 ?60 ?65 -50 ?60" maxlength="120" spellcheck="false" autocomplete="off"></label><div class="buttons"><button type="button">New towers</button></div></section><section class="lab" aria-label="The skip list"><div class="panel stage"><p class="empty">The list starts empty. Press Step to run the first operation.</p><div class="legend"><span><i class="dot head"></i>the head</span><span><i class="dot selected"></i>where this step's search went</span><span><i class="dot current"></i>the key it found</span></div></div><div class="side"><div class="panel" aria-live="polite"><span class="label">Operation 0 of 15</span><p class="narration">The bottom level is a sorted linked list of every key. Each level above links only the keys whose towers reach it, about a quarter of the level below, so a search can take long strides first.</p></div><div class="panel"><span class="label">The list</span><div class="stat"><div><span class="num">0</span>keys</div><div class="good"><span class="num">0</span>levels</div><div><span class="num">0</span>moves in this search</div></div></div></div></section><section class="panel controls" aria-label="Playback"><div class="buttons"><button type="button" aria-label="Step back">◀ Back</button><button type="button" class="primary">▶ Play</button><button type="button">Step ▶</button><button type="button">Reset</button></div><div class="timeline-scroll"><svg class="timeline" width="420" viewBox="0 0 420 64" aria-label="Timeline of events"><line x1="8" y1="32" x2="412" y2="32" class="axis" /><g class="marble future" data-step="0"><circle cx="22" cy="32" r="10.0" class="m-blue" /><text x="22" y="36" text-anchor="middle">30</text><title>Insert 30 with a tower of 1 level: each level above the bottom is added with probability 1/4, by a coin toss at insertion. It is linked in on every level it reaches. The search made 1 move.</title></g><g class="marble future" data-step="1"><circle cx="48" cy="32" r="10.0" class="m-blue" /><text x="48" y="36" text-anchor="middle">10</text><title>Insert 10 with a tower of 1 level: each level above the bottom is added with probability 1/4, by a coin toss at insertion. It is linked in on every level it reaches. The search made 1 move.</title></g><g class="marble future" data-step="2"><circle cx="74" cy="32" r="10.0" class="m-blue" /><text x="74" y="36" text-anchor="middle">50</text><title>Insert 50 with a tower of 3 levels: each level above the bottom is added with probability 1/4, by a coin toss at insertion. It is linked in on every level it reaches. The search made 1 move.</title></g><g class="marble future" data-step="3"><circle cx="100" cy="32" r="10.0" class="m-blue" /><text x="100" y="36" text-anchor="middle">20</text><title>Insert 20 with a tower of 1 level: each level above the bottom is added with probability 1/4, by a coin toss at insertion. It is linked in on every level it reaches. The search made 4 moves.</title></g><g class="marble future" data-step="4"><circle cx="126" cy="32" r="10.0" class="m-blue" /><text x="126" y="36" text-anchor="middle">40</text><title>Insert 40 with a tower of 2 levels: each level above the bottom is added with probability 1/4, by a coin toss at insertion. It is linked in on every level it reaches. The search made 2 moves.</title></g><g class="marble future" data-step="5"><circle cx="152" cy="32" r="10.0" class="m-blue" /><text x="152" y="36" text-anchor="middle">70</text><title>Insert 70 with a tower of 1 level: each level above the bottom is added with probability 1/4, by a coin toss at insertion. It is linked in on every level it reaches. The search made 4 moves.</title></g><g class="marble future" data-step="6"><circle cx="178" cy="32" r="10.0" class="m-blue" /><text x="178" y="36" text-anchor="middle">60</text><title>Insert 60 with a tower of 1 level: each level above the bottom is added with probability 1/4, by a coin toss at insertion. It is linked in on every level it reaches. The search made 4 moves.</title></g><g class="marble future" data-step="7"><circle cx="204" cy="32" r="10.0" class="m-blue" /><text x="204" y="36" text-anchor="middle">80</text><title>Insert 80 with a tower of 1 level: each level above the bottom is added with probability 1/4, by a coin toss at insertion. It is linked in on every level it reaches. The search made 6 moves.</title></g><g class="marble future" data-step="8"><circle cx="230" cy="32" r="10.0" class="m-blue" /><text x="230" y="36" text-anchor="middle">90</text><title>Insert 90 with a tower of 1 level: each level above the bottom is added with probability 1/4, by a coin toss at insertion. It is linked in on every level it reaches. The search made 7 moves.</title></g><g class="marble future" data-step="9"><circle cx="256" cy="32" r="10.0" class="m-blue" /><text x="256" y="36" text-anchor="middle">15</text><title>Insert 15 with a tower of 1 level: each level above the bottom is added with probability 1/4, by a coin toss at insertion. It is linked in on every level it reaches. The search made 4 moves.</title></g><g class="marble future" data-step="10"><circle cx="282" cy="32" r="10.0" class="m-blue" /><text x="282" y="36" text-anchor="middle">35</text><title>Insert 35 with a tower of 4 levels: each level above the bottom is added with probability 1/4, by a coin toss at insertion. It is linked in on every level it reaches. The search made 1 move.</title></g><g class="marble future" data-step="11"><circle cx="308" cy="32" r="10.0" class="m-green" /><text x="308" y="36" text-anchor="middle">60</text><title>Look up 60: found. The search starts on the top level, goes right while the next key is smaller, and drops a level otherwise, skipping most of the list. The search made 6 moves.</title></g><g class="marble future" data-step="12"><circle cx="334" cy="32" r="7.0" class="m-green" /><text x="334" y="36" text-anchor="middle">65</text><title>Look up 65: not there. The search goes right while the next key is smaller and down otherwise, and drops off the bottom level next to where 65 would be. The search made 6 moves.</title></g><g class="marble future" data-step="13"><circle cx="360" cy="32" r="10.0" class="m-red" /><text x="360" y="36" text-anchor="middle">50</text><title>Remove 50. Its tower of 3 levels comes out, and each link that led to it now skips past it.</title></g><g class="marble future" data-step="14"><circle cx="386" cy="32" r="10.0" class="m-green" /><text x="386" y="36" text-anchor="middle">60</text><title>Look up 60: found. The search starts on the top level, goes right while the next key is smaller, and drops a level otherwise, skipping most of the list. The search made 6 moves.</title></g><line x1="9" y1="8" x2="9" y2="56" class="playhead" /></svg></div><input id="scrub-skiplist" class="scrub" type="range" min="0" max="15" value="0" aria-label="Scrub through the steps"><div class="tl-legend"><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-blue" /></svg>insert</span><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-green" /></svg>look up</span><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-red" /></svg>remove</span></div></section></div></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>A sorted set without rebalancing</h2>
+  <p>A skip list keeps keys in order and finds, inserts or removes one in a number of steps that grows, on average, with the logarithm of the count. It never rotates or rebalances anything: an insertion links the new key in on a few levels, and a removal unlinks it. That makes it simple to get right and easy to walk in order.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>Express lanes, chosen by coin toss</h2>
+  <p>The bottom level is an ordinary sorted linked list of every key. Each key also gets a tower: with probability 1/4 it reaches the level above, with probability 1/4 of that the next one, and so on. Each level is a sorted list of the keys whose towers reach it, about a quarter as many as the level below. A search starts at the head on the top level, moves right while the next key is smaller than the one it wants, and drops a level otherwise.</p>
+  <p>The heights are random, so no input order can make the list slow; only bad luck can, and long runs of it are very unlikely. Pugh described the structure in 1990. Press “New towers” to run the same operations with other heights.</p>
+
+  <h2><small>Where it breaks</small>Pointers everywhere</h2>
+  <p>Each step of a search follows a link to wherever the next key lives, so it touches more scattered memory than a B-tree, which reads keys packed in a row. The bound is an expected one rather than a worst case. When every operation must be fast, or the set is read far more than it is changed, a balanced tree or a B-tree does better.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The operations above, in GrafluentCollections</h2>
+  <pre id="code" data-loading aria-busy="true" aria-label="Swift code"><span><span class="k">import</span> <span class="t">SkipLists</span>
+
+<span class="k">let</span> operations: [<span class="t">KeyOperation</span>] = [.insert(<span class="n">30</span>), .insert(<span class="n">10</span>), .insert(<span class="n">50</span>), .insert(<span class="n">20</span>), .insert(<span class="n">40</span>), .insert(<span class="n">70</span>), .insert(<span class="n">60</span>), .insert(<span class="n">80</span>), .insert(<span class="n">90</span>), .insert(<span class="n">15</span>), .insert(<span class="n">35</span>), .access(<span class="n">60</span>), .access(<span class="n">65</span>), .remove(<span class="n">50</span>), .access(<span class="n">60</span>)]
+<span class="k">let</span> seed: <span class="t">UInt64</span> = <span class="n">3</span>
+
+<span class="k">var</span> random = <span class="t">PageRandom</span>(state: seed)  <span class="c">// any RandomNumberGenerator</span>
+<span class="k">var</span> list = <span class="t">SkipList</span>&lt;<span class="t">Int</span>&gt;(using: &amp;random)
+<span class="k">var</span> history = [list]
+<span class="k">for</span> operation <span class="k">in</span> operations {
+    <span class="k">switch</span> operation {
+    <span class="k">case</span> .insert(<span class="k">let</span> key): list.insert(key)
+    <span class="k">case</span> .remove(<span class="k">let</span> key): list.remove(key)
+    <span class="k">case</span> .access(<span class="k">let</span> key): _ = list.contains(key)
+    <span class="k">case</span> .split, .join: break  <span class="c">// the splay page's alone</span>
+    }
+    history.append(list)
+}
+<span class="k">let</span> count = list.count  <span class="c">// 10</span>
+
+<span class="k">let</span> layers = list.layersView
+<span class="k">var</span> towers: [<span class="t">Int</span>: <span class="t">Int</span>] = [:]
+<span class="k">for</span> vertex <span class="k">in</span> layers.vertices {
+    towers[vertex.element, default: <span class="n">0</span>] += <span class="n">1</span>
+}
+<span class="k">let</span> tallest = towers.values.max()  <span class="c">// 4</span>
+</span></pre>
+</section>
+<nav class="pager" aria-label="Pages"><a class="prev" href="btree.html"><span>Previous</span>B-trees</a><a class="next" href="./#contents"><span>Next</span>Contents</a></nav>
+</div>
+<script>
+  if (!location.hash) window.scrollTo(0, 0);
+  // Until the reader scrolls, keep the page at its top while the fonts and the interactive parts
+  // come in. `pinned` is read again once the interactive parts have mounted.
+  let pinned = !location.hash;
+  if (pinned) {
+    const release = () => { pinned = false; };
+    for (const kind of ["wheel", "touchstart", "keydown", "mousedown"]) addEventListener(kind, release, { once: true, passive: true });
+    const pin = new ResizeObserver(() => { if (pinned) window.scrollTo(0, 0); });
+    pin.observe(document.body);
+    setTimeout(() => { pinned = false; pin.disconnect(); }, 3000);
+  }
+  document.getElementById("theme").addEventListener("click", () => {
+    const root = document.documentElement;
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("explore-theme", root.dataset.theme); } catch {}
+  });
+</script>
+<script type="module">
+  // GrafluentCollections and the interface run as WebAssembly; this loads them.
+  import { init } from "./index.js";
+  // The page's first frame is already drawn; these views mount in its place. Return to the top
+  // once they are drawn, unless the link named a section or the reader has scrolled.
+  const toTop = () => { if (pinned) window.scrollTo(0, 0); };
+  init().then(() => requestAnimationFrame(() => requestAnimationFrame(toTop))).catch((error) => {
+    console.error("The explorer failed to start:", error);
+    for (const part of document.querySelectorAll("[data-loading]")) { part.removeAttribute("data-loading"); part.removeAttribute("aria-busy"); }
+    const app = document.getElementById("app");
+    if (app) app.textContent = "The interactive part of this page could not start in this browser.";
+  });
+</script>
+</body>
+</html>

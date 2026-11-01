@@ -68,4 +68,62 @@ let benchmarks: @Sendable () -> Void = {
         }
         benchmark.stopMeasurement()
     }
+
+    // A suffix trie built by inserting every suffix of a short text symbol by symbol, children
+    // in sibling chains: the O(n²) form the suffix tree replaces.
+    let short = Array(bytes.prefix(2_000))
+    Benchmark("SuffixStructures: BASELINE naive suffix trie on 2000 symbols") { benchmark in
+        for _ in benchmark.scaledIterations {
+            var symbols: [UInt8] = [0]
+            var firstChildren: [Int32] = [-1]
+            var nextSiblings: [Int32] = [-1]
+            for start in short.indices {
+                var node = 0
+                for position in start ..< short.count {
+                    let symbol = short[position]
+                    var child = Int(firstChildren[node])
+                    while child >= 0 && symbols[child] != symbol {
+                        child = Int(nextSiblings[child])
+                    }
+                    if child < 0 {
+                        child = symbols.count
+                        symbols.append(symbol)
+                        firstChildren.append(-1)
+                        nextSiblings.append(firstChildren[node])
+                        firstChildren[node] = Int32(child)
+                    }
+                    node = child
+                }
+            }
+            blackHole(symbols.count)
+        }
+    }
+
+    Benchmark("SuffixStructures: SuffixTree<UInt8>.init(_:) on 2000 symbols") { benchmark in
+        for _ in benchmark.scaledIterations {
+            blackHole(SuffixTree(short))
+        }
+    }
+
+    Benchmark(
+        "SuffixStructures: SuffixTree<UInt8>.init(_:)",
+        configuration: .init(metrics: [.wallClock, .mallocCountTotal, .instructions, .peakMemoryResident])
+    ) { benchmark in
+        for _ in benchmark.scaledIterations {
+            blackHole(SuffixTree(bytes))
+        }
+    }
+
+    Benchmark("SuffixStructures: SuffixTree<UInt8>.contains(_:)") { benchmark in
+        let tree = SuffixTree(bytes)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            var found = 0
+            for pattern in patterns where tree.contains(pattern) {
+                found &+= 1
+            }
+            blackHole(found)
+        }
+        benchmark.stopMeasurement()
+    }
 }

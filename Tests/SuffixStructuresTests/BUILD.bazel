@@ -21,6 +21,8 @@ swift_library(
         "//Sources/SuffixStructures",
         "//Tests/GrafluentCollectionsTestSupport",
         "@swiftpkg_swift_property_based//:PropertyBased",
+        "@swiftpkg_grafluent//:GraphProtocols",
+        "@swiftpkg_grafluent//:Trees",
     ],
 )
 
@@ -62,6 +64,8 @@ swift_library(
         "//Sources/SuffixStructures",
         "//Tests/GrafluentCollectionsTestSupport",
         "@swiftpkg_swift_property_based//:PropertyBased",
+        "@swiftpkg_grafluent//:GraphProtocols",
+        "@swiftpkg_grafluent//:Trees",
     ],
 )
 

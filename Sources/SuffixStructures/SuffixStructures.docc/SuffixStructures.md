@@ -23,8 +23,25 @@ The text may be any sequence of `Comparable` symbols. For `UInt8`, such as a str
 construction sorts the bytes themselves in O(*n*) (induced sorting: Nong, Zhang and Chan, 2009);
 any other symbol type is first replaced by its rank among the text's distinct symbols.
 
+A ``SuffixTree`` is the compressed trie of the same suffixes, built left to right by Ukkonen's
+algorithm (1995), over one text or several. A pattern is found in O(*m*) steps down from the
+root; the deepest internal node is the longest repeated substring, and the deepest node with
+suffixes of every text below it the longest common substring. Its nodes convert to Grafluent's
+`RootedTree` with `RootedTree(_:)`, and its suffix links are a `DirectedGraph`,
+``SuffixTree/suffixLinksView``.
+
+```swift
+let both = SuffixTree(texts: ["xabxac", "abcabxabcd"])
+both.longestCommonSubstring?.range.count   // 4, "abxa"
+both.occurrences(of: "ab").count           // 4
+```
+
 ## Topics
 
 ### Suffix arrays
 
 - ``SuffixArray``
+
+### Suffix trees
+
+- ``SuffixTree``

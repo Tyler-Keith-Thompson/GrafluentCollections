@@ -175,6 +175,14 @@ of a hand-written loop over arrays.
   A byte text is sorted as bytes; any other `Comparable` symbol type is replaced by its rank,
   so construction needs no `Hashable`. Names are spelled out (`longestCommonPrefixes`, not
   `lcp`).
+- D13. A suffix tree works over codes and numbers its nodes in preorder (2026-11-01):
+  `SuffixTree` maps each symbol to an `Int32` code (its rank when `Symbol` is `Comparable`,
+  else its order of first occurrence; a byte is its own code), ends each text in a negative
+  terminator of its own, and renumbers the finished tree in preorder, so a subtree is a range of
+  nodes and the leaves of a `Comparable` text are its suffix array. Labels are `Occurrence`
+  values (a text index and a range in that text) rather than symbols. Nodes are `Int32`, so the
+  texts' total length traps at `Int32.max / 2`. The generalized tree is `init(texts:)`, labelled
+  apart from `init(_:)` so a collection of strings is never read as one text.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

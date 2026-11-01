@@ -3,11 +3,15 @@
 load("//tools:docc.bzl", "docc_archive")
 load("//tools:swift_rules.bzl", "swift_library")
 
-# Structures over a text's suffixes that answer substring queries: SuffixArray.
+# Structures over a text's suffixes that answer substring queries: SuffixArray, SuffixTree.
 swift_library(
     name = "SuffixStructures",
     srcs = glob(["**/*.swift"]),
     module_name = "SuffixStructures",
+    deps = [
+        "@swiftpkg_grafluent//:GraphProtocols",
+        "@swiftpkg_grafluent//:Trees",
+    ],
     visibility = ["//visibility:public"],
 )
 

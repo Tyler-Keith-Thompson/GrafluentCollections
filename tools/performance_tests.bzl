@@ -8,5 +8,6 @@ PERFORMANCE_TEST_PACKAGES = [
     "Tests/DecisionDiagramsTests",
     "Tests/RangeTreesTests",
     "Tests/SkipListsTests",
+    "Tests/SpatialTreesTests",
     "Tests/SuffixStructuresTests",
 ]

@@ -224,6 +224,16 @@ of a hand-written loop over arrays.
   earliest. Intervals are `Range` (half-open) and must be non-empty: the plain spelling traps,
   `checked:` throws `EmptyRange`. Searches are lazy `SearchView`s in key order, costing
   O(min(n, (k + 1) log n)). `ClosedRange` was left out until a caller needs it.
+- D19. A k-d tree is static, over SIMD points, and answers with indices (2026-11-01):
+  `KDTree<Point: SIMD>` with floating-point scalars takes its dimension from `scalarCount`, so
+  `SIMD2<Double>` and `SIMD3<Float>` work with no protocol to adopt and distances use SIMD
+  arithmetic. It is built once by median splits (Hoare selection), stored with no links in the
+  implicit median layout, and has no insertion until a caller needs one. As a collection it
+  holds the points in the order given, and searches (`nearestIndex(to:)`,
+  `nearestIndices(to:count:)`, `indices(within:of:)`, `indices(in:)`) return those indices,
+  nearest first or ascending, ties to the smaller index, so duplicates stay distinguishable.
+  NaN coordinates trap (`checked:` throws `NotANumber`); a NaN query or negative radius finds
+  nothing. `BoundingBox` is shared with the planned quadtree and octree. Module `SpatialTrees`.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

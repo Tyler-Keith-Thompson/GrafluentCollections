@@ -78,5 +78,14 @@ let package = Package(
             path: "Benchmarks/RangeTreesBenchmarks",
             plugins: [.plugin(name: "BenchmarkPlugin", package: "benchmark")]
         ),
+        .executableTarget(
+            name: "SpatialTreesBenchmarks",
+            dependencies: [
+                .product(name: "Benchmark", package: "benchmark"),
+                .product(name: "SpatialTrees", package: "GrafluentCollections"),
+            ],
+            path: "Benchmarks/SpatialTreesBenchmarks",
+            plugins: [.plugin(name: "BenchmarkPlugin", package: "benchmark")]
+        ),
     ]
 )

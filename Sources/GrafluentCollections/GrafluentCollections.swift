@@ -10,3 +10,4 @@
 @_exported import SuffixStructures
 @_exported import DecisionDiagrams
 @_exported import RangeTrees
+@_exported import SpatialTrees

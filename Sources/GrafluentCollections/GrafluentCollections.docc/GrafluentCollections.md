@@ -32,4 +32,5 @@ print(scores.sum(in: 2 ..< 6))       // 19
 - ``SuffixStructures``
 - ``DecisionDiagrams``
 - ``RangeTrees``
+- ``SpatialTrees``
 - ``CollectionErrors``

@@ -17,3 +17,4 @@ throw it.
 - ``DuplicateKey``
 - ``OverlappingKeys``
 - ``EmptyRange``
+- ``NotANumber``

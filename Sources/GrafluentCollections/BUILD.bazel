@@ -17,6 +17,7 @@ swift_library(
         "//Sources/SuffixStructures",
         "//Sources/DecisionDiagrams",
         "//Sources/RangeTrees",
+        "//Sources/SpatialTrees",
     ],
     visibility = ["//visibility:public"],
 )
@@ -35,6 +36,7 @@ docc_archive(
         "//Sources/SuffixStructures:SuffixStructuresDocumentation",
         "//Sources/DecisionDiagrams:DecisionDiagramsDocumentation",
         "//Sources/RangeTrees:RangeTreesDocumentation",
+        "//Sources/SpatialTrees:SpatialTreesDocumentation",
     ],
     tags = ["manual"],
     visibility = ["//visibility:public"],

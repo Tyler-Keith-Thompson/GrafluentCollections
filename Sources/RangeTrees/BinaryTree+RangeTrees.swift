@@ -1,3 +1,4 @@
+import BinarySearchTrees
 import Trees
 
 extension BinaryTree where Vertex == Int {
@@ -24,6 +25,37 @@ extension BinaryTree where Vertex == Int {
     public init?<Action>(_ tree: LazySegmentTree<Action>) {
         guard !tree.isEmpty else { return nil }
         self.init(_perfectWithLeaves: tree._size)
+    }
+
+    /// The shape of an interval tree: its in-order positions as vertices, each with the same
+    /// left and right children as in the tree; nil when the tree is empty. Vertex `i` stands for
+    /// the entry `tree[i]`.
+    ///
+    /// - Parameter tree: The interval tree whose shape is converted.
+    /// - Complexity: O(*n*).
+    @inlinable
+    public init?<Bound, Value>(_ tree: IntervalTree<Bound, Value>) {
+        let core = tree._core
+        guard core.root >= 0 else { return nil }
+        // Each slot's in-order position, by one in-order walk.
+        var positions = [Int](repeating: 0, count: core.count)
+        var slots = [Int32](repeating: 0, count: core.count)
+        var walk = IntervalTree<Bound, Value>._Core.InorderSlots(core)
+        var position = 0
+        while let slot = walk.next() {
+            positions[Int(slot)] = position
+            slots[position] = slot
+            position &+= 1
+        }
+        let rootPosition = positions[Int(core.root)]
+        let tree = BinaryTree(root: rootPosition) { vertex in
+            let node = core.nodes[Int(slots[vertex])]
+            return (node.left >= 0 ? positions[Int(node.left)] : nil, node.right >= 0 ? positions[Int(node.right)] : nil)
+        }
+        guard let tree else {
+            preconditionFailure("An interval tree's vertices form a binary tree")
+        }
+        self = tree
     }
 
     /// The perfect binary tree with `leaves` leaves, a power of two, numbered in level order.

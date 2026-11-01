@@ -1,6 +1,7 @@
 # ``RangeTrees``
 
-Trees over a sequence of values that answer range queries and take updates in O(log *n*).
+Trees over a sequence of values or a set of intervals that answer range queries and take updates
+in O(log *n*).
 
 ## Overview
 
@@ -41,7 +42,20 @@ pending at the cells that cover the range. A ``MonoidAction`` names the monoid, 
 how an update changes a combined value; it is told how many values the combination covers, so
 adding a constant to a range of sums is `sum + update * count`.
 
-Both trees' shapes convert to Grafluent's `BinaryTree` with `BinaryTree(_:)`.
+An ``IntervalTree`` holds half-open intervals with a value each, in an AVL tree ordered by lower
+bound whose vertices also record the largest upper bound below them. It finds the intervals that
+contain a point, overlap a range or lie within one, skipping every subtree that ends too early.
+
+```swift
+var bookings = IntervalTree<Int, String>()
+bookings.insert(9 ..< 11, value: "Ada")
+bookings.insert(10 ..< 12, value: "Grace")
+bookings.containing(10).map(\.value)          // ["Ada", "Grace"]
+bookings.overlapping(11 ..< 13).map(\.value)  // ["Grace"]
+```
+
+The segment trees' and the interval tree's shapes convert to Grafluent's `BinaryTree` with
+`BinaryTree(_:)`.
 
 ## Topics
 
@@ -53,6 +67,10 @@ Both trees' shapes convert to Grafluent's `BinaryTree` with `BinaryTree(_:)`.
 
 - ``SegmentTree``
 - ``LazySegmentTree``
+
+### Interval trees
+
+- ``IntervalTree``
 
 ### Monoids
 

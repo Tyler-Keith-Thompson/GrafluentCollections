@@ -239,4 +239,70 @@ let benchmarks: @Sendable () -> Void = {
             }
         }
     }
+
+    // 10⁵ intervals of length 1 to 100 over 0 ..< 10⁶, and 1,000 stabbing points.
+    let intervals = (0 ..< n).map { k -> IntervalTree<Int, Int>.Entry in
+        let lower = next(below: 1_000_000)
+        return .init(range: lower ..< lower + 1 + next(below: 100), value: k)
+    }
+    let points = (0 ..< 1_000).map { _ in next(below: 1_000_000) }
+
+    // The hand-written form: a linear filter over the intervals per point.
+    Benchmark("RangeTrees: BASELINE linear filter of intervals containing a point") { benchmark in
+        let ranges = intervals.map(\.range)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            for point in points {
+                var found = 0
+                for range in ranges where range.lowerBound <= point && point < range.upperBound {
+                    found &+= 1
+                }
+                blackHole(found)
+            }
+        }
+    }
+
+    Benchmark("RangeTrees: IntervalTree.init(_:)") { benchmark in
+        for _ in benchmark.scaledIterations {
+            blackHole(IntervalTree(intervals))
+        }
+    }
+
+    Benchmark("RangeTrees: IntervalTree.insert(_:value:)") { benchmark in
+        for _ in benchmark.scaledIterations {
+            var tree = IntervalTree<Int, Int>()
+            for entry in intervals {
+                tree.insert(entry.range, value: entry.value)
+            }
+            blackHole(tree)
+        }
+    }
+
+    Benchmark("RangeTrees: IntervalTree.containing(_:)") { benchmark in
+        let tree = IntervalTree(intervals)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            for point in points {
+                var found = 0
+                for _ in tree.containing(point) {
+                    found &+= 1
+                }
+                blackHole(found)
+            }
+        }
+    }
+
+    Benchmark("RangeTrees: IntervalTree.overlapping(_:)") { benchmark in
+        let tree = IntervalTree(intervals)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            for point in points {
+                var found = 0
+                for _ in tree.overlapping(point ..< point + 1_000) {
+                    found &+= 1
+                }
+                blackHole(found)
+            }
+        }
+    }
 }

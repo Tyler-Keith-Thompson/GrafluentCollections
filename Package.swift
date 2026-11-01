@@ -42,7 +42,7 @@ let targets: [Target] = [
     // Decision diagrams
     .target(name: "DecisionDiagrams", dependencies: ["CollectionErrors", .product(name: "GraphProtocols", package: "grafluent")], exclude: bazelFiles),
     // Range and spatial trees
-    .target(name: "RangeTrees", dependencies: ["CollectionErrors", .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
+    .target(name: "RangeTrees", dependencies: ["CollectionErrors", "BinarySearchTrees", .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
 
     // Umbrella: `import GrafluentCollections` imports every module.
     .target(name: "GrafluentCollections", dependencies: ["CollectionErrors", "BinarySearchTrees", "BTrees", "SkipLists", "Tries", "SuffixStructures", "DecisionDiagrams", "RangeTrees"], exclude: bazelFiles),

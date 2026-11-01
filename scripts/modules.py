@@ -39,7 +39,7 @@ MOCKING = "mockable/Mockable"
 # (name, group, description, dependencies)
 MODULES = [
     # Shared
-    ("CollectionErrors", "Shared", "The typed errors the collections throw: IndexOutOfRange, DuplicateKey, OverlappingKeys.", []),
+    ("CollectionErrors", "Shared", "The typed errors the collections throw: IndexOutOfRange, DuplicateKey, OverlappingKeys, EmptyRange.", []),
     # Search trees
     ("BinarySearchTrees", "Search trees", "Balanced binary search trees as sorted sets and dictionaries: AVLTree, AVLDictionary, RedBlackTree, Treap, SplayTree.", ["CollectionErrors", "grafluent/Trees"]),
     ("BTrees", "Search trees", "B-trees as sorted sets and dictionaries with many elements per node: BTree, BTreeDictionary.", ["CollectionErrors", "grafluent/Trees"]),
@@ -51,7 +51,7 @@ MODULES = [
     # Decision diagrams
     ("DecisionDiagrams", "Decision diagrams", "Canonical diagrams of Boolean functions and families of sets: BinaryDecisionDiagram, ZeroSuppressedDecisionDiagram.", ["CollectionErrors", "grafluent/GraphProtocols"]),
     # Range and spatial trees
-    ("RangeTrees", "Range and spatial trees", "Trees over a sequence that answer range queries: FenwickTree, SegmentTree, LazySegmentTree.", ["CollectionErrors", "grafluent/Trees"]),
+    ("RangeTrees", "Range and spatial trees", "Trees over a sequence or a set of intervals that answer range queries: FenwickTree, SegmentTree, LazySegmentTree, IntervalTree.", ["CollectionErrors", "BinarySearchTrees", "grafluent/Trees"]),
 ]
 
 # Executables: (name, description, dependencies). Each is an `.executableTarget` and product in

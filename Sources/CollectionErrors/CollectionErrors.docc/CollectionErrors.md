@@ -16,3 +16,4 @@ throw it.
 - ``IndexOutOfRange``
 - ``DuplicateKey``
 - ``OverlappingKeys``
+- ``EmptyRange``

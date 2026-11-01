@@ -1,8 +1,29 @@
+/// A value each vertex keeps about its subtree beside the size, such as an interval tree's largest
+/// upper bound, recomputed from the vertex and its children whenever its children change.
+@usableFromInline
+package protocol _TreeAugmentation {
+    /// Recomputes `x`'s summary from its own key and its children's summaries.
+    static func update<Key>(_ nodes: UnsafeMutableBufferPointer<_TreeNode<Key>>, _ x: Int32)
+}
+
+/// No summary beyond the size.
+@usableFromInline
+package enum _NoAugmentation: _TreeAugmentation {
+    @inlinable @inline(__always)
+    package static func update<Key>(_ nodes: UnsafeMutableBufferPointer<_TreeNode<Key>>, _ x: Int32) {}
+}
+
+/// AVL balancing without a summary, as the AVL trees use.
+@usableFromInline
+package typealias _AVLBalancing = _AugmentedAVLBalancing<_NoAugmentation>
+
 /// AVL balancing (Adelson-Velsky and Landis, 1962): each vertex records its height in vertices,
 /// and the heights of its two subtrees differ by at most one. Every vertex on the path is
 /// rebalanced on the way back up, with one or two rotations where the difference reaches two.
+/// Every vertex whose children change is updated, so `Augmentation` keeps a summary of each
+/// subtree.
 @usableFromInline
-package enum _AVLBalancing: _TreeBalancing {
+package enum _AugmentedAVLBalancing<Augmentation: _TreeAugmentation>: _TreeBalancing {
     @inlinable
     package static var leafBalance: Int32 { 1 }
 
@@ -52,6 +73,7 @@ package enum _AVLBalancing: _TreeBalancing {
         let right = nodes[Int(x)].right
         nodes[Int(x)].balance = Swift.max(_height(nodes, left), _height(nodes, right)) &+ 1
         nodes[Int(x)].size = _Tree.size(nodes, left) &+ _Tree.size(nodes, right) &+ 1
+        Augmentation.update(nodes, x)
     }
 
     @inlinable

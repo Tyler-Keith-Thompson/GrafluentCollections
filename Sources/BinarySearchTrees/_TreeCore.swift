@@ -109,14 +109,14 @@ package struct _TreeCore<Key: Comparable, Value, Balancing> {
     @usableFromInline package var root: Int32
 
     @inlinable
-    init() {
+    package init() {
         values = []
         nodes = []
         root = -1
     }
 
     @inlinable
-    var count: Int { nodes.count }
+    package var count: Int { nodes.count }
 
     /// The key at `slot`.
     @inlinable
@@ -205,7 +205,7 @@ package struct _TreeCore<Key: Comparable, Value, Balancing> {
     ///
     /// - Precondition: `0 <= rank < count`.
     @inlinable
-    func slot(atRank rank: Int) -> Int32 {
+    package func slot(atRank rank: Int) -> Int32 {
         nodes.withUnsafeBufferPointer { nodes in
             var x = root
             var remaining = Int32(truncatingIfNeeded: rank)
@@ -243,7 +243,7 @@ extension _TreeCore where Balancing: _BalancedBuild {
     /// The perfectly balanced tree over keys sorted in strictly ascending order, and their values.
     /// Slot `k` holds the `k`-th key. O(*n*).
     @inlinable
-    init(sortedUniqueKeys keys: ContiguousArray<Key>, values: ContiguousArray<Value>) {
+    package init(sortedUniqueKeys keys: ContiguousArray<Key>, values: ContiguousArray<Value>) {
         precondition(keys.count < Int(Int32.max), "A balanced tree holds fewer than 2³¹ − 1 elements")
         self.values = values
         let count = keys.count
@@ -296,7 +296,7 @@ extension _TreeCore where Balancing: _TreeBalancing {
     /// - Returns: Whether it was inserted, and the slot holding the key equal to `key` afterwards.
     /// - Complexity: O(log *n*), plus O(*n*) when the storage is shared or must grow.
     @inlinable
-    mutating func insert(_ key: Key, _ value: Value) -> (inserted: Bool, slot: Int32) {
+    package mutating func insert(_ key: Key, _ value: Value) -> (inserted: Bool, slot: Int32) {
         withUnsafeTemporaryAllocation(of: Int32.self, capacity: Self._pathCapacity) { path in
             withUnsafeTemporaryAllocation(of: Bool.self, capacity: Self._pathCapacity) { wentRight in
                 var depth = 0
@@ -351,7 +351,7 @@ extension _TreeCore where Balancing: _TreeBalancing {
 
     /// Removes `key` and its value, if present. O(log *n*), plus O(*n*) when the storage is shared.
     @inlinable
-    mutating func remove(_ key: Key) -> (key: Key, value: Value)? {
+    package mutating func remove(_ key: Key) -> (key: Key, value: Value)? {
         withUnsafeTemporaryAllocation(of: Int32.self, capacity: Self._pathCapacity) { path in
             withUnsafeTemporaryAllocation(of: Bool.self, capacity: Self._pathCapacity) { wentRight in
                 var depth = 0
@@ -573,12 +573,12 @@ extension _TreeCore {
     /// The slots in key order, by an explicit stack of the left spine.
     @frozen
     @usableFromInline
-    struct InorderSlots {
+    package struct InorderSlots {
         @usableFromInline let nodes: ContiguousArray<_TreeNode<Key>>
         @usableFromInline var stack: ContiguousArray<Int32>
 
         @inlinable
-        init(_ core: _TreeCore) {
+        package init(_ core: _TreeCore) {
             nodes = core.nodes
             stack = []
             // No AVL or red–black tree is higher than twice the bits of its count; a higher treap
@@ -592,7 +592,7 @@ extension _TreeCore {
         }
 
         @inlinable
-        mutating func next() -> Int32? {
+        package mutating func next() -> Int32? {
             guard let x = stack.popLast() else { return nil }
             var y = nodes[Int(x)].right
             while y >= 0 {

@@ -156,7 +156,7 @@ print(diagram.restrict(f, variable: 2, to: false) == diagram.and(x0, x1))  // tr
 
 One module per family of structures. `BinarySearchTrees` (`AVLTree`, `AVLDictionary`, `RedBlackTree`, `Treap`, `SplayTree`),
 `BTrees` (`BTree`, `BTreeDictionary`), `SkipLists` (`SkipList`),
-`Tries` (`Trie`, `TrieDictionary`, `RadixTree`, `RadixTreeDictionary`, `AhoCorasickAutomaton`), `SuffixStructures` (`SuffixArray`, `SuffixTree`, `SuffixAutomaton`), `DecisionDiagrams` (`BinaryDecisionDiagram`, `ZeroSuppressedDecisionDiagram`) and `RangeTrees` (`FenwickTree`, `SegmentTree`, `LazySegmentTree`) have shipped; the others are planned. The backlog tracks each planned structure, and `.kanban/triage.md` says what belongs
+`Tries` (`Trie`, `TrieDictionary`, `RadixTree`, `RadixTreeDictionary`, `AhoCorasickAutomaton`), `SuffixStructures` (`SuffixArray`, `SuffixTree`, `SuffixAutomaton`), `DecisionDiagrams` (`BinaryDecisionDiagram`, `ZeroSuppressedDecisionDiagram`) and `RangeTrees` (`FenwickTree`, `SegmentTree`, `LazySegmentTree`, `IntervalTree`) have shipped; the others are planned. The backlog tracks each planned structure, and `.kanban/triage.md` says what belongs
 here.
 
 | Group | Modules |
@@ -165,7 +165,7 @@ here.
 | Tries | `Tries` (tries over any sequence of symbols, radix and Patricia trees, Aho–Corasick automata) |
 | Suffix structures | `SuffixStructures` (suffix arrays with LCP, suffix trees, suffix automata) |
 | Decision diagrams | `DecisionDiagrams` (reduced ordered BDDs, zero-suppressed ZDDs) |
-| Range and spatial trees | `RangeTrees` (Fenwick trees, segment trees with lazy propagation; interval trees planned), `SpatialTrees` (k-d trees, quadtrees, octrees) |
+| Range and spatial trees | `RangeTrees` (Fenwick trees, segment trees with lazy propagation, interval trees), `SpatialTrees` (k-d trees, quadtrees, octrees) |
 | Sequences and persistence | `Ropes`, `PersistentTrees` (path-copying balanced trees) |
 | Caches | `Caches` (LRU structures) |
 | Shared | `CollectionErrors`: the errors the `checked:` spellings throw, re-exported by every module that throws them |

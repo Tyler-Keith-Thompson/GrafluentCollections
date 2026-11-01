@@ -214,6 +214,16 @@ of a hand-written loop over arrays.
   is padded to a power of two (2*s* cells) so that `maxRight`/`minLeft` descend one perfect tree.
   Lazy reads compose pending updates on the way down and change nothing (as D7 for splay
   trees); range updates push them down.
+- D18. An interval tree reuses the AVL tree's storage, with a summary per vertex (2026-11-01):
+  `IntervalTree<Bound, Value>` is a `_TreeCore` from `BinarySearchTrees` balanced by
+  `_AugmentedAVLBalancing`, the AVL scheme made generic over a `_TreeAugmentation` that every
+  vertex update recomputes (`_AVLBalancing` is the same scheme with none, so the AVL trees are
+  unchanged). The largest upper bound in each subtree lives inside the key, which ordering
+  ignores, so the core's slot moves and key swaps carry it. Keys are (lower, upper, insertion
+  serial), so equal intervals may repeat and keep insertion order; `remove(_:)` takes the
+  earliest. Intervals are `Range` (half-open) and must be non-empty: the plain spelling traps,
+  `checked:` throws `EmptyRange`. Searches are lazy `SearchView`s in key order, costing
+  O(min(n, (k + 1) log n)). `ClosedRange` was left out until a caller needs it.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

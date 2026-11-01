@@ -3,13 +3,14 @@
 load("//tools:docc.bzl", "docc_archive")
 load("//tools:swift_rules.bzl", "swift_library")
 
-# Trees over a sequence that answer range queries: FenwickTree, SegmentTree, LazySegmentTree.
+# Trees over a sequence or a set of intervals that answer range queries: FenwickTree, SegmentTree, LazySegmentTree, IntervalTree.
 swift_library(
     name = "RangeTrees",
     srcs = glob(["**/*.swift"]),
     module_name = "RangeTrees",
     deps = [
         "//Sources/CollectionErrors",
+        "//Sources/BinarySearchTrees",
         "@swiftpkg_grafluent//:Trees",
     ],
     visibility = ["//visibility:public"],
@@ -22,6 +23,7 @@ docc_archive(
     catalog = glob(["*.docc/**"], allow_empty = True),
     deps = [
         "//Sources/CollectionErrors:CollectionErrorsDocumentation",
+        "//Sources/BinarySearchTrees:BinarySearchTreesDocumentation",
     ],
     tags = ["manual"],
     visibility = ["//visibility:public"],

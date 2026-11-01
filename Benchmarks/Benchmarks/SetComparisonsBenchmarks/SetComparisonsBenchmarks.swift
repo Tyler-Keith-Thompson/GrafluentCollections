@@ -17,14 +17,17 @@ let benchmarks: @Sendable () -> Void = {
     Benchmark.defaultConfiguration.maxDuration = .seconds(2)
 
     let workload = IntegerWorkload(count: 10_000, seed: 24)
+    // The treap's priorities and the skip list's tower heights come from a seeded generator too,
+    // so their shapes, and their counts, are the same on every run.
+    var generator = SplitMix64(seed: 25)
 
     registerSortedArray(workload)
     register("AVLTree", AVLTree<Int>(), workload)
     register("RedBlackTree", RedBlackTree<Int>(), workload)
-    register("Treap", Treap<Int>(), workload)
+    register("Treap", Treap<Int>(using: &generator), workload)
     register("SplayTree", SplayTree<Int>(), workload)
     register("BTree", BTree<Int>(), workload)
-    register("SkipList", SkipList<Int>(), workload)
+    register("SkipList", SkipList<Int>(using: &generator), workload)
     register("PersistentTreeSet", PersistentTreeSet<Int>(), workload)
     register("Set", Set<Int>(), workload)
     register("TreeSet", TreeSet<Int>(), workload)

@@ -31,7 +31,7 @@ shape.vertexCount                 // 3
 | `SuffixAutomaton` | `Arborescence` (the suffix-link tree) |
 | `FenwickTree` | `Arborescence` (the update tree) |
 | `SegmentTree`, `LazySegmentTree`, `IntervalTree`, `KDTree`, `Rope` | `BinaryTree` |
-| `Quadtree`, `Octree` | `RootedTree` |
+| `Quadtree`, `Octree`, `MXCIFQuadtree`, `MXCIFOctree` | `RootedTree` |
 | `LRUCache` | `RootedTree` (the recency order, a path) |
 
 A structure whose shape is not a tree offers a view instead: a Grafluent graph over the

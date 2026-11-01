@@ -371,6 +371,17 @@ of a hand-written loop over arrays.
   no generation stamp guards that, since a function was already an unchecked index into its
   table. The name follows BuDDy's and CUDD's garbage collection; reference counts per vertex
   were rejected for the cost they add to every apply.
+- D33. Boxes get their own MX-CIF types, not a mode of the point trees (2026-11-01):
+  `MXCIFQuadtree<Element>` and `MXCIFOctree<Element>` (Kedem's MX-CIF quadtree; Samet §3.4)
+  wrap one `_MXCIFTree<Point, Element>`, since points split buckets and boxes never do. An item
+  hangs on the deepest cell that wholly contains its box, cells are made on the way down to it
+  (to depth 24) and freed when their subtree empties; a box whose lower coordinate is a centre's
+  goes to the upper half, as a point does. Boxes include their faces, so touching boxes
+  overlap; `BoundingBox` gains `contains(_ box:)` and `intersects(_:)`. Searches return
+  `SpatialBoxItem` (box and element); `overlappingPairs()` returns materialized
+  `OverlappingPair`s, each pair once. A box outside `bounds` traps (`checked:` throws
+  `OutOfBounds`). There is no `update` for a moving box: remove and insert it. Loose quadtrees
+  (enlarged cells) were not built.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

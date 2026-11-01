@@ -23,6 +23,26 @@ extension RootedTree where Vertex == Int {
         self.init(_cellParents: tree._core.cellParents())
     }
 
+    /// The cells of an MX-CIF quadtree: the whole region at vertex 0, and below each cell that
+    /// has quadrants its four quadrants, numbered in breadth-first order. A quadrant's position
+    /// among its siblings is its orthant, as for a ``Quadtree``.
+    ///
+    /// - Parameter tree: The quadtree whose cells are converted. Its elements are not read.
+    /// - Complexity: O(*c*) for *c* cells.
+    @inlinable
+    public init<Element>(_ tree: MXCIFQuadtree<Element>) {
+        self.init(_cellParents: tree._core.cellParents())
+    }
+
+    /// The cells of an MX-CIF octree, as for an ``MXCIFQuadtree``, with eight octants per cell.
+    ///
+    /// - Parameter tree: The octree whose cells are converted. Its elements are not read.
+    /// - Complexity: O(*c*) for *c* cells.
+    @inlinable
+    public init<Element>(_ tree: MXCIFOctree<Element>) {
+        self.init(_cellParents: tree._core.cellParents())
+    }
+
     @inlinable
     init(_cellParents parents: [Int?]) {
         guard let tree = RootedTree(parents: parents) else {

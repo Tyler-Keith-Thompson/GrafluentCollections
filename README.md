@@ -164,7 +164,7 @@ print(diagram.restrict(f, variable: 2, to: false) == diagram.and(x0, x1))  // tr
 
 One module per family of structures. `BinarySearchTrees` (`AVLTree`, `AVLDictionary`, `RedBlackTree`, `Treap`, `SplayTree`),
 `BTrees` (`BTree`, `BTreeDictionary`), `SkipLists` (`SkipList`),
-`Tries` (`Trie`, `TrieDictionary`, `RadixTree`, `RadixTreeDictionary`, `AhoCorasickAutomaton`), `SuffixStructures` (`SuffixArray`, `SuffixTree`, `SuffixAutomaton`), `DecisionDiagrams` (`BinaryDecisionDiagram`, `ZeroSuppressedDecisionDiagram`), `RangeTrees` (`FenwickTree`, `SegmentTree`, `LazySegmentTree`, `IntervalTree`), `SpatialTrees` (`KDTree`, `Quadtree`, `Octree`), `Ropes` (`Rope`), `PersistentTrees` (`PersistentTreeSet`, `PersistentTreeDictionary`) and `Caches` (`LRUCache`) have shipped; the others are planned. The backlog tracks each planned structure, and `.kanban/triage.md` says what belongs
+`Tries` (`Trie`, `TrieDictionary`, `RadixTree`, `RadixTreeDictionary`, `AhoCorasickAutomaton`), `SuffixStructures` (`SuffixArray`, `SuffixTree`, `SuffixAutomaton`), `DecisionDiagrams` (`BinaryDecisionDiagram`, `ZeroSuppressedDecisionDiagram`), `RangeTrees` (`FenwickTree`, `SegmentTree`, `LazySegmentTree`, `IntervalTree`), `SpatialTrees` (`KDTree`, `Quadtree`, `Octree`, `MXCIFQuadtree`, `MXCIFOctree`), `Ropes` (`Rope`), `PersistentTrees` (`PersistentTreeSet`, `PersistentTreeDictionary`) and `Caches` (`LRUCache`) have shipped; the others are planned. The backlog tracks each planned structure, and `.kanban/triage.md` says what belongs
 here.
 
 | Group | Modules |

@@ -511,6 +511,18 @@ public struct BoundingBox<Point: SIMD>: Hashable where Point.Scalar: FloatingPoi
     public func contains(_ point: Point) -> Bool {
         all(lower .<= point) && all(point .<= upper)
     }
+
+    /// Whether `box` lies wholly inside this box; a box sharing a face with this one counts.
+    @inlinable
+    public func contains(_ box: BoundingBox) -> Bool {
+        all(lower .<= box.lower) && all(box.upper .<= upper)
+    }
+
+    /// Whether this box and `other` share a point; boxes that touch at a face or a corner do.
+    @inlinable
+    public func intersects(_ other: BoundingBox) -> Bool {
+        all(lower .<= other.upper) && all(other.lower .<= upper)
+    }
 }
 
 extension BoundingBox: Sendable where Point: Sendable {}

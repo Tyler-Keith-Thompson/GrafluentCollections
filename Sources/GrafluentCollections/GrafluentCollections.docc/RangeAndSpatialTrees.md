@@ -71,6 +71,21 @@ map.nearest(to: [11, 19])?.element              // "café"
 map.items(within: 5, of: [11, 21]).count        // 2
 ```
 
+### Boxes: MXCIFQuadtree and MXCIFOctree
+
+An `MXCIFQuadtree` (in the plane) and an `MXCIFOctree` (in space) hold elements that cover a
+region rather than sit at a point. Each box hangs on the smallest cell that wholly contains it,
+so the tree finds the boxes containing a point, those overlapping a box, and every pair that
+overlaps, as for collision detection or map labels:
+
+```swift
+var plan = MXCIFQuadtree<String>(bounds: BoundingBox(lower: [0, 0], upper: [100, 100]))
+plan.insert("hall", in: BoundingBox(lower: [10, 10], upper: [60, 20]))
+plan.insert("office", in: BoundingBox(lower: [10, 20], upper: [30, 40]))
+plan.items(containing: [20, 15]).map(\.element)    // ["hall"]
+plan.overlappingPairs().count                      // 1
+```
+
 ### Choosing
 
 | Question | Type |
@@ -81,3 +96,4 @@ map.items(within: 5, of: [11, 21]).count        // 2
 | Which intervals meet a point or a range | `IntervalTree` |
 | Nearest points in a fixed set, any dimension | `KDTree` |
 | Points that change, in two or three dimensions | `Quadtree`, `Octree` |
+| Boxes that overlap, in two or three dimensions | `MXCIFQuadtree`, `MXCIFOctree` |

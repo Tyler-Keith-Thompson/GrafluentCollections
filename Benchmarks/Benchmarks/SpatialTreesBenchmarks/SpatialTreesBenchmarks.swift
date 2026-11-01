@@ -160,4 +160,79 @@ let benchmarks: @Sendable () -> Void = {
             }
         }
     }
+
+    // Boxes up to 0.01 on a side at seeded random corners in the unit square.
+    func randomBoxes(_ count: Int) -> [BoundingBox<SIMD2<Double>>] {
+        (0 ..< count).map { _ in
+            let corner = SIMD2<Double>(next() * 0.99, next() * 0.99)
+            return BoundingBox(lower: corner, upper: corner + [next() * 0.01, next() * 0.01])
+        }
+    }
+    let fewBoxes = randomBoxes(2_000)
+    let someBoxes = randomBoxes(10_000)
+    let mostBoxes = randomBoxes(100_000)
+
+    // The hand-written form: every pair of boxes tested.
+    Benchmark("SpatialTrees: BASELINE brute-force overlapping pairs of 2,000 boxes") { benchmark in
+        for _ in benchmark.scaledIterations {
+            fewBoxes.withUnsafeBufferPointer { boxes in
+                var pairs = 0
+                for i in boxes.indices {
+                    for j in i + 1 ..< boxes.count where boxes[i].intersects(boxes[j]) {
+                        pairs &+= 1
+                    }
+                }
+                blackHole(pairs)
+            }
+        }
+    }
+
+    Benchmark("SpatialTrees: MXCIFQuadtree overlappingPairs() of 2,000 boxes") { benchmark in
+        var tree = MXCIFQuadtree<Int>(bounds: unit)
+        for (k, box) in fewBoxes.enumerated() {
+            tree.insert(k, in: box)
+        }
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            blackHole(tree.overlappingPairs())
+        }
+    }
+
+    // The hand-written form: every box tested, per query.
+    Benchmark("SpatialTrees: BASELINE brute-force overlapping 10⁴ boxes, 1,000 queries") { benchmark in
+        for _ in benchmark.scaledIterations {
+            someBoxes.withUnsafeBufferPointer { stored in
+                for query in boxes {
+                    var found = 0
+                    for box in stored where box.intersects(query) {
+                        found &+= 1
+                    }
+                    blackHole(found)
+                }
+            }
+        }
+    }
+
+    Benchmark("SpatialTrees: MXCIFQuadtree items(overlapping:) of 10⁴ boxes, 1,000 queries") { benchmark in
+        var tree = MXCIFQuadtree<Int>(bounds: unit)
+        for (k, box) in someBoxes.enumerated() {
+            tree.insert(k, in: box)
+        }
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            for query in boxes {
+                blackHole(tree.items(overlapping: query))
+            }
+        }
+    }
+
+    Benchmark("SpatialTrees: MXCIFQuadtree insert(_:in:) of 10⁵ boxes") { benchmark in
+        for _ in benchmark.scaledIterations {
+            var tree = MXCIFQuadtree<Int>(bounds: unit)
+            for (k, box) in mostBoxes.enumerated() {
+                tree.insert(k, in: box)
+            }
+            blackHole(tree)
+        }
+    }
 }

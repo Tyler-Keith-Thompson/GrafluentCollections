@@ -5,6 +5,7 @@
 PERFORMANCE_TEST_PACKAGES = [
     "Tests/BinarySearchTreesTests",
     "Tests/BTreesTests",
+    "Tests/DecisionDiagramsTests",
     "Tests/RangeTreesTests",
     "Tests/SkipListsTests",
     "Tests/SuffixStructuresTests",

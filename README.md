@@ -139,11 +139,24 @@ print(banana.longestRepeatedSubstring!)                              // 1..<4, "
 print(banana.distinctSubstringCount)                                 // 15
 ```
 
+A `BinaryDecisionDiagram` keeps Boolean functions in canonical form, so equal functions are
+equal values:
+
+```swift
+import GrafluentCollections
+
+var diagram = BinaryDecisionDiagram(variableCount: 3)
+let x0 = diagram.variable(0), x1 = diagram.variable(1), x2 = diagram.variable(2)
+let f = diagram.or(diagram.and(x0, x1), x2)
+print(diagram.satisfyingAssignmentCount(of: f))                  // 5.0
+print(diagram.restrict(f, variable: 2, to: false) == diagram.and(x0, x1))  // true
+```
+
 ## Modules
 
 One module per family of structures. `BinarySearchTrees` (`AVLTree`, `AVLDictionary`, `RedBlackTree`, `Treap`, `SplayTree`),
 `BTrees` (`BTree`, `BTreeDictionary`), `SkipLists` (`SkipList`),
-`Tries` (`Trie`, `TrieDictionary`, `RadixTree`, `RadixTreeDictionary`, `AhoCorasickAutomaton`), `SuffixStructures` (`SuffixArray`, `SuffixTree`, `SuffixAutomaton`) and `RangeTrees` (`FenwickTree`) have shipped; the others are planned. The backlog tracks each planned structure, and `.kanban/triage.md` says what belongs
+`Tries` (`Trie`, `TrieDictionary`, `RadixTree`, `RadixTreeDictionary`, `AhoCorasickAutomaton`), `SuffixStructures` (`SuffixArray`, `SuffixTree`, `SuffixAutomaton`), `DecisionDiagrams` (`BinaryDecisionDiagram`) and `RangeTrees` (`FenwickTree`) have shipped; the others are planned. The backlog tracks each planned structure, and `.kanban/triage.md` says what belongs
 here.
 
 | Group | Modules |
@@ -151,7 +164,7 @@ here.
 | Search trees | `BinarySearchTrees` (AVL, red–black and splay trees, treaps), `BTrees` (B-trees), `SkipLists` (skip lists) |
 | Tries | `Tries` (tries over any sequence of symbols, radix and Patricia trees, Aho–Corasick automata) |
 | Suffix structures | `SuffixStructures` (suffix arrays with LCP, suffix trees, suffix automata) |
-| Decision diagrams | `DecisionDiagrams` (reduced ordered BDDs, ZDDs) |
+| Decision diagrams | `DecisionDiagrams` (reduced ordered BDDs; ZDDs planned) |
 | Range and spatial trees | `RangeTrees` (Fenwick trees; segment and interval trees planned), `SpatialTrees` (k-d trees, quadtrees, octrees) |
 | Sequences and persistence | `Ropes`, `PersistentTrees` (path-copying balanced trees) |
 | Caches | `Caches` (LRU structures) |

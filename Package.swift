@@ -19,6 +19,7 @@ let products: [Product] = [
     .library(name: "SkipLists", targets: ["SkipLists"]),
     .library(name: "Tries", targets: ["Tries"]),
     .library(name: "SuffixStructures", targets: ["SuffixStructures"]),
+    .library(name: "DecisionDiagrams", targets: ["DecisionDiagrams"]),
     .library(name: "RangeTrees", targets: ["RangeTrees"]),
 ]
 
@@ -38,11 +39,13 @@ let targets: [Target] = [
     .target(name: "Tries", dependencies: ["CollectionErrors", .product(name: "GraphProtocols", package: "grafluent"), .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
     // Suffix structures
     .target(name: "SuffixStructures", dependencies: [.product(name: "GraphProtocols", package: "grafluent"), .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
+    // Decision diagrams
+    .target(name: "DecisionDiagrams", dependencies: ["CollectionErrors", .product(name: "GraphProtocols", package: "grafluent")], exclude: bazelFiles),
     // Range and spatial trees
     .target(name: "RangeTrees", dependencies: ["CollectionErrors", .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
 
     // Umbrella: `import GrafluentCollections` imports every module.
-    .target(name: "GrafluentCollections", dependencies: ["CollectionErrors", "BinarySearchTrees", "BTrees", "SkipLists", "Tries", "SuffixStructures", "RangeTrees"], exclude: bazelFiles),
+    .target(name: "GrafluentCollections", dependencies: ["CollectionErrors", "BinarySearchTrees", "BTrees", "SkipLists", "Tries", "SuffixStructures", "DecisionDiagrams", "RangeTrees"], exclude: bazelFiles),
 
     // Shared fixtures (data only) for every test target.
     .target(name: "GrafluentCollectionsTestSupport", path: "Tests/GrafluentCollectionsTestSupport", exclude: bazelFiles),
@@ -52,6 +55,7 @@ let targets: [Target] = [
     .testTarget(name: "SkipListsTests", dependencies: ["SkipLists", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "GraphProtocols", package: "grafluent")], exclude: ["BUILD.bazel", "Performance"]),
     .testTarget(name: "TriesTests", dependencies: ["Tries", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "GraphProtocols", package: "grafluent"), .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
     .testTarget(name: "SuffixStructuresTests", dependencies: ["SuffixStructures", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "GraphProtocols", package: "grafluent"), .product(name: "Trees", package: "grafluent")], exclude: ["BUILD.bazel", "Performance"]),
+    .testTarget(name: "DecisionDiagramsTests", dependencies: ["DecisionDiagrams", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "GraphProtocols", package: "grafluent")], exclude: ["BUILD.bazel", "Performance"]),
     .testTarget(name: "RangeTreesTests", dependencies: ["RangeTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], exclude: ["BUILD.bazel", "Performance"]),
     .testTarget(name: "GrafluentCollectionsTests", dependencies: ["GrafluentCollections", .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
 
@@ -60,6 +64,7 @@ let targets: [Target] = [
     .testTarget(name: "BTreesPerformanceTests", dependencies: ["BTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], path: "Tests/BTreesTests/Performance"),
     .testTarget(name: "SkipListsPerformanceTests", dependencies: ["SkipLists", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "GraphProtocols", package: "grafluent")], path: "Tests/SkipListsTests/Performance"),
     .testTarget(name: "SuffixStructuresPerformanceTests", dependencies: ["SuffixStructures", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "GraphProtocols", package: "grafluent"), .product(name: "Trees", package: "grafluent")], path: "Tests/SuffixStructuresTests/Performance"),
+    .testTarget(name: "DecisionDiagramsPerformanceTests", dependencies: ["DecisionDiagrams", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "GraphProtocols", package: "grafluent")], path: "Tests/DecisionDiagramsTests/Performance"),
     .testTarget(name: "RangeTreesPerformanceTests", dependencies: ["RangeTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], path: "Tests/RangeTreesTests/Performance"),
 ]
 

@@ -8,4 +8,5 @@
 @_exported import SkipLists
 @_exported import Tries
 @_exported import SuffixStructures
+@_exported import DecisionDiagrams
 @_exported import RangeTrees

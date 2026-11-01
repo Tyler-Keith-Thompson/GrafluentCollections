@@ -188,6 +188,13 @@ of a hand-written loop over arrays.
   them into rows sorted by code; a 256-wide table for `UInt8` would take 1 KB per state, about
   2 GB for 10⁶ symbols. Its suffix-link tree is a conversion on the Grafluent type,
   `Arborescence(_:)`, as every other conversion is, rather than a property.
+- D15. A decision diagram's functions are roots in a table value, built by its mutating methods
+  (2026-11-01): `BinaryDecisionDiagram` is the unique and computed tables as copy-on-write arrays,
+  and a `Function` is a root vertex in it, so `diagram.and(f, g)` rather than `f & g`: an
+  operator on functions alone would have to reach a shared, mutable table, which value semantics
+  rule out. The variable count is fixed when the table is made; variables are tested in index
+  order. Operators are four-bit truth tables, so `apply` covers all sixteen. Satisfying
+  assignments are counted in `Double`, exact below 2⁵³. The table keeps every vertex it makes.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

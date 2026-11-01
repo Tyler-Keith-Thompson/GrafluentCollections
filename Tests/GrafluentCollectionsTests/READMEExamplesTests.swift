@@ -78,6 +78,16 @@ struct READMEExamplesTests {
         #expect(automaton.matches(in: "ushers").map(\.patternIndex) == found)
     }
 
+    @Test("Usage: a binary decision diagram's canonical functions")
+    func binaryDecisionDiagram() {
+        var diagram = BinaryDecisionDiagram(variableCount: 3)
+        let x0 = diagram.variable(0), x1 = diagram.variable(1), x2 = diagram.variable(2)
+        let f = diagram.or(diagram.and(x0, x1), x2)
+        let five: Double = 5
+        #expect(diagram.satisfyingAssignmentCount(of: f) == five)
+        #expect(diagram.restrict(f, variable: 2, to: false) == diagram.and(x0, x1))
+    }
+
     @Test("Usage: a suffix array's substring queries")
     func suffixArray() {
         let banana = SuffixArray("banana")

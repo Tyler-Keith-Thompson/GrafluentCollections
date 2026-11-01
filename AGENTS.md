@@ -10,7 +10,7 @@ structure, and Grafluent users who want to run graph algorithms over one. The ch
 `.kanban/triage.md` says what is in and out of scope; the backlog holds the planned structures.
 `BinarySearchTrees` (`AVLTree`, `AVLDictionary`, `RedBlackTree`, `Treap`, `SplayTree`), `BTrees`
 (`BTree`, `BTreeDictionary`), `SkipLists` (`SkipList`), `Tries` (`Trie`,
-`TrieDictionary`, `RadixTree`, `RadixTreeDictionary`, `AhoCorasickAutomaton`), `SuffixStructures` (`SuffixArray`, `SuffixTree`, `SuffixAutomaton`) and `RangeTrees` (`FenwickTree`) have landed and set the pattern for the rest: a structure, its Grafluent conversion, tests, a
+`TrieDictionary`, `RadixTree`, `RadixTreeDictionary`, `AhoCorasickAutomaton`), `SuffixStructures` (`SuffixArray`, `SuffixTree`, `SuffixAutomaton`), `DecisionDiagrams` (`BinaryDecisionDiagram`) and `RangeTrees` (`FenwickTree`) have landed and set the pattern for the rest: a structure, its Grafluent conversion, tests, a
 ratio test and benchmarks. Swift 6.3 (minimum).
 Bazel is the development build; SwiftPM is the published package. `README.md` is the user-facing
 overview.

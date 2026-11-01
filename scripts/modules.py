@@ -48,6 +48,8 @@ MODULES = [
     ("Tries", "Tries", "Tries over sequences of any Hashable symbols, with prefix queries, and multi-pattern matching: Trie, TrieDictionary, RadixTree, RadixTreeDictionary, AhoCorasickAutomaton.", ["CollectionErrors", "grafluent/GraphProtocols", "grafluent/Trees"]),
     # Suffix structures
     ("SuffixStructures", "Suffix structures", "Structures over a text's suffixes that answer substring queries: SuffixArray, SuffixTree, SuffixAutomaton.", ["grafluent/GraphProtocols", "grafluent/Trees"]),
+    # Decision diagrams
+    ("DecisionDiagrams", "Decision diagrams", "Canonical diagrams of Boolean functions: BinaryDecisionDiagram.", ["CollectionErrors", "grafluent/GraphProtocols"]),
     # Range and spatial trees
     ("RangeTrees", "Range and spatial trees", "Trees over a sequence that answer range queries: FenwickTree.", ["CollectionErrors", "grafluent/Trees"]),
 ]
@@ -66,6 +68,7 @@ TEST_TARGETS = [
     ("SkipListsTests", ["SkipLists", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/GraphProtocols"]),
     ("TriesTests", ["Tries", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/GraphProtocols", "grafluent/Trees"]),
     ("SuffixStructuresTests", ["SuffixStructures", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/GraphProtocols", "grafluent/Trees"]),
+    ("DecisionDiagramsTests", ["DecisionDiagrams", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/GraphProtocols"]),
     ("RangeTreesTests", ["RangeTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     (f"{PROJECT}Tests", [PROJECT, "grafluent/Trees"]),
 ]
@@ -91,6 +94,7 @@ TEST_SIZES = {name: "medium" for name in [
 PERFORMANCE_TESTS = [
     "BinarySearchTreesTests",
     "BTreesTests",
+    "DecisionDiagramsTests",
     "RangeTreesTests",
     "SkipListsTests",
     "SuffixStructuresTests",

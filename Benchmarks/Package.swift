@@ -11,8 +11,30 @@ let package = Package(
         // Named, so the identity does not depend on the checkout directory's name.
         .package(name: "GrafluentCollections", path: ".."),
         .package(url: "https://github.com/ordo-one/benchmark", from: "1.27.0"),
+        // Benchmark-only: the shipping containers the structures are compared against.
+        .package(url: "https://github.com/apple/swift-collections", from: "1.1.0"),
     ],
     targets: [
+        // Seeded generators and key sets shared by the benchmark targets.
+        .target(
+            name: "BenchmarkWorkloads",
+            path: "Benchmarks/BenchmarkWorkloads"
+        ),
+        .executableTarget(
+            name: "SetComparisonsBenchmarks",
+            dependencies: [
+                .product(name: "Benchmark", package: "benchmark"),
+                "BenchmarkWorkloads",
+                .product(name: "BinarySearchTrees", package: "GrafluentCollections"),
+                .product(name: "BTrees", package: "GrafluentCollections"),
+                .product(name: "SkipLists", package: "GrafluentCollections"),
+                .product(name: "PersistentTrees", package: "GrafluentCollections"),
+                .product(name: "BitCollections", package: "swift-collections"),
+                .product(name: "HashTreeCollections", package: "swift-collections"),
+            ],
+            path: "Benchmarks/SetComparisonsBenchmarks",
+            plugins: [.plugin(name: "BenchmarkPlugin", package: "benchmark")]
+        ),
         .executableTarget(
             name: "BinarySearchTreesBenchmarks",
             dependencies: [

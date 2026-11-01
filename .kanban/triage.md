@@ -287,6 +287,20 @@ of a hand-written loop over arrays.
   `insert(_:forKey:)` returns the evicted `Entry`, `updateValue(_:forKey:)` the replaced value.
   Hit and miss counters were left out, since they would cost every read. LFU and ARC variants
   wait for a caller.
+- D24. The shared benchmark workloads apply to set-shaped structures, in one comparison target
+  (2026-11-01): `SetComparisonsBenchmarks` runs seven workloads (insert ascending and random,
+  lookup hit and miss, iterate, remove then insert, copy then insert) on 10⁴ integer keys over
+  every sorted set (`AVLTree`, `RedBlackTree`, `Treap`, `SplayTree`, `BTree`, `SkipList`,
+  `PersistentTreeSet`), a hand-written sorted array as `BASELINE`, `Set`, and swift-collections'
+  `TreeSet` and `BitSet`. swift-collections is a dependency of the Benchmarks package only (N10).
+  `OrderedSet` and `Heap` were left out: neither is a sorted set, so the workloads would not
+  compare like with like. The dictionaries share their sets' tree cores and keep their own
+  per-module store benchmarks. Structures that aren't sets (tries, suffix structures, decision
+  diagrams, range and spatial trees, ropes, caches) keep workloads from their own domain, listed
+  in `Benchmarks/README.md`. The existing targets keep their own generators so their committed
+  baselines stay comparable; `BenchmarkWorkloads` (SplitMix64, `IntegerWorkload`) serves new
+  targets. Every module has a release ratio test; a ratio that the library loses (the trie
+  against `Set<String>`) is bounded as a slowdown and filed.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

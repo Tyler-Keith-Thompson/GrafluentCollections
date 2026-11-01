@@ -13,4 +13,5 @@ PERFORMANCE_TEST_PACKAGES = [
     "Tests/SkipListsTests",
     "Tests/SpatialTreesTests",
     "Tests/SuffixStructuresTests",
+    "Tests/TriesTests",
 ]

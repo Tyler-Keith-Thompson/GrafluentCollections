@@ -39,7 +39,7 @@ MOCKING = "mockable/Mockable"
 # (name, group, description, dependencies)
 MODULES = [
     # Shared
-    ("CollectionErrors", "Shared", "The typed errors the collections throw: IndexOutOfRange, DuplicateKey, OverlappingKeys, EmptyRange, NotANumber.", []),
+    ("CollectionErrors", "Shared", "The typed errors the collections throw: IndexOutOfRange, DuplicateKey, OverlappingKeys, EmptyRange, NotANumber, OutOfBounds.", []),
     # Search trees
     ("BinarySearchTrees", "Search trees", "Balanced binary search trees as sorted sets and dictionaries: AVLTree, AVLDictionary, RedBlackTree, Treap, SplayTree.", ["CollectionErrors", "grafluent/Trees"]),
     ("BTrees", "Search trees", "B-trees as sorted sets and dictionaries with many elements per node: BTree, BTreeDictionary.", ["CollectionErrors", "grafluent/Trees"]),
@@ -52,7 +52,7 @@ MODULES = [
     ("DecisionDiagrams", "Decision diagrams", "Canonical diagrams of Boolean functions and families of sets: BinaryDecisionDiagram, ZeroSuppressedDecisionDiagram.", ["CollectionErrors", "grafluent/GraphProtocols"]),
     # Range and spatial trees
     ("RangeTrees", "Range and spatial trees", "Trees over a sequence or a set of intervals that answer range queries: FenwickTree, SegmentTree, LazySegmentTree, IntervalTree.", ["CollectionErrors", "BinarySearchTrees", "grafluent/Trees"]),
-    ("SpatialTrees", "Range and spatial trees", "Trees over points in space that answer nearest-neighbour and range searches: KDTree.", ["CollectionErrors", "grafluent/Trees"]),
+    ("SpatialTrees", "Range and spatial trees", "Trees over points in space that answer nearest-neighbour and range searches: KDTree, Quadtree, Octree.", ["CollectionErrors", "grafluent/Trees"]),
 ]
 
 # Executables: (name, description, dependencies). Each is an `.executableTarget` and product in

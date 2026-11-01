@@ -81,4 +81,83 @@ let benchmarks: @Sendable () -> Void = {
             }
         }
     }
+
+    // Boxes 0.01 on a side: about ten of the 10⁵ points each, a hundred of the 10⁶.
+    let boxes = queries.map { BoundingBox(lower: $0, upper: $0 + [0.01, 0.01]) }
+    let manyBoxes = manyQueries.map { BoundingBox(lower: $0, upper: $0 + [0.01, 0.01]) }
+    let unit = BoundingBox<SIMD2<Double>>(lower: [0, 0], upper: [1, 1])
+
+    // The hand-written form: every point tested against every box.
+    Benchmark("SpatialTrees: BASELINE brute-force box queries of 10⁵ points") { benchmark in
+        for _ in benchmark.scaledIterations {
+            small.withUnsafeBufferPointer { points in
+                for box in boxes {
+                    var found = 0
+                    for point in points where box.contains(point) {
+                        found &+= 1
+                    }
+                    blackHole(found)
+                }
+            }
+        }
+    }
+
+    Benchmark("SpatialTrees: Quadtree items(in:) of 10⁵ points") { benchmark in
+        var tree = Quadtree<Int>(bounds: unit)
+        for (k, point) in small.enumerated() {
+            tree.insert(k, at: point)
+        }
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            for box in boxes {
+                blackHole(tree.items(in: box))
+            }
+        }
+    }
+
+    Benchmark("SpatialTrees: KDTree indices(in:) of 10⁵ points") { benchmark in
+        let tree = KDTree(small)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            for box in boxes {
+                blackHole(tree.indices(in: box))
+            }
+        }
+    }
+
+    Benchmark("SpatialTrees: Quadtree insert(_:at:) of 10⁶ points") { benchmark in
+        for _ in benchmark.scaledIterations {
+            var tree = Quadtree<Int>(bounds: unit)
+            for (k, point) in large.enumerated() {
+                tree.insert(k, at: point)
+            }
+            blackHole(tree)
+        }
+    }
+
+    Benchmark("SpatialTrees: Quadtree items(in:) of 10⁶ points, 10⁴ queries") { benchmark in
+        var tree = Quadtree<Int>(bounds: unit)
+        for (k, point) in large.enumerated() {
+            tree.insert(k, at: point)
+        }
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            for box in manyBoxes {
+                blackHole(tree.items(in: box))
+            }
+        }
+    }
+
+    Benchmark("SpatialTrees: Quadtree nearest(to:) of 10⁶ points") { benchmark in
+        var tree = Quadtree<Int>(bounds: unit)
+        for (k, point) in large.enumerated() {
+            tree.insert(k, at: point)
+        }
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            for query in queries {
+                blackHole(tree.nearest(to: query))
+            }
+        }
+    }
 }

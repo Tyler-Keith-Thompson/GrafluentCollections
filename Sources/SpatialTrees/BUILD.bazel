@@ -3,7 +3,7 @@
 load("//tools:docc.bzl", "docc_archive")
 load("//tools:swift_rules.bzl", "swift_library")
 
-# Trees over points in space that answer nearest-neighbour and range searches: KDTree.
+# Trees over points in space that answer nearest-neighbour and range searches: KDTree, Quadtree, Octree.
 swift_library(
     name = "SpatialTrees",
     srcs = glob(["**/*.swift"]),

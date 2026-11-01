@@ -234,6 +234,19 @@ of a hand-written loop over arrays.
   nearest first or ascending, ties to the smaller index, so duplicates stay distinguishable.
   NaN coordinates trap (`checked:` throws `NotANumber`); a NaN query or negative radius finds
   nothing. `BoundingBox` is shared with the planned quadtree and octree. Module `SpatialTrees`.
+- D20. Quadtrees and octrees share one core over SIMD points and hold points only (2026-11-01):
+  `Quadtree<Element>` (`SIMD2<Double>`) and `Octree<Element>` (`SIMD3<Double>`) wrap one
+  `_Orthtree<Point, Element>` with 2ᵈ children per cell, in flat arrays: per-cell first child
+  (children consecutive), bucket head and subtree count; per-item point, element, bucket link
+  and leaf. Elements are inserted at a point given beside them, not read from the element by a
+  closure or protocol. Leaves split past `bucketCapacity` (default 8) down to depth 24, where
+  coincident points share a leaf; a removal merges the highest cell on its path that fits one
+  bucket again, and freed child blocks are reused. Points outside `bounds` trap (`checked:`
+  throws `OutOfBounds`). Searches return `SpatialItem` (point and element) in no particular
+  order, nearest first for `nearest(to:count:)`. The cells convert to `RootedTree` in
+  breadth-first order. The boxes variant (items at the deepest cell containing them) is a
+  backlog item of its own; the Morton-coded linear layout was not used, since it makes
+  insertion O(n).
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

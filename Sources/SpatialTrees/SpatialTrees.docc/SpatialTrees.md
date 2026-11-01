@@ -34,9 +34,32 @@ with the indices the points were given at, and ``BoundingBox`` describes a box f
 The tree's shape converts to Grafluent's `BinaryTree` with `BinaryTree(_:)`, whose vertices are
 the points' indices.
 
+A ``Quadtree`` and an ``Octree`` hold elements at points, and unlike a k-d tree take insertions
+and removals as the points move. Each splits its region into four (eight) equal cells, and each
+cell again, until every leaf holds at most a bucket of elements; a removal that leaves a cell's
+children holding no more than a bucket merges them back. Searches return ``SpatialItem`` values,
+an element with its point.
+
+```swift
+var map = Quadtree<String>(bounds: BoundingBox(lower: [0, 0], upper: [100, 100]))
+map.insert("café", at: [10, 20])
+map.insert("station", at: [80, 75])
+map.nearest(to: [11, 19])?.element   // "café"
+map.remove("café", at: [10, 20])
+```
+
+Their cells convert to Grafluent's `RootedTree` with `RootedTree(_:)`, so Grafluent draws the
+subdivision.
+
 ## Topics
 
 ### k-d trees
 
 - ``KDTree``
 - ``BoundingBox``
+
+### Quadtrees and octrees
+
+- ``Quadtree``
+- ``Octree``
+- ``SpatialItem``

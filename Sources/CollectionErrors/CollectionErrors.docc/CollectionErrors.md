@@ -18,3 +18,4 @@ throw it.
 - ``OverlappingKeys``
 - ``EmptyRange``
 - ``NotANumber``
+- ``OutOfBounds``

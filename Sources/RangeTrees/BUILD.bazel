@@ -3,7 +3,7 @@
 load("//tools:docc.bzl", "docc_archive")
 load("//tools:swift_rules.bzl", "swift_library")
 
-# Trees over a sequence that answer range queries: FenwickTree.
+# Trees over a sequence that answer range queries: FenwickTree, SegmentTree, LazySegmentTree.
 swift_library(
     name = "RangeTrees",
     srcs = glob(["**/*.swift"]),

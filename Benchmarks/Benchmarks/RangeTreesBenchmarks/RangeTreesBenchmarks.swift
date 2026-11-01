@@ -127,4 +127,116 @@ let benchmarks: @Sendable () -> Void = {
             blackHole(sum)
         }
     }
+
+    // Range queries over query / 2 ..< query, as FenwickTree.sum(in:) above.
+    enum AddToSum: MonoidAction {
+        typealias Values = Sum<Int>
+        static var identity: Int { 0 }
+        static func compose(_ outer: Int, _ inner: Int) -> Int { outer &+ inner }
+        static func apply(_ update: Int, to sum: Int, count: Int) -> Int { sum &+ update &* count }
+    }
+
+    Benchmark("RangeTrees: BASELINE linear-scan range sums") { benchmark in
+        for _ in benchmark.scaledIterations {
+            values.withUnsafeBufferPointer { values in
+                for query in queries {
+                    var sum = 0
+                    for k in query / 2 ..< query {
+                        sum &+= values[k]
+                    }
+                    blackHole(sum)
+                }
+            }
+        }
+    }
+
+    Benchmark("RangeTrees: BASELINE linear-scan range minima") { benchmark in
+        for _ in benchmark.scaledIterations {
+            values.withUnsafeBufferPointer { values in
+                for query in queries {
+                    var minimum = Int.max
+                    for k in query / 2 ..< query {
+                        minimum = Swift.min(minimum, values[k])
+                    }
+                    blackHole(minimum)
+                }
+            }
+        }
+    }
+
+    Benchmark("RangeTrees: BASELINE loop adding to every value in a range") { benchmark in
+        var array = values
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            array.withUnsafeMutableBufferPointer { array in
+                for update in updates {
+                    for k in update.index / 2 ..< update.index {
+                        array[k] &+= update.amount
+                    }
+                }
+            }
+        }
+        blackHole(array)
+    }
+
+    Benchmark("RangeTrees: SegmentTree.init(_:)") { benchmark in
+        for _ in benchmark.scaledIterations {
+            blackHole(SegmentTree<Sum<Int>>(values))
+        }
+    }
+
+    Benchmark("RangeTrees: SegmentTree<Sum<Int>>.combined(in:)") { benchmark in
+        let tree = SegmentTree<Sum<Int>>(values)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            for query in queries {
+                blackHole(tree.combined(in: query / 2 ..< query))
+            }
+        }
+    }
+
+    Benchmark("RangeTrees: SegmentTree<Minimum<Int>>.combined(in:)") { benchmark in
+        let tree = SegmentTree<Minimum<Int>>(values)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            for query in queries {
+                blackHole(tree.combined(in: query / 2 ..< query))
+            }
+        }
+    }
+
+    Benchmark("RangeTrees: SegmentTree.update(at:to:)") { benchmark in
+        var tree = SegmentTree<Sum<Int>>(values)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            for update in updates {
+                tree.update(at: update.index, to: update.amount)
+            }
+        }
+        blackHole(tree)
+    }
+
+    Benchmark("RangeTrees: LazySegmentTree.apply(_:in:)") { benchmark in
+        var tree = LazySegmentTree<AddToSum>(values)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            for update in updates {
+                tree.apply(update.amount, in: update.index / 2 ..< update.index)
+            }
+        }
+        blackHole(tree)
+    }
+
+    Benchmark("RangeTrees: LazySegmentTree.combined(in:)") { benchmark in
+        var tree = LazySegmentTree<AddToSum>(values)
+        for update in updates {
+            tree.apply(update.amount, in: update.index / 2 ..< update.index)
+        }
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            for query in queries {
+                blackHole(tree.combined(in: query / 2 ..< query))
+            }
+        }
+    }
 }

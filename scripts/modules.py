@@ -51,7 +51,7 @@ MODULES = [
     # Decision diagrams
     ("DecisionDiagrams", "Decision diagrams", "Canonical diagrams of Boolean functions and families of sets: BinaryDecisionDiagram, ZeroSuppressedDecisionDiagram.", ["CollectionErrors", "grafluent/GraphProtocols"]),
     # Range and spatial trees
-    ("RangeTrees", "Range and spatial trees", "Trees over a sequence that answer range queries: FenwickTree.", ["CollectionErrors", "grafluent/Trees"]),
+    ("RangeTrees", "Range and spatial trees", "Trees over a sequence that answer range queries: FenwickTree, SegmentTree, LazySegmentTree.", ["CollectionErrors", "grafluent/Trees"]),
 ]
 
 # Executables: (name, description, dependencies). Each is an `.executableTarget` and product in

@@ -203,6 +203,17 @@ of a hand-written loop over arrays.
   `including`/`excluding` (filters, the element kept), and `minimalSets`/`maximalSets` by
   Knuth's nonsuperset and nonsubset recursions. Counts are `Double`, as in D15. Sets are read
   through a lazy `setsView(of:)`, each set ascending.
+- D17. A segment tree's operation is a type, not a closure (2026-11-01): `SegmentTree<Operation:
+  Monoid>` takes a `Monoid` whose static `identity` and `combine` specialize into the loops, where
+  stored closures would be called indirectly at every cell. `Sum`, `Product`, `Minimum` and
+  `Maximum` (the last two over fixed-width integers, whose bounds are the identities) are
+  provided; anything else is a few-line enum. Grafluent's `Semirings` has no plain monoid, so
+  `Monoid` lives here, with a Grafluent item filed to host it. `LazySegmentTree<Action:
+  MonoidAction>` has one parameter naming both monoid and updates, and `apply` is told the number
+  of values a combination covers, so range-add over sums needs no (sum, length) pairs. The tree
+  is padded to a power of two (2*s* cells) so that `maxRight`/`minLeft` descend one perfect tree.
+  Lazy reads compose pending updates on the way down and change nothing (as D7 for splay
+  trees); range updates push them down.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

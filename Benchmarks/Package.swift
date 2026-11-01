@@ -13,6 +13,8 @@ let package = Package(
         .package(url: "https://github.com/ordo-one/benchmark", from: "1.27.0"),
         // Benchmark-only: the shipping containers the structures are compared against.
         .package(url: "https://github.com/apple/swift-collections", from: "1.1.0"),
+        // The tree types the conversions build.
+        .package(url: "https://github.com/Tyler-Keith-Thompson/Grafluent", from: "0.0.64"),
     ],
     targets: [
         // Seeded generators and key sets shared by the benchmark targets.
@@ -40,6 +42,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Benchmark", package: "benchmark"),
                 .product(name: "BinarySearchTrees", package: "GrafluentCollections"),
+                .product(name: "Trees", package: "Grafluent"),
             ],
             path: "Benchmarks/BinarySearchTreesBenchmarks",
             plugins: [.plugin(name: "BenchmarkPlugin", package: "benchmark")]

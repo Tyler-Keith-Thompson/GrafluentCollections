@@ -22,7 +22,7 @@ TEST_SUPPORT = f"{PROJECT}TestSupport"
 # add `swiftpkg_<identity>` (hyphens as underscores) to use_repo in MODULE.bazel, `just resolve`.
 PACKAGES = [
     # The graph library whose tree types the collections convert to (triage charter D1, D4).
-    ("grafluent", "https://github.com/Tyler-Keith-Thompson/Grafluent", "0.0.1"),
+    ("grafluent", "https://github.com/Tyler-Keith-Thompson/Grafluent", "0.0.64"),
     # Tests only: property checks with shrinking, for Swift Testing.
     ("swift-property-based", "https://github.com/x-sheep/swift-property-based", "2.0.1"),
     # Mocks generated from protocols (`@Mockable`). Uncomment when a module first needs one; see

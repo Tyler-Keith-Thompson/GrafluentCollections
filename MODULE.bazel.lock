@@ -553,7 +553,7 @@
           "REPO_MAPPING:rules_swift_package_manager+,bazel_skylib bazel_skylib+",
           "REPO_MAPPING:rules_swift_package_manager+,bazel_tools bazel_tools",
           "REPO_MAPPING:rules_swift_package_manager+,cgrindel_bazel_starlib cgrindel_bazel_starlib+",
-          "FILE:@@//swift/Package.resolved ee806a4d16edd59c44079164f22e878b8ddc1a055efebc904f2cb19c9fdf954f"
+          "FILE:@@//swift/Package.resolved 8a7eeba00e4908a28072c861cbb2b62a6c7c8ccef9081255ae2a670fe11f1a6e"
         ],
         "generatedRepoSpecs": {
           "swift_deps_info": {
@@ -589,9 +589,9 @@
             "repoRuleId": "@@rules_swift_package_manager+//swiftpkg/internal:swift_package.bzl%swift_package",
             "attributes": {
               "bazel_package_name": "swiftpkg_grafluent",
-              "commit": "a7b4001e1b1daa84d2da793c840d08c4978d5bbd",
+              "commit": "5cbd591778bf05c68640e6dc2520b5073b282cc0",
               "remote": "https://github.com/Tyler-Keith-Thompson/Grafluent",
-              "version": "0.0.58",
+              "version": "0.0.66",
               "env": {},
               "env_inherit": [],
               "cached_json_directory": "",

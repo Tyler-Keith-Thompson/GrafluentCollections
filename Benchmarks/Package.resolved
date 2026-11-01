@@ -1,5 +1,5 @@
 {
-  "originHash" : "38b361bd41d999f08c29f0023b0d65b89c622ceecafe2a0f4b88339a025d5617",
+  "originHash" : "11f457eb057dfd889c8dffd677988a9d0debb5408352c3c45623149e9748d38d",
   "pins" : [
     {
       "identity" : "benchmark",
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Tyler-Keith-Thompson/Grafluent",
       "state" : {
-        "revision" : "a7b4001e1b1daa84d2da793c840d08c4978d5bbd",
-        "version" : "0.0.58"
+        "revision" : "5cbd591778bf05c68640e6dc2520b5073b282cc0",
+        "version" : "0.0.66"
       }
     },
     {

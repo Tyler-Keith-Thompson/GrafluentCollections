@@ -1,5 +1,6 @@
 import Benchmark
 import BinarySearchTrees
+import Trees
 
 let benchmarks: @Sendable () -> Void = {
     Benchmark.defaultConfiguration.metrics = [.wallClock, .mallocCountTotal, .instructions]
@@ -60,6 +61,26 @@ let benchmarks: @Sendable () -> Void = {
     Benchmark("BinarySearchTrees: AVLTree.init(_:)") { benchmark in
         for _ in benchmark.scaledIterations {
             blackHole(AVLTree(keys))
+        }
+    }
+
+    // The floor for converting a tree's shape: Grafluent's own build from ready child tables,
+    // here a complete binary tree on as many vertices as the AVL tree holds.
+    Benchmark("BinarySearchTrees: BASELINE BinaryTree(left:right:) from child tables") { benchmark in
+        let count = sorted.count
+        let left: [Int?] = (0 ..< count).map { 2 * $0 + 1 < count ? 2 * $0 + 1 : nil }
+        let right: [Int?] = (0 ..< count).map { 2 * $0 + 2 < count ? 2 * $0 + 2 : nil }
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            blackHole(BinaryTree(left: left, right: right))
+        }
+    }
+
+    Benchmark("BinarySearchTrees: BinaryTree(_:) of an AVLTree") { benchmark in
+        let tree = AVLTree(keys)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            blackHole(BinaryTree(tree))
         }
     }
 

@@ -55,30 +55,37 @@ extension BinaryTree where Vertex: Comparable {
         self.init(_tree: dictionary._core)
     }
 
-    /// `BinaryTree(root:children:)` asks for each vertex's children level by level, so the
-    /// slots are queued in the same order and each answer is a lookup of the next one; a key
-    /// asked out of that order is found by a search instead.
+    /// The vertices are listed in level order, root first, so the shape's vertex order doesn't
+    /// depend on where the core happens to keep each node. A breadth-first walk over the slots
+    /// numbers them; a vertex's children then sit at the next two free numbers, so the child
+    /// tables are filled in the same pass, with no key compared.
     @inlinable
     init?<Value, Balancing>(_tree core: _TreeCore<Vertex, Value, Balancing>) {
         guard core.root >= 0 else { return nil }
-        var queue = ContiguousArray<Int32>()
-        queue.reserveCapacity(core.count)
-        queue.append(core.root)
-        var cursor = 0
-        let tree = BinaryTree(root: core.key(at: core.root)) { vertex in
-            var slot = cursor < queue.count ? queue[cursor] : -1
-            if slot < 0 || core.key(at: slot) != vertex {
-                slot = core.slot(of: vertex)
+        let count = core.count
+        var order = ContiguousArray<Int32>()
+        order.reserveCapacity(count)
+        order.append(core.root)
+        var left = [Int?](repeating: nil, count: count)
+        var right = [Int?](repeating: nil, count: count)
+        core.nodes.withUnsafeBufferPointer { nodes in
+            var index = 0
+            while index < order.count {
+                let node = nodes[Int(order[index])]
+                if node.left >= 0 {
+                    left[index] = order.count
+                    order.append(node.left)
+                }
+                if node.right >= 0 {
+                    right[index] = order.count
+                    order.append(node.right)
+                }
+                index &+= 1
             }
-            cursor &+= 1
-            let left = core.nodes[Int(slot)].left
-            let right = core.nodes[Int(slot)].right
-            if left >= 0 { queue.append(left) }
-            if right >= 0 { queue.append(right) }
-            return (left >= 0 ? core.key(at: left) : nil, right >= 0 ? core.key(at: right) : nil)
         }
+        let tree = BinaryTree(vertices: order.lazy.map { core.key(at: $0) }, left: left, right: right)
         guard let tree else {
-            preconditionFailure("A search tree's keys are distinct")
+            preconditionFailure("A search tree's keys are distinct and its links form one tree")
         }
         self = tree
     }

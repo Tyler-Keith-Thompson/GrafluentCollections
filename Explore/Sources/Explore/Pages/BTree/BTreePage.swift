@@ -83,7 +83,7 @@ func bTreeLayout(_ shape: RootedTree<[Int]>?) -> (boxes: [BTreeBox], links: [BTr
 
 @Reactive
 final class BTreeModel {
-    var text = "10 20 30 40 50 60 70 25 35 45 55 65 5 15 75 80 -40 -45 -50 -35"
+    var text = "10 20 30 40 50 60 70 25 35 45 55 65 5 15 75 80 -40 -45 -50 -35 -30 -25 -20"
     var operations: [Int] = []
     var history: [BTreeDictionary<Int, Row>] = [BTreeDictionary()]
     var shapes: [RootedTree<[Int]>?] = [nil]
@@ -127,8 +127,9 @@ func describeBTree(_ step: BTreeStep) -> String {
     let key = step.key
     if step.removes {
         guard step.changed else { return "Remove \(key): it is not in the table, so nothing changes." }
+        let neighbour = step.movedUp.contains { $0 > key } ? "the key just after it" : "the key just before it"
         var text = step.wasInner
-            ? "Remove \(key). It sits in an inner node, so \(step.movedUp.isEmpty ? "the key just before it" : "\(keyList(step.movedUp)), the key just before it,") comes up from a leaf to take its place."
+            ? "Remove \(key). It sits in an inner node, so \(step.movedUp.isEmpty ? neighbour : "\(keyList(step.movedUp)), \(neighbour),") comes up from a leaf to take its place."
             : "Remove \(key) from its leaf."
         let merges = step.nodesBefore - step.nodesAfter
         if merges > 0 {

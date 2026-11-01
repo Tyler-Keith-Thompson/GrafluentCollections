@@ -35,4 +35,14 @@ struct BinaryDecisionDiagramExitTests {
             _ = BinaryDecisionDiagram.Operator(truthTable: 16)
         }
     }
+
+    @Test("Collecting garbage keeping a function from a larger table traps", .tags(.precondition))
+    func collectGarbageForeignFunctionTraps() async {
+        await #expect(processExitsWith: .failure) {
+            var big = BinaryDecisionDiagram(variableCount: 4)
+            let f = big.and(big.variable(2), big.variable(3))
+            var small = BinaryDecisionDiagram(variableCount: 4)
+            _ = small.collectGarbage(keeping: [f])
+        }
+    }
 }

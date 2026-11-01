@@ -21,7 +21,8 @@
 ///
 /// Families are built by the mutating methods, which add vertices to the table and leave every
 /// existing family as it was; a family belongs to the table it was built in and its copies. The
-/// table keeps every vertex it has made.
+/// table keeps every vertex it has made until ``collectGarbage(keeping:)`` drops the ones no kept
+/// family reaches.
 @frozen
 public struct ZeroSuppressedDecisionDiagram {
     /// A family of sets in a ``ZeroSuppressedDecisionDiagram``: the vertex at its root.
@@ -248,6 +249,24 @@ public struct ZeroSuppressedDecisionDiagram {
 
     /// The number of vertices in the table, the constants included.
     public var tableVertexCount: Int { _table.count }
+
+    /// Drops every vertex that none of `families` reaches, and returns them renumbered, in the
+    /// same order: garbage collection, for the intermediate results a long computation leaves in
+    /// the table.
+    ///
+    /// Afterward only the returned families and the constants belong to this table. Every other
+    /// family built in it, including the ones passed in, names a different family or none, and
+    /// must not be used. The computed table is emptied.
+    ///
+    /// - Parameter families: The families to keep. Each traps unless it belongs to this table.
+    /// - Returns: The kept families, in the order given.
+    /// - Complexity: O(*n*) in the vertices of the table before the call.
+    public mutating func collectGarbage(keeping families: [Family]) -> [Family] {
+        for f in families {
+            _check(f)
+        }
+        return _table.collectGarbage(keeping: families.map(\._vertex)).map(Family.init)
+    }
 
     /// The sets of a family, read from its diagram; see
     /// ``ZeroSuppressedDecisionDiagram/setsView(of:)``.

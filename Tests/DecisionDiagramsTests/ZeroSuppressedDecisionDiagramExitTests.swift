@@ -37,4 +37,14 @@ struct ZeroSuppressedDecisionDiagramExitTests {
             _ = ZeroSuppressedDecisionDiagram(elementCount: -1)
         }
     }
+
+    @Test("Collecting garbage keeping a family from a larger table traps", .tags(.precondition))
+    func collectGarbageForeignFamilyTraps() async {
+        await #expect(processExitsWith: .failure) {
+            var big = ZeroSuppressedDecisionDiagram(elementCount: 4)
+            let f = big.family([[2, 3], [1]])
+            var small = ZeroSuppressedDecisionDiagram(elementCount: 4)
+            _ = small.collectGarbage(keeping: [f])
+        }
+    }
 }

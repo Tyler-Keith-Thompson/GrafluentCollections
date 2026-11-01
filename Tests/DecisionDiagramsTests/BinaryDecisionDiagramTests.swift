@@ -207,6 +207,85 @@ struct BinaryDecisionDiagramTests {
         }
     }
 
+    @Test("Collecting garbage after six queens keeps only the board's vertices, and the board still counts four")
+    func collectGarbageAfterQueens() {
+        let n = 6
+        func attacks(_ i: Int, _ j: Int, _ k: Int, _ l: Int) -> Bool {
+            i == k || j == l || i - j == k - l || i + j == k + l
+        }
+        var diagram = BinaryDecisionDiagram(variableCount: n * n)
+        var board = diagram.constant(true)
+        for i in 0 ..< n {
+            var row = diagram.constant(false)
+            for j in 0 ..< n {
+                row = diagram.or(row, diagram.variable(i * n + j))
+            }
+            board = diagram.and(board, row)
+        }
+        for i in 0 ..< n {
+            for j in 0 ..< n {
+                var safe = diagram.constant(true)
+                for k in 0 ..< n {
+                    for l in 0 ..< n where (k, l) != (i, j) && attacks(i, j, k, l) {
+                        safe = diagram.and(safe, diagram.not(diagram.variable(k * n + l)))
+                    }
+                }
+                board = diagram.and(board, diagram.implies(diagram.variable(i * n + j), safe))
+            }
+        }
+        let boardVertices = diagram.vertexCount(of: board)
+        #expect(diagram.tableVertexCount > boardVertices)
+        let kept = diagram.collectGarbage(keeping: [board])
+        let four: Double = 4
+        #expect(diagram.tableVertexCount == boardVertices)
+        #expect(diagram.vertexCount(of: kept[0]) == boardVertices)
+        #expect(diagram.satisfyingAssignmentCount(of: kept[0]) == four)
+        // No solution puts a queen in the corner, so fixing it empty keeps all four; the result
+        // no longer depends on that square, so the count over all 36 squares doubles.
+        let cornerFree = diagram.restrict(kept[0], variable: 0, to: false)
+        let eight: Double = 8
+        #expect(diagram.satisfyingAssignmentCount(of: cornerFree) == eight)
+    }
+
+    @Test("Kept functions come back in the order given, and building one again finds its kept root")
+    func collectGarbageKeepsOrderAndCanonicity() {
+        var diagram = BinaryDecisionDiagram(variableCount: 3)
+        let x0 = diagram.variable(0), x1 = diagram.variable(1), x2 = diagram.variable(2)
+        let f = diagram.or(diagram.and(x0, x1), x2)
+        let g = diagram.xor(x0, x2)
+        _ = diagram.and(diagram.not(x1), diagram.implies(x0, x2))
+        let kept = diagram.collectGarbage(keeping: [g, f])
+        let keptCount = 2
+        #expect(kept.count == keptCount)
+        func assignment(_ bits: Int) -> [Bool] {
+            (0 ..< 3).map { bits >> (2 - $0) & 1 == 1 }
+        }
+        for bits in 0 ..< 8 {
+            let a = assignment(bits)
+            #expect(diagram.evaluate(kept[0], at: a) == (a[0] != a[2]))
+            #expect(diagram.evaluate(kept[1], at: a) == (a[0] && a[1] || a[2]))
+        }
+        let y0 = diagram.variable(0), y1 = diagram.variable(1), y2 = diagram.variable(2)
+        #expect(diagram.or(diagram.and(y0, y1), y2) == kept[1])
+        #expect(diagram.xor(y0, y2) == kept[0])
+        let size = diagram.tableVertexCount
+        #expect(diagram.or(diagram.and(y0, y1), y2) == kept[1])
+        #expect(diagram.tableVertexCount == size)
+    }
+
+    @Test("Collecting garbage keeping nothing leaves the two constants")
+    func collectGarbageKeepingNothing() {
+        var diagram = BinaryDecisionDiagram(variableCount: 2)
+        _ = diagram.and(diagram.variable(0), diagram.variable(1))
+        let none: [BinaryDecisionDiagram.Function] = []
+        let kept = diagram.collectGarbage(keeping: none)
+        let constants = 2
+        #expect(kept.isEmpty)
+        #expect(diagram.tableVertexCount == constants)
+        let truth = diagram.constant(true)
+        #expect(diagram.evaluate(truth, at: [false, false]))
+    }
+
     @Test("The checked spelling throws IndexOutOfRange for a variable index out of range")
     func checkedThrows() throws {
         var diagram = BinaryDecisionDiagram(variableCount: 2)
@@ -220,6 +299,41 @@ struct BinaryDecisionDiagramTests {
 
 @Suite("BinaryDecisionDiagram: properties")
 struct BinaryDecisionDiagramPropertyTests {
+    @Test("After collecting garbage, the kept functions keep their truth tables, the table holds exactly what they reach, and rebuilding finds them", .tags(.randomized))
+    func collectGarbagePreservesFunctions() async {
+        let steps = Gen.int(in: 0 ... 1_000_000).array(of: 3 ... 24)
+        await propertyCheck(count: 200, input: steps) { steps in
+            let n = 4
+            var diagram = BinaryDecisionDiagram(variableCount: n)
+            var functions = (0 ..< n).map { diagram.variable($0) }
+            for step in steps {
+                let op = BinaryDecisionDiagram.Operator(truthTable: UInt8(step % 16))
+                functions.append(diagram.apply(op, functions[(step / 16) % functions.count], functions[(step / 1_024) % functions.count]))
+            }
+            let chosen = [functions.count - 1, steps[0] % functions.count]
+            func assignment(_ bits: Int) -> [Bool] {
+                (0 ..< n).map { bits >> (n - 1 - $0) & 1 == 1 }
+            }
+            let before = chosen.map { i in (0 ..< 1 << n).map { diagram.evaluate(functions[i], at: assignment($0)) } }
+            let kept = diagram.collectGarbage(keeping: chosen.map { functions[$0] })
+            let after = kept.map { f in (0 ..< 1 << n).map { diagram.evaluate(f, at: assignment($0)) } }
+            #expect(after == before)
+            // The table holds what the kept functions reach: at least the larger diagram, at most
+            // both diagrams' vertices together.
+            let sizes = kept.map { diagram.vertexCount(of: $0) }
+            #expect(diagram.tableVertexCount >= sizes.max()!)
+            #expect(diagram.tableVertexCount <= sizes.reduce(0, +))
+            // Replaying the program in the collected table rebuilds the kept functions as the
+            // same roots.
+            var replay = (0 ..< n).map { diagram.variable($0) }
+            for step in steps {
+                let op = BinaryDecisionDiagram.Operator(truthTable: UInt8(step % 16))
+                replay.append(diagram.apply(op, replay[(step / 16) % replay.count], replay[(step / 1_024) % replay.count]))
+            }
+            #expect(chosen.map { replay[$0] } == kept)
+        }
+    }
+
     @Test("Random formulas match their truth tables in value, count, support, restriction and quantification", .tags(.randomized))
     func randomFormulas() async {
         // A formula is a straight-line program over five variables: each step applies one of the

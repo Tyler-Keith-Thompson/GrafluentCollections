@@ -194,7 +194,8 @@ of a hand-written loop over arrays.
   operator on functions alone would have to reach a shared, mutable table, which value semantics
   rule out. The variable count is fixed when the table is made; variables are tested in index
   order. Operators are four-bit truth tables, so `apply` covers all sixteen. Satisfying
-  assignments are counted in `Double`, exact below 2⁵³. The table keeps every vertex it makes.
+  assignments are counted in `Double`, exact below 2⁵³. The table keeps every vertex it makes
+  until `collectGarbage(keeping:)` (D32).
 - D16. A zero-suppressed decision diagram follows D15 over families of sets (2026-11-01):
   `ZeroSuppressedDecisionDiagram` shares the binary diagram's vertex arrays, unique table and
   computed table, and differs only in its reduction rule (no vertex whose high child is the empty
@@ -362,6 +363,14 @@ of a hand-written loop over arrays.
   beside its hand-worked suite. The wasm piece was taken from a render of the template with
   `--wasm`, because `template-update` carries changes to the pieces a project has, not new ones.
   The 32-bit run is local only; a CI job for it waits for the owner.
+- D32. Decision diagrams drop unreachable vertices on request, not by reference counting
+  (2026-11-01): `collectGarbage(keeping:)` takes the functions (or families) to keep, marks what
+  they reach in one descending pass (children sit below parents), compacts the kept vertices in
+  order, rebuilds the unique table and empties the computed table, and returns the kept roots
+  renumbered, in the order given. Every other function value from before is invalid afterward;
+  no generation stamp guards that, since a function was already an unchecked index into its
+  table. The name follows BuDDy's and CUDD's garbage collection; reference counts per vertex
+  were rejected for the cost they add to every apply.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

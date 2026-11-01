@@ -110,6 +110,61 @@ struct _DecisionTable: Sendable {
         cacheResults[slot] = result
     }
 
+    /// Keeps the constants and the vertices `roots` reach, dropping every other vertex, and returns
+    /// each root's new number. The kept vertices keep their order, so children still come before
+    /// their parents; the unique table is rebuilt for them and the computed table emptied.
+    ///
+    /// - Precondition: Every root is a vertex of this table.
+    mutating func collectGarbage(keeping roots: [Int32]) -> [Int32] {
+        let n = variables.count
+        var kept = ContiguousArray<Bool>(repeating: false, count: n)
+        kept[0] = true
+        kept[1] = true
+        for root in roots {
+            precondition(root >= 0 && Int(root) < n, "The root is not a vertex of this table")
+            kept[Int(root)] = true
+        }
+        // A vertex's children have lower numbers than it, so one pass downward marks all it reaches.
+        var v = n &- 1
+        while v >= 2 {
+            if kept[v] {
+                kept[Int(lows[v])] = true
+                kept[Int(highs[v])] = true
+            }
+            v &-= 1
+        }
+        var renumbered = ContiguousArray<Int32>(repeating: -1, count: n)
+        var newVariables = ContiguousArray<Int32>()
+        var newLows = ContiguousArray<Int32>()
+        var newHighs = ContiguousArray<Int32>()
+        for v in 0 ..< n where kept[v] {
+            renumbered[v] = Int32(truncatingIfNeeded: newVariables.count)
+            newVariables.append(variables[v])
+            newLows.append(v < 2 ? lows[v] : renumbered[Int(lows[v])])
+            newHighs.append(v < 2 ? highs[v] : renumbered[Int(highs[v])])
+        }
+        variables = newVariables
+        lows = newLows
+        highs = newHighs
+        var capacity = 1 << 10
+        while capacity < variables.count &* 2 {
+            capacity &*= 2
+        }
+        unique = ContiguousArray(repeating: -1, count: capacity)
+        let mask = capacity &- 1
+        for v in 2 ..< variables.count {
+            var slot = Self.hash(variables[v], lows[v], highs[v]) & mask
+            while unique[slot] >= 0 {
+                slot = (slot &+ 1) & mask
+            }
+            unique[slot] = Int32(truncatingIfNeeded: v)
+        }
+        let cacheCapacity = Swift.max(1 << 12, capacity)
+        cacheKeys = ContiguousArray(repeating: .max, count: cacheCapacity)
+        cacheResults = ContiguousArray(repeating: 0, count: cacheCapacity)
+        return roots.map { renumbered[Int($0)] }
+    }
+
     /// The vertices reachable from `root`, ascending: children come before their parents.
     func reachable(from root: Int32) -> [Int32] {
         var seen = Set<Int32>([root])

@@ -22,7 +22,8 @@
 ///
 /// Functions are built by the mutating methods, which add vertices to the table and leave every
 /// existing function as it was; a function belongs to the table it was built in and its copies.
-/// The table keeps every vertex it has made.
+/// The table keeps every vertex it has made until ``collectGarbage(keeping:)`` drops the ones no
+/// kept function reaches.
 @frozen
 public struct BinaryDecisionDiagram {
     /// A Boolean function in a ``BinaryDecisionDiagram``: the vertex at its root.
@@ -254,6 +255,24 @@ public struct BinaryDecisionDiagram {
 
     /// The number of vertices in the table, the constants included.
     public var tableVertexCount: Int { _table.count }
+
+    /// Drops every vertex that none of `functions` reaches, and returns them renumbered, in the
+    /// same order: garbage collection, for the intermediate results a long computation leaves in
+    /// the table.
+    ///
+    /// Afterward only the returned functions and the constants belong to this table. Every other
+    /// function built in it, including the ones passed in, names a different function or none, and
+    /// must not be used. The computed table is emptied.
+    ///
+    /// - Parameter functions: The functions to keep. Each traps unless it belongs to this table.
+    /// - Returns: The kept functions, in the order given.
+    /// - Complexity: O(*n*) in the vertices of the table before the call.
+    public mutating func collectGarbage(keeping functions: [Function]) -> [Function] {
+        for f in functions {
+            _check(f)
+        }
+        return _table.collectGarbage(keeping: functions.map(\._vertex)).map(Function.init)
+    }
 
     /// How often ``apply(_:_:_:)`` found a result in its computed table.
     public var computedTableStatistics: ComputedTableStatistics {

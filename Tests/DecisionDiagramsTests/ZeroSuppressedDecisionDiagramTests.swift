@@ -88,6 +88,22 @@ struct ZeroSuppressedDecisionDiagramTests {
         #expect(rebuilt == a)
     }
 
+    @Test("Collecting garbage keeps the given families' sets and drops the rest of the table")
+    func collectGarbage() {
+        var diagram = ZeroSuppressedDecisionDiagram(elementCount: 4)
+        let a = diagram.family([[0, 2], [1], [3, 1]])
+        let b = diagram.family([[0], [1, 2, 3]])
+        _ = diagram.join(a, b)
+        _ = diagram.union(diagram.single(3), diagram.single(0))
+        let sizeBefore = diagram.tableVertexCount
+        let kept = diagram.collectGarbage(keeping: [b])
+        let bSets: [[Int]] = [[0], [1, 2, 3]].sorted { $0.lexicographicallyPrecedes($1) }
+        #expect(diagram.tableVertexCount < sizeBefore)
+        #expect(diagram.tableVertexCount == diagram.vertexCount(of: kept[0]))
+        #expect(Array(diagram.setsView(of: kept[0])).sorted { $0.lexicographicallyPrecedes($1) } == bSets)
+        #expect(diagram.family([[1, 2, 3], [0]]) == kept[0])
+    }
+
     @Test("Union, intersection and difference of {{0}, {0, 1}} and {{0, 1}, {2}}")
     func setOperations() {
         var diagram = ZeroSuppressedDecisionDiagram(elementCount: 3)

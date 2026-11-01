@@ -25,6 +25,7 @@ func mountPage(_ page: String) -> Bool {
     case "decisiondiagrams": DecisionDiagramsPage.mount()
     case "rope": RopePage.mount()
     case "persistent": PersistentPage.mount()
+    case "lru": CachePage.mount()
     default: return false
     }
     return true

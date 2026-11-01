@@ -1,0 +1,28 @@
+<!-- title: LRU caches · Explore GrafluentCollections -->
+<!-- description: Store and look up entries in a real LRUCache with a small capacity and watch the recency order and each eviction. -->
+<header class="sign">
+  <h1>LRU caches</h1>
+  <p class="question">When a cache is full, which entry should it forget?</p>
+</header>
+<p class="example lead">Example: a cache with room for three holds a, b and c. Looking up a moves it to the front, so when d arrives the cache forgets b, the entry used longest ago, and not a, the oldest one stored.</p>
+
+<div id="app"></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>Keeping the answers you are likely to need again</h2>
+  <p>A cache keeps the results of slow work, a disk read, a network request or a long computation, so asking again is fast. Memory is limited, so a full cache must drop something, and the entry used longest ago is a good guess at the one least needed: what a program used recently it tends to use again soon. Databases, operating systems, web servers and image loaders use LRU or close variants.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>A dictionary and a list</h2>
+  <p>A hash table finds an entry by its key in constant time. The entries are also linked in a list in order of use, most recent at the front. Every hit or store unlinks its entry and puts it at the front, and an eviction takes the entry at the back, so every operation is O(1).</p>
+  <p>GrafluentCollections keeps the entries in one flat array, the list’s links as indices into it, and a table from key to index. Iterating the cache goes from most to least recent without changing the order, and <code>RootedTree(cache)</code> gives the list as a path.</p>
+
+  <h2><small>Where it breaks</small>Scans and frequency</h2>
+  <p>One pass over more data than the cache holds pushes out everything, including entries used constantly, for data read once. And recency is not frequency: an entry used a thousand times yesterday goes before one used once a minute ago. Policies such as LFU, 2Q, ARC and W-TinyLFU weigh frequency too, at some cost in bookkeeping.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The operations above, in GrafluentCollections</h2>
+  <pre id="code" aria-label="Swift code"></pre>
+</section>

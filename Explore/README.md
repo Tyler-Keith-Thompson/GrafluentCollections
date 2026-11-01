@@ -32,6 +32,7 @@ contents and the menu without a link.
 | `decisiondiagrams` | `BinaryDecisionDiagram`: `variable(_:)`, `and(_:_:)`, `or(_:_:)`, `xor(_:_:)`, `not(_:)`, `evaluate(_:at:)`, `satisfyingAssignmentCount(of:)`, `tableVertexCount`; `graphView` for the vertices and edges, with `variable(of:)` and `isHighEdge(at:)` |
 | `rope` | `Rope`: `init(_:)`, `insert(contentsOf:at:)`, `removeSubrange(_:)`, `extracting(_:)`, `+`, `count`; `chunksView` for the chunks; `BinaryTree(_:)` for the shape, with `inorder`, `root`, `parent(of:)`, `depth(of:)` |
 | `persistent` | `PersistentTreeSet`: `init(_:)`, `inserting(_:)`, `removing(_:)`, `elementsInSharedVertices(with:)`; `BinaryTree(_:)` for each version's shape, with `inorder`, `height`, `parent(of:)`, `depth(of:)` |
+| `lru` | `LRUCache`: `init(capacity:)`, `insert(_:forKey:)` with the evicted entry, the reading subscript, `contains(_:)`, iteration from most to least recent; `RootedTree(_:)` for the recency path, with `parent(of:)` and `height` |
 
 ## Requirements
 

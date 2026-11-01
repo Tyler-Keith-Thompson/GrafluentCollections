@@ -527,3 +527,10 @@ figure.fig { margin: 0; }
 .scan span.now { color: var(--danger); text-decoration: underline; text-underline-offset: 4px; }
 .node.match circle { fill: var(--signal); stroke: var(--signal); }
 .dot.match { background: var(--signal); border-color: var(--signal); }
+
+/* Interval tree: the intervals as bars on a number line, the query shaded behind them. */
+.bars { margin-top: 8px; }
+.bars .bar { fill: var(--road); }
+.bars .bar.found { fill: var(--danger); }
+.bars .band { fill: var(--signal); opacity: .25; }
+.bars .tick { font-family: var(--mono); font-size: 11px; fill: var(--muted); }

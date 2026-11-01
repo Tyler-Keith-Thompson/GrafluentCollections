@@ -19,6 +19,7 @@ func mountPage(_ page: String) -> Bool {
     case "ahocorasick": AhoCorasickPage.mount()
     case "fenwick": FenwickPage.mount()
     case "segmenttree": SegmentTreePage.mount()
+    case "intervaltree": IntervalTreePage.mount()
     default: return false
     }
     return true

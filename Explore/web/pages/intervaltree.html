@@ -1,0 +1,28 @@
+<!-- title: Interval trees · Explore GrafluentCollections -->
+<!-- description: Insert intervals into a real IntervalTree and ask which ones contain a point or overlap a range, watching the search skip whole subtrees. -->
+<header class="sign">
+  <h1>Interval trees</h1>
+  <p class="question">Which of these intervals touch this moment, without checking every one?</p>
+</header>
+<p class="example lead">Example: which intervals contain 27? The search starts at the root and goes left only into subtrees whose largest end is past 27. It goes right only past intervals that start before 28. It finds [10, 30) and [25, 40) and never looks at the intervals that end by 12.</p>
+
+<div id="app"></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>Overlaps, quickly</h2>
+  <p>An interval tree holds ranges, such as meetings, gene positions, memory regions or the spans of a timeline. It answers which ones contain a point, overlap a range, or lie inside it, in time that grows with the logarithm of the count plus the number found. Calendars, genome browsers, schedulers and collision checks all ask that question.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>Sort by start, remember the furthest end</h2>
+  <p>The intervals sit in a balanced search tree, ordered by where they start. That alone answers half the question: every interval in a right subtree starts after its parent’s start, so once an interval starts at or past the end of the query, everything to its right does too. For the other half, each vertex also records the largest end anywhere below it. A subtree whose largest end is at or before the query’s start can’t hold anything that reaches the query, so the search skips it whole.</p>
+  <p>Insertions and removals keep the tree balanced like an AVL tree and fix the recorded ends on their way back up. In the drawing, each circle shows that recorded end. The vertices’ own intervals appear below the circles, and again as bars on the number line.</p>
+
+  <h2><small>Where it breaks</small>Many answers, or many dimensions</h2>
+  <p>When a query overlaps most of the intervals, the search visits most of the tree; nothing can beat reading every answer. The tree also handles one dimension only. For boxes in the plane, an MX-CIF quadtree or a k-d tree does the same job.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The operations above, in GrafluentCollections</h2>
+  <pre id="code" aria-label="Swift code"></pre>
+</section>

@@ -26,6 +26,7 @@ contents and the menu without a link.
 | `ahocorasick` | `AhoCorasickAutomaton`: `init(patterns:)`, `stateCount`, `matches(in:)`; `statesView` for the goto edges and failure links, with `patternIndices(endingAt:)` |
 | `fenwick` | `FenwickTree`: `init(_:)`, `prefixSum(through:)`, `add(_:at:)`, `sum(in:)`; `Arborescence(_:)` for the update tree, with `parent(of:)` and `root` |
 | `segmenttree` | `LazySegmentTree` over `Sum` and `Minimum` with an add-to-range `MonoidAction`: `init(_:)`, `combined(in:)`, `apply(_:in:)`; `BinaryTree(_:)` for the shape, with `preorder`, `left(of:)`, `right(of:)` |
+| `intervaltree` | `IntervalTree`: `insert(_:value:)`, `remove(_:)`, `containing(_:)`, `overlapping(_:)`, subscript by in-order position; `BinaryTree(_:)` for the shape, with `left(of:)`, `right(of:)`, `parent(of:)`, `depth(of:)` |
 
 ## Requirements
 

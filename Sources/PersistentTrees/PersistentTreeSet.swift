@@ -338,6 +338,38 @@ extension PersistentTreeSet: SetAlgebra {
     public func isSuperset(of other: PersistentTreeSet) -> Bool {
         _PersistentNode.isSubset(other._root, of: _root)
     }
+
+    /// The elements whose vertices this version shares with `other`, in ascending order: the
+    /// parts of the tree an edit between the two left alone.
+    ///
+    /// A vertex is shared when both versions hold the very same vertex, not merely an equal
+    /// element, and then its whole subtree is shared too. A version shares every vertex with
+    /// itself, and none with a set built separately.
+    ///
+    /// - Parameter other: Another version, such as the one this was edited from.
+    /// - Returns: The shared elements, ascending.
+    /// - Complexity: O(*n* log *m*) for *n* elements here and *m* in `other`, and O(*n*) when
+    ///   the two share their root.
+    @inlinable
+    public func elementsInSharedVertices(with other: PersistentTreeSet) -> [Element] {
+        var result: [Element] = []
+        // An in-order walk; each vertex carries whether it lies in a shared subtree.
+        var stack: [(node: _PersistentNode<Element, Void>, shared: Bool)] = []
+        func pushLeftSpine(_ start: _PersistentNode<Element, Void>?, shared: Bool, into stack: inout [(node: _PersistentNode<Element, Void>, shared: Bool)]) {
+            var node = start
+            while let current = node {
+                let isShared = shared || _PersistentNode.find(current.key, in: other._root) === current
+                stack.append((current, isShared))
+                node = current.left
+            }
+        }
+        pushLeftSpine(_root, shared: false, into: &stack)
+        while let (node, shared) = stack.popLast() {
+            if shared { result.append(node.key) }
+            pushLeftSpine(node.right, shared: shared, into: &stack)
+        }
+        return result
+    }
 }
 
 extension PersistentTreeSet: ExpressibleByArrayLiteral {

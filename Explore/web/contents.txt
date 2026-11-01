@@ -16,5 +16,5 @@ segmenttree|Segment trees|Ranges|Sums and minimums over any range, with range up
 intervaltree|Interval trees|Ranges|Which intervals overlap a point or a range.|page
 kdtree|k-d trees and quadtrees|Space|Nearest neighbours and boxes in two dimensions.|page
 rope|Ropes|Text|Long text edited in the middle without copying it.|page
-persistent|Persistent trees|History|Every version kept, sharing what did not change.|soon
+persistent|Persistent trees|History|Every version kept, sharing what did not change.|page
 lru|LRU caches|History|A bounded dictionary that forgets the least recently used.|soon

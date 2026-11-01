@@ -24,6 +24,7 @@ func mountPage(_ page: String) -> Bool {
     case "suffix": SuffixPage.mount()
     case "decisiondiagrams": DecisionDiagramsPage.mount()
     case "rope": RopePage.mount()
+    case "persistent": PersistentPage.mount()
     default: return false
     }
     return true

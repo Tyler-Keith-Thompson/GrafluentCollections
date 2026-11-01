@@ -52,6 +52,22 @@ struct PersistentTreeSetTests {
         #expect(shared >= 1_024 - height)
     }
 
+    @Test("elementsInSharedVertices names the vertices two versions hold in common")
+    func sharedVertices() {
+        let base = PersistentTreeSet(0 ..< 15)
+        let all = Array(0 ..< 15)
+        #expect(base.elementsInSharedVertices(with: base) == all)
+        let separate = PersistentTreeSet(0 ..< 15)
+        let none: [Int] = []
+        #expect(base.elementsInSharedVertices(with: separate) == none)
+        #expect(PersistentTreeSet<Int>().elementsInSharedVertices(with: base) == none)
+        // 0 ..< 15 builds a perfect tree rooted at 7; inserting 20 copies the path 7, 11, 13, 14.
+        let next = base.inserting(20)
+        let shared = Array(0 ... 6) + [8, 9, 10, 12]
+        #expect(next.elementsInSharedVertices(with: base) == shared)
+        #expect(base.elementsInSharedVertices(with: next) == shared)
+    }
+
     @Test("Set operations match the standard library and keep shared subtrees whole")
     func setOperations() {
         let a = PersistentTreeSet(Swift.stride(from: 0, to: 100, by: 2))
@@ -223,6 +239,24 @@ struct PersistentTreeSetPropertyTests {
             for (version, snapshot) in zip(versions, snapshots) {
                 #expect(Array(version) == snapshot.sorted())
                 #expect(_PersistentNode.isValid(version._root))
+            }
+            for (version, previous) in zip(versions.dropFirst(), versions) {
+                var mine: Set<ObjectIdentifier> = []
+                var stack = [previous._root].compactMap { $0 }
+                while let node = stack.popLast() {
+                    mine.insert(ObjectIdentifier(node))
+                    if let left = node.left { stack.append(left) }
+                    if let right = node.right { stack.append(right) }
+                }
+                var expected: [Int] = []
+                var walk = [version._root].compactMap { $0 }
+                while let node = walk.popLast() {
+                    if mine.contains(ObjectIdentifier(node)) { expected.append(node.key) }
+                    if let left = node.left { walk.append(left) }
+                    if let right = node.right { walk.append(right) }
+                }
+                let shared = version.elementsInSharedVertices(with: previous)
+                #expect(shared == expected.sorted())
             }
             let a = versions[versions.count / 2], b = versions[versions.count - 1]
             let sa = snapshots[versions.count / 2], sb = snapshots[versions.count - 1]

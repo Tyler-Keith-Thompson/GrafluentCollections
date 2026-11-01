@@ -401,6 +401,12 @@ of a hand-written loop over arrays.
   `BinaryTree(rope)`; none is empty. It lets callers write a rope out a chunk at a time and draw
   which chunks an edit touched. Chunk sizes and boundaries remain the rope's choice: nothing can
   set them, and they may change between versions.
+- D37. A persistent set names the vertices two versions share (2026-11-01):
+  `PersistentTreeSet.elementsInSharedVertices(with:) -> [Element]`, ascending, the elements whose
+  vertex both versions hold by identity, so callers can see and measure structural sharing
+  without the `package` vertices. Equal subtrees are not a substitute: a rebalance can rebuild a
+  vertex with the same element and children, so about one vertex in two hundred of a random
+  history is equal but not shared. The dictionary can gain the same read when someone needs it.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

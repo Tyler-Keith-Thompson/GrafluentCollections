@@ -1,0 +1,28 @@
+<!-- title: Persistent trees · Explore GrafluentCollections -->
+<!-- description: Edit a real PersistentTreeSet and see each new version beside the one before, sharing every vertex the edit did not touch. -->
+<header class="sign">
+  <h1>Persistent trees</h1>
+  <p class="question">How do you keep every version of a set without copying it for each edit?</p>
+</header>
+<p class="example lead">Example: inserting 7 into a set of fourteen numbers makes version 1. It has five new vertices, the path from the root down to where 7 goes. Its other ten vertices are the very ones version 0 holds, and version 0 still reads as it did.</p>
+
+<div id="app"></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>Undo, snapshots and safe sharing</h2>
+  <p>A persistent structure never changes a version once it exists: an edit returns a new version, and the old one stays readable. That gives undo and history for free, lets a reader keep a consistent snapshot while a writer moves on, and makes sharing across threads safe without locks. Functional languages build their maps and sets this way, and so do editors, version-control internals and databases that offer snapshots.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>Copy the path, share the rest</h2>
+  <p>In a search tree, an edit only changes the vertices on the path from the root to the change. So the new version copies just that path, with each copy pointing at the old version’s untouched subtrees, and a rebalance copies the few vertices it rotates. Each edit costs O(log <i>n</i>) new vertices, and a history of <i>n</i> edits takes O(<i>n</i> log <i>n</i>) space in all, not a whole tree per version.</p>
+  <p>GrafluentCollections balances by weight (Adams, 1993): no subtree holds more than three times its sibling’s elements. <code>elementsInSharedVertices(with:)</code> names the vertices two versions hold in common, and <code>BinaryTree(version)</code> gives each version’s shape.</p>
+
+  <h2><small>Where it breaks</small>Many small allocations</h2>
+  <p>Every edit allocates new vertices, and every vertex is a separate object, so a set that is only ever used in its latest version is faster as an ordinary sorted array or a mutable tree that changes in place. Versions also keep each other’s vertices alive, so holding on to old versions holds their memory.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The versions above, in GrafluentCollections</h2>
+  <pre id="code" aria-label="Swift code"></pre>
+</section>

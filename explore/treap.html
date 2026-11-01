@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Treaps · Explore GrafluentCollections</title>
+<meta name="description" content="Insert and remove keys in a real Treap and watch random priorities give it the shape of a random search tree, whatever order the keys arrive in.">
+<script>
+  // The theme the reader picked last time, before anything is drawn.
+  try { const t = localStorage.getItem("explore-theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+  // A new page opens at its top, even where the host keeps the previous page's scroll position.
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%231d4f9c%22/%3E%3Cpath d=%22M9 22L16 9l7 13z%22 fill=%22none%22 stroke=%22white%22 stroke-width=%222.5%22/%3E%3Ccircle cx=%229%22 cy=%2222%22 r=%223.5%22 fill=%22white%22/%3E%3Ccircle cx=%2216%22 cy=%229%22 r=%223.5%22 fill=%22white%22/%3E%3Ccircle cx=%2223%22 cy=%2222%22 r=%223.5%22 fill=%22white%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="explore.css">
+<link rel="modulepreload" href="index.js">
+<link rel="preload" href="Explore.wasm" as="fetch" type="application/wasm" crossorigin>
+</head>
+<body data-page="treap">
+<div class="wrap">
+  <nav class="topbar" aria-label="Site">
+    <a class="home" href="./">Explore <b>GrafluentCollections</b></a>
+    <span class="spacer"></span>
+    <details class="menu"><summary><span class="burger" aria-hidden="true"></span><span class="mlabel">All pages</span></summary>
+      <nav class="mpanel" aria-label="All pages"><a class="mhome" href="./">Contents</a>
+        <div class="mgroup"><span>Search trees</span><a href="avl.html">AVL trees</a><a href="redblack.html">Red–black trees</a><a href="treap.html" aria-current="page">Treaps</a><a href="splay.html">Splay trees</a><i>B-trees (soon)</i><i>Skip lists (soon)</i></div>
+        <div class="mgroup"><span>Strings</span><i>Tries and radix trees (soon)</i><i>Aho–Corasick (soon)</i><i>Suffix arrays and trees (soon)</i></div>
+        <div class="mgroup"><span>Logic</span><i>Decision diagrams (soon)</i></div>
+        <div class="mgroup"><span>Ranges</span><i>Fenwick trees (soon)</i><i>Segment trees (soon)</i><i>Interval trees (soon)</i></div>
+        <div class="mgroup"><span>Space</span><i>k-d trees and quadtrees (soon)</i></div>
+        <div class="mgroup"><span>Text</span><i>Ropes (soon)</i></div>
+        <div class="mgroup"><span>History</span><i>Persistent trees (soon)</i><i>LRU caches (soon)</i></div>
+      </nav>
+    </details>
+    <a href="../documentation/">Docs</a>
+    <button type="button" class="theme" id="theme" aria-label="Switch between light and dark">◐<span class="tlabel"> Theme</span></button>
+  </nav>
+<header class="sign">
+  <h1>Treaps</h1>
+  <p class="question">Can a coin toss keep a search tree balanced?</p>
+</header>
+<p class="example lead">Example: insert 1 to 8 in order. A plain search tree would become a chain eight levels deep. In a treap each key draws a random priority, and the tree comes out as shallow as if the keys had arrived shuffled.</p>
+
+<div id="app" data-loading aria-busy="true"><div><section class="panel controls" aria-label="Your operations"><label class="field" for="treap-text">Keys to insert, a minus sign to remove <input id="treap-text" type="text" value="1 2 3 4 5 6 7 8 -4 -1" maxlength="120" spellcheck="false" autocomplete="off"></label><div class="buttons"><button type="button">New priorities</button></div></section><section class="lab" aria-label="The treap"><div class="panel stage"><p class="empty">The treap starts empty. Press Step to run the first operation.</p><div class="legend"><span><i class="dot current"></i>just inserted</span><span><i class="dot selected"></i>moved by this step</span><span>under each key: its priority, 0 to 99</span></div></div><div class="side"><div class="panel" aria-live="polite"><span class="label">Operation 0 of 10</span><p class="narration">Every key draws a random priority as it goes in. The keys are in search-tree order left to right, and no key has a higher priority than the one above it.</p></div><div class="panel"><span class="label">The treap</span><div class="stat"><div><span class="num">0</span>keys</div><div class="good"><span class="num">0</span>levels</div></div></div><div class="panel"><span class="label">By priority, highest first</span><p class="narration">—</p></div></div></section><section class="panel controls" aria-label="Playback"><div class="buttons"><button type="button" aria-label="Step back">◀ Back</button><button type="button" class="primary">▶ Play</button><button type="button">Step ▶</button><button type="button">Reset</button></div><div class="timeline-scroll"><svg class="timeline" width="300" viewBox="0 0 300 64" aria-label="Timeline of events"><line x1="8" y1="32" x2="292" y2="32" class="axis" /><g class="marble future" data-step="0"><circle cx="22" cy="32" r="10.0" class="m-blue" /><text x="22" y="36" text-anchor="middle">1</text><title>Insert 1 with priority 22. The treap was empty, so it is the root.</title></g><g class="marble future" data-step="1"><circle cx="48" cy="32" r="10.0" class="m-blue" /><text x="48" y="36" text-anchor="middle">2</text><title>Insert 2 with priority 14. It goes in as a leaf, and its parent's priority is higher, so it stays.</title></g><g class="marble future" data-step="2"><circle cx="74" cy="32" r="10.0" class="m-blue" /><text x="74" y="36" text-anchor="middle">3</text><title>Insert 3 with priority 4. It goes in as a leaf, and its parent's priority is higher, so it stays.</title></g><g class="marble future" data-step="3"><circle cx="100" cy="32" r="10.0" class="m-violet" /><text x="100" y="36" text-anchor="middle">4</text><title>Insert 4 with priority 10. It goes in where its priority puts it above 3, splitting them to either side.</title></g><g class="marble future" data-step="4"><circle cx="126" cy="32" r="10.0" class="m-violet" /><text x="126" y="36" text-anchor="middle">5</text><title>Insert 5 with priority 84. It goes in where its priority puts it above 1, splitting them to either side.</title></g><g class="marble future" data-step="5"><circle cx="152" cy="32" r="10.0" class="m-blue" /><text x="152" y="36" text-anchor="middle">6</text><title>Insert 6 with priority 68. It goes in as a leaf, and its parent's priority is higher, so it stays.</title></g><g class="marble future" data-step="6"><circle cx="178" cy="32" r="10.0" class="m-blue" /><text x="178" y="36" text-anchor="middle">7</text><title>Insert 7 with priority 41. It goes in as a leaf, and its parent's priority is higher, so it stays.</title></g><g class="marble future" data-step="7"><circle cx="204" cy="32" r="10.0" class="m-blue" /><text x="204" y="36" text-anchor="middle">8</text><title>Insert 8 with priority 40. It goes in as a leaf, and its parent's priority is higher, so it stays.</title></g><g class="marble future" data-step="8"><circle cx="230" cy="32" r="10.0" class="m-red" /><text x="230" y="36" text-anchor="middle">4</text><title>Remove 4. Its two subtrees join: of the two roots, the higher priority goes on top, all the way down, which moves 3.</title></g><g class="marble future" data-step="9"><circle cx="256" cy="32" r="10.0" class="m-red" /><text x="256" y="36" text-anchor="middle">1</text><title>Remove 1. Its two subtrees join: of the two roots, the higher priority goes on top, all the way down, which moves 2.</title></g><line x1="9" y1="8" x2="9" y2="56" class="playhead" /></svg></div><input id="scrub-treap" class="scrub" type="range" min="0" max="10" value="0" aria-label="Scrub through the steps"><div class="tl-legend"><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-blue" /></svg>insert as a leaf</span><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-violet" /></svg>insert above other keys</span><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-red" /></svg>remove</span></div></section></div></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>A sorted set that splits and joins</h2>
+  <p>A treap keeps keys in order and finds, inserts or removes any one of them in an expected number of steps that grows with the logarithm of the count. Its strength is cutting and gluing: split it at a key into the keys below and the rest, or join two treaps whose keys don’t interleave, each in the same logarithmic time. That suits ranges handed out and returned, or a sequence edited in pieces.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>A search tree and a heap at once</h2>
+  <p>Read left to right, the keys are in order, as in any search tree. Read top to bottom, the priorities only go down: no key has a higher priority than the one above it, as in a heap. For a given set of keys and priorities only one tree satisfies both, the one you would get by inserting the keys from highest priority to lowest. With random priorities that is a random insertion order, so the expected depth of every key is logarithmic, whatever order the keys really came in.</p>
+  <p>Inserting walks down by key until it meets a key of lower priority, then splits that subtree at the new key and hangs the halves under it. Removing joins the key’s two subtrees, the root of higher priority on top at each step. Seidel and Aragon described the treap in 1989. The priorities here come from a seeded generator, so the same seed gives the same tree; <em>New priorities</em> tries another.</p>
+
+  <h2><small>Where it breaks</small>Expected, not guaranteed</h2>
+  <p>The bounds are averages over the coin tosses: an unlucky draw can make one tree deep, though a long chain is vanishingly unlikely. When you need a worst-case bound on every operation, use an AVL or red–black tree. When the same few keys are read again and again, a splay tree moves them to the top.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The operations above, in GrafluentCollections</h2>
+  <pre id="code" data-loading aria-busy="true" aria-label="Swift code"><span><span class="k">import</span> <span class="t">BinarySearchTrees</span>
+<span class="k">import</span> <span class="t">Trees</span>
+
+<span class="k">let</span> operations = [<span class="n">1</span>, <span class="n">2</span>, <span class="n">3</span>, <span class="n">4</span>, <span class="n">5</span>, <span class="n">6</span>, <span class="n">7</span>, <span class="n">8</span>, -<span class="n">4</span>, -<span class="n">1</span>]  <span class="c">// negative: remove</span>
+<span class="k">let</span> seed: <span class="t">UInt64</span> = <span class="n">7</span>
+
+<span class="k">var</span> random = <span class="t">PageRandom</span>(state: seed)  <span class="c">// any RandomNumberGenerator</span>
+<span class="k">var</span> treap = <span class="t">Treap</span>&lt;<span class="t">Int</span>&gt;(using: &amp;random)
+<span class="k">var</span> history = [treap]
+<span class="k">for</span> key <span class="k">in</span> operations {
+    <span class="k">if</span> key &lt; <span class="n">0</span> {
+        treap.remove(-key)
+    } <span class="k">else</span> {
+        treap.insert(key)
+    }
+    history.append(treap)
+}
+<span class="k">let</span> height = treap.height  <span class="c">// 4</span>
+
+<span class="k">let</span> shape = <span class="t">BinaryTree</span>(treap)
+<span class="k">let</span> top = shape.map { treap.priority(of: $<span class="n">0</span>.root) }  <span class="c">// 1494899881</span>
+</span></pre>
+</section>
+<nav class="pager" aria-label="Pages"><a class="prev" href="redblack.html"><span>Previous</span>Red–black trees</a><a class="next" href="splay.html"><span>Next</span>Splay trees</a></nav>
+</div>
+<script>
+  if (!location.hash) window.scrollTo(0, 0);
+  // Until the reader scrolls, keep the page at its top while the fonts and the interactive parts
+  // come in. `pinned` is read again once the interactive parts have mounted.
+  let pinned = !location.hash;
+  if (pinned) {
+    const release = () => { pinned = false; };
+    for (const kind of ["wheel", "touchstart", "keydown", "mousedown"]) addEventListener(kind, release, { once: true, passive: true });
+    const pin = new ResizeObserver(() => { if (pinned) window.scrollTo(0, 0); });
+    pin.observe(document.body);
+    setTimeout(() => { pinned = false; pin.disconnect(); }, 3000);
+  }
+  document.getElementById("theme").addEventListener("click", () => {
+    const root = document.documentElement;
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("explore-theme", root.dataset.theme); } catch {}
+  });
+</script>
+<script type="module">
+  // GrafluentCollections and the interface run as WebAssembly; this loads them.
+  import { init } from "./index.js";
+  // The page's first frame is already drawn; these views mount in its place. Return to the top
+  // once they are drawn, unless the link named a section or the reader has scrolled.
+  const toTop = () => { if (pinned) window.scrollTo(0, 0); };
+  init().then(() => requestAnimationFrame(() => requestAnimationFrame(toTop))).catch((error) => {
+    console.error("The explorer failed to start:", error);
+    for (const part of document.querySelectorAll("[data-loading]")) { part.removeAttribute("data-loading"); part.removeAttribute("aria-busy"); }
+    const app = document.getElementById("app");
+    if (app) app.textContent = "The interactive part of this page could not start in this browser.";
+  });
+</script>
+</body>
+</html>

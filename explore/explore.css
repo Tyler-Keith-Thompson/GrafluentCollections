@@ -495,3 +495,13 @@ figure.fig { margin: 0; }
 }
 .in-swift { max-width: none; }
 .in-swift h2 { max-width: 68ch; }
+
+/* Red–black trees: each key drawn in its colour; black stays near-black in either theme, with
+   an ink outline so it shows on a dark sheet. */
+.dot.current { border-color: var(--danger); border-width: 3px; }
+.node.red circle { fill: var(--danger); stroke: var(--danger); }
+.node.black circle { fill: #1c1c1e; stroke: var(--ink); }
+.node.red .badge, .node.black .badge { fill: #fff; }
+.node.red.selected circle, .node.black.selected circle { stroke: var(--signal); stroke-width: 6; }
+.dot.red { background: var(--danger); border-color: var(--danger); }
+.dot.black { background: #1c1c1e; border-color: var(--ink); }

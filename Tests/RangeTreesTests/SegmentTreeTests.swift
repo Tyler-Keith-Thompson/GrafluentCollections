@@ -228,6 +228,38 @@ struct LazySegmentTreeTests {
         #expect(tree.combined(in: 0 ..< 3) == nine)
     }
 
+    @Test("A lazy tree over a non-commutative monoid reads every range left to right after overlapping updates")
+    func lazyConcatenationKeepsOrder() {
+        enum Concatenation: Monoid {
+            static var identity: String { "" }
+            static func combine(_ lhs: String, _ rhs: String) -> String { lhs + rhs }
+        }
+        // An update swaps the case of every letter in its range; two swaps cancel.
+        enum SwapCase: MonoidAction {
+            typealias Values = Concatenation
+            static var identity: Bool { false }
+            static func compose(_ outer: Bool, _ inner: Bool) -> Bool { outer != inner }
+            static func apply(_ update: Bool, to text: String, count: Int) -> String {
+                guard update else { return text }
+                return String(text.map { $0.isUppercase ? Character($0.lowercased()) : Character($0.uppercased()) })
+            }
+        }
+        let letters: [String] = "abcdefghijklm".map { String($0) }
+        var tree = LazySegmentTree<SwapCase>(letters)
+        tree.apply(true, in: 2 ..< 9)
+        tree.apply(true, in: 5 ..< 13)
+        tree.apply(true, in: 0 ..< 4)
+        let expected: [String] = "ABcdEfghiJKLM".map { String($0) }
+        #expect(Array(tree) == expected)
+        let all = "ABcdEfghiJKLM"
+        #expect(tree.combined(in: tree.indices) == all)
+        for lower in 0 ... expected.count {
+            for upper in lower ... expected.count {
+                #expect(tree.combined(in: lower ..< upper) == expected[lower ..< upper].joined())
+            }
+        }
+    }
+
     @Test("Affine updates compose in the order they were made")
     func affineOrder() {
         // x ↦ a·x + b, acting on sums: a·sum + b·count.

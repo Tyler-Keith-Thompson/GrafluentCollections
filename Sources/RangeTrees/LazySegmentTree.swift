@@ -93,7 +93,7 @@ public struct LazySegmentTree<Action: MonoidAction> {
     public func combined(in range: Range<Int>) -> Element {
         precondition(range.lowerBound >= 0 && range.upperBound <= _count, "Range out of bounds")
         guard !range.isEmpty else { return Action.Values.identity }
-        return _combined(cell: 1, lower: 0, upper: _size, range, pending: Action.identity)
+        return _combined(range)
     }
 
     /// The values whose indices lie in `range`, combined in index order, throwing instead of
@@ -176,24 +176,77 @@ public struct LazySegmentTree<Action: MonoidAction> {
 
     // MARK: - Internals
 
-    /// The cells of `range` below `cell`, which covers `lower ..< upper`, combined, with
-    /// `pending` (the updates pending above `cell`) applied.
+    /// The values in `range`, combined in index order, with the updates pending above each cell
+    /// applied. It walks down from the root to the cell where the range splits, then down each
+    /// side to the range's two ends, gathering the cells the range covers.
     @inlinable
-    func _combined(cell: Int, lower: Int, upper: Int, _ range: Range<Int>, pending: Update) -> Element {
-        if range.lowerBound <= lower && upper <= range.upperBound {
-            return Action.apply(pending, to: _cells[cell], count: upper &- lower)
+    func _combined(_ range: Range<Int>) -> Element {
+        _cells.withUnsafeBufferPointer { cells in
+            _pending.withUnsafeBufferPointer { pending in
+                let lowerBound = range.lowerBound, upperBound = range.upperBound
+                var cell = 1, lower = 0, upper = pending.count
+                var above = Action.identity
+                var middle: Int
+                while true {
+                    if lowerBound <= lower && upper <= upperBound {
+                        return Action.apply(above, to: cells[cell], count: upper &- lower)
+                    }
+                    middle = (lower &+ upper) &>> 1
+                    above = Action.compose(above, pending[cell])
+                    if upperBound <= middle {
+                        cell = 2 &* cell
+                        upper = middle
+                    } else if middle <= lowerBound {
+                        cell = 2 &* cell &+ 1
+                        lower = middle
+                    } else {
+                        break
+                    }
+                }
+                // The left side, lowerBound ..< middle: each cell right of the path is covered.
+                var left = Action.Values.identity
+                var side = 2 &* cell, sideLower = lower, sideUpper = middle, sidePending = above
+                while lowerBound > sideLower {
+                    let half = (sideLower &+ sideUpper) &>> 1
+                    let below = Action.compose(sidePending, pending[side])
+                    if lowerBound < half {
+                        let covered = Action.apply(below, to: cells[2 &* side &+ 1], count: sideUpper &- half)
+                        left = Action.Values.combine(covered, left)
+                        side = 2 &* side
+                        sideUpper = half
+                    } else {
+                        side = 2 &* side &+ 1
+                        sideLower = half
+                    }
+                    sidePending = below
+                }
+                left = Action.Values.combine(
+                    Action.apply(sidePending, to: cells[side], count: sideUpper &- sideLower), left)
+                // The right side, middle ..< upperBound: each cell left of the path is covered.
+                var right = Action.Values.identity
+                side = 2 &* cell &+ 1
+                sideLower = middle
+                sideUpper = upper
+                sidePending = above
+                while upperBound < sideUpper {
+                    let half = (sideLower &+ sideUpper) &>> 1
+                    let below = Action.compose(sidePending, pending[side])
+                    if half < upperBound {
+                        let covered = Action.apply(below, to: cells[2 &* side], count: half &- sideLower)
+                        right = Action.Values.combine(right, covered)
+                        side = 2 &* side &+ 1
+                        sideLower = half
+                    } else {
+                        side = 2 &* side
+                        sideUpper = half
+                    }
+                    sidePending = below
+                }
+                right = Action.Values.combine(
+                    right, Action.apply(sidePending, to: cells[side], count: sideUpper &- sideLower))
+                return Action.Values.combine(left, right)
+            }
         }
-        let middle = (lower &+ upper) / 2
-        let below = Action.compose(pending, _pending[cell])
-        if range.upperBound <= middle {
-            return _combined(cell: 2 &* cell, lower: lower, upper: middle, range, pending: below)
-        }
-        if middle <= range.lowerBound {
-            return _combined(cell: 2 &* cell &+ 1, lower: middle, upper: upper, range, pending: below)
-        }
-        let left = _combined(cell: 2 &* cell, lower: lower, upper: middle, range, pending: below)
-        let right = _combined(cell: 2 &* cell &+ 1, lower: middle, upper: upper, range, pending: below)
-        return Action.Values.combine(left, right)
     }
 
     /// The cells and pending updates, written through once the storage is unique.

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aho–Corasick · Explore GrafluentCollections</title>
+<meta name="description" content="Build a real AhoCorasickAutomaton from your patterns and step through a text letter by letter, following goto edges and failure links to every match.">
+<script>
+  // The theme the reader picked last time, before anything is drawn.
+  try { const t = localStorage.getItem("explore-theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+  // A new page opens at its top, even where the host keeps the previous page's scroll position.
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%231d4f9c%22/%3E%3Cpath d=%22M9 22L16 9l7 13z%22 fill=%22none%22 stroke=%22white%22 stroke-width=%222.5%22/%3E%3Ccircle cx=%229%22 cy=%2222%22 r=%223.5%22 fill=%22white%22/%3E%3Ccircle cx=%2216%22 cy=%229%22 r=%223.5%22 fill=%22white%22/%3E%3Ccircle cx=%2223%22 cy=%2222%22 r=%223.5%22 fill=%22white%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="explore.css">
+<link rel="modulepreload" href="index.js">
+<link rel="preload" href="Explore.wasm" as="fetch" type="application/wasm" crossorigin>
+</head>
+<body data-page="ahocorasick">
+<div class="wrap">
+  <nav class="topbar" aria-label="Site">
+    <a class="home" href="./">Explore <b>GrafluentCollections</b></a>
+    <span class="spacer"></span>
+    <details class="menu"><summary><span class="burger" aria-hidden="true"></span><span class="mlabel">All pages</span></summary>
+      <nav class="mpanel" aria-label="All pages"><a class="mhome" href="./">Contents</a>
+        <div class="mgroup"><span>Search trees</span><a href="avl.html">AVL trees</a><a href="redblack.html">Red–black trees</a><a href="treap.html">Treaps</a><a href="splay.html">Splay trees</a><a href="btree.html">B-trees</a><a href="skiplist.html">Skip lists</a></div>
+        <div class="mgroup"><span>Strings</span><a href="trie.html">Tries and radix trees</a><a href="ahocorasick.html" aria-current="page">Aho–Corasick</a><i>Suffix arrays and trees (soon)</i></div>
+        <div class="mgroup"><span>Logic</span><i>Decision diagrams (soon)</i></div>
+        <div class="mgroup"><span>Ranges</span><i>Fenwick trees (soon)</i><i>Segment trees (soon)</i><i>Interval trees (soon)</i></div>
+        <div class="mgroup"><span>Space</span><i>k-d trees and quadtrees (soon)</i></div>
+        <div class="mgroup"><span>Text</span><i>Ropes (soon)</i></div>
+        <div class="mgroup"><span>History</span><i>Persistent trees (soon)</i><i>LRU caches (soon)</i></div>
+      </nav>
+    </details>
+    <a href="../documentation/">Docs</a>
+    <button type="button" class="theme" id="theme" aria-label="Switch between light and dark">◐<span class="tlabel"> Theme</span></button>
+  </nav>
+<header class="sign">
+  <h1>Aho–Corasick</h1>
+  <p class="question">How do you find many patterns in a text while reading it only once?</p>
+</header>
+<p class="example lead">Example: search “ushers” for he, she, his and hers. After reading “ushe” the automaton is in the state for “she”, so she ends here, and so does he, the end of “she”. Reading “r” next, “she” has no way on, so its failure link drops to “he”, which continues to “her” and then “hers”.</p>
+
+<div id="app" data-loading aria-busy="true"><div><section class="panel controls" aria-label="Your patterns and text"><label class="field" for="aho-patterns">Patterns <input id="aho-patterns" type="text" value="he she his hers" maxlength="80" spellcheck="false" autocomplete="off"></label><label class="field" for="aho-text">Text to scan <input id="aho-text" type="text" value="ushers" maxlength="40" spellcheck="false" autocomplete="off"></label></section><section class="lab" aria-label="The automaton"><div class="panel stage"><svg class="canvas" viewBox="0 0 680 282" role="img" aria-label="The automaton: 10 states, goto edges down and failure links across"><g class="edge tree" data-edge="0"><path d="M348.7,35.8 L318.1,73.9" class="hit" /><path d="M348.7,35.8 L318.1,73.9" class="stroke" /><polygon points="318.1,73.9 320.7,61.8 329.3,68.7" class="head" /><text x="322.366383847687" y="52.85691559189137" text-anchor="middle" class="weight">h</text></g><g class="edge tree" data-edge="1"><path d="M361.3,35.8 L391.9,73.9" class="hit" /><path d="M361.3,35.8 L391.9,73.9" class="stroke" /><polygon points="391.9,73.9 380.7,68.7 389.3,61.8" class="head" /><text x="367.366383847687" y="69.14308440810863" text-anchor="middle" class="weight">s</text></g><g class="edge tree" data-edge="2"><path d="M304.3,94.6 L286.1,128.5" class="hit" /><path d="M304.3,94.6 L286.1,128.5" class="stroke" /><polygon points="286.1,128.5 286.5,116.2 296.2,121.4" class="head" /><text x="283.54076038962586" y="110.86112163729955" text-anchor="middle" class="weight">e</text></g><g class="edge tree" data-edge="3"><path d="M315.7,94.6 L333.9,128.5" class="hit" /><path d="M315.7,94.6 L333.9,128.5" class="stroke" /><polygon points="333.9,128.5 323.8,121.4 333.5,116.2" class="head" /><text x="313.54076038962586" y="123.13887836270045" text-anchor="middle" class="weight">i</text></g><g class="edge tree" data-edge="4"><path d="M400.0,96.0 L400.0,127.0" class="hit" /><path d="M400.0,96.0 L400.0,127.0" class="stroke" /><polygon points="400.0,127.0 394.5,116.0 405.5,116.0" class="head" /><text x="387.0" y="117.0" text-anchor="middle" class="weight">h</text></g><g class="edge tree" data-edge="5"><path d="M280.0,152.0 L280.0,183.0" class="hit" /><path d="M280.0,152.0 L280.0,183.0" class="stroke" /><polygon points="280.0,183.0 274.5,172.0 285.5,172.0" class="head" /><text x="267.0" y="173.0" text-anchor="middle" class="weight">r</text></g><g class="edge tree" data-edge="6"><path d="M340.0,152.0 L340.0,183.0" class="hit" /><path d="M340.0,152.0 L340.0,183.0" class="stroke" /><polygon points="340.0,183.0 334.5,172.0 345.5,172.0" class="head" /><text x="327.0" y="173.0" text-anchor="middle" class="weight">s</text></g><g class="edge tree" data-edge="7"><path d="M400.0,152.0 L400.0,183.0" class="hit" /><path d="M400.0,152.0 L400.0,183.0" class="stroke" /><polygon points="400.0,183.0 394.5,172.0 405.5,172.0" class="head" /><text x="387.0" y="173.0" text-anchor="middle" class="weight">e</text></g><g class="edge tree" data-edge="8"><path d="M280.0,208.0 L280.0,239.0" class="hit" /><path d="M280.0,208.0 L280.0,239.0" class="stroke" /><polygon points="280.0,239.0 274.5,228.0 285.5,228.0" class="head" /><text x="267.0" y="229.0" text-anchor="middle" class="weight">s</text></g><g class="edge fail" data-edge="9"><path d="M395.1,129.0 Q374.0,81.4 323.0,83.5" class="hit" /><path d="M395.1,129.0 Q374.0,81.4 323.0,83.5" class="stroke" /><polygon points="323.0,83.5 333.8,77.5 334.2,88.5" class="head" /></g><g class="edge fail" data-edge="10"><path d="M350.1,189.6 Q401.7,157.0 400.3,97.0" class="hit" /><path d="M350.1,189.6 Q401.7,157.0 400.3,97.0" class="stroke" /><polygon points="400.3,97.0 406.1,107.9 395.1,108.1" class="head" /></g><g class="edge fail" data-edge="11"><path d="M392.9,186.3 Q355.2,135.4 293.0,139.2" class="hit" /><path d="M392.9,186.3 Q355.2,135.4 293.0,139.2" class="stroke" /><polygon points="293.0,139.2 303.6,133.0 304.3,144.0" class="head" /></g><g class="edge fail" data-edge="12"><path d="M289.8,245.1 Q369.3,188.9 396.3,96.5" class="hit" /><path d="M289.8,245.1 Q369.3,188.9 396.3,96.5" class="stroke" /><polygon points="396.3,96.5 398.5,108.6 388.0,105.5" class="head" /></g><g class="node current" data-node="0" tabindex="-1" role="presentation" aria-label=""><circle cx="355.0" cy="28.0" r="8.0" /></g><g class="node " data-node="1" tabindex="-1" role="presentation" aria-label=""><circle cx="310.0" cy="84.0" r="10.0" /></g><g class="node " data-node="2" tabindex="-1" role="presentation" aria-label=""><circle cx="400.0" cy="84.0" r="10.0" /></g><g class="node done" data-node="3" tabindex="-1" role="presentation" aria-label=""><circle cx="280.0" cy="140.0" r="10.0" /></g><g class="node " data-node="4" tabindex="-1" role="presentation" aria-label=""><circle cx="340.0" cy="140.0" r="10.0" /></g><g class="node " data-node="5" tabindex="-1" role="presentation" aria-label=""><circle cx="400.0" cy="140.0" r="10.0" /></g><g class="node " data-node="6" tabindex="-1" role="presentation" aria-label=""><circle cx="280.0" cy="196.0" r="10.0" /></g><g class="node done" data-node="7" tabindex="-1" role="presentation" aria-label=""><circle cx="340.0" cy="196.0" r="10.0" /></g><g class="node done" data-node="8" tabindex="-1" role="presentation" aria-label=""><circle cx="400.0" cy="196.0" r="10.0" /></g><g class="node done" data-node="9" tabindex="-1" role="presentation" aria-label=""><circle cx="280.0" cy="252.0" r="10.0" /></g></svg><div class="legend"><span><i class="dot done"></i>a pattern ends here</span><span><i class="dot current"></i>the state after this letter</span><span><i class="dot selected"></i>left by a failure link</span><span>dashed: failure links (those to the root are left out)</span></div></div><div class="side"><div class="panel"><span class="label">The text</span><p class="scan"><span class="">u</span><span class="">s</span><span class="">h</span><span class="">e</span><span class="">r</span><span class="">s</span></p></div><div class="panel" aria-live="polite"><span class="label">Letter 0 of 6</span><p class="narration">The goto edges form a trie of the patterns. Each state's failure link points to the state for the longest proper end of its letters that also starts a pattern, so the scan never moves backwards in the text.</p></div><div class="panel"><span class="label">Matches so far</span><p class="narration">None</p></div></div></section><section class="panel controls" aria-label="Playback"><div class="buttons"><button type="button" aria-label="Step back">◀ Back</button><button type="button" class="primary">▶ Play</button><button type="button">Step ▶</button><button type="button">Reset</button></div><div class="timeline-scroll"><svg class="timeline" width="300" viewBox="0 0 300 64" aria-label="Timeline of events"><line x1="8" y1="32" x2="292" y2="32" class="axis" /><g class="marble future" data-step="0"><circle cx="22" cy="32" r="7.0" class="m-blue" /><text x="22" y="36" text-anchor="middle">u</text><title>Read ‘u’ at the root: no pattern starts with it, so stay at the root.</title></g><g class="marble future" data-step="1"><circle cx="48" cy="32" r="7.0" class="m-blue" /><text x="48" y="36" text-anchor="middle">s</text><title>Read ‘s’ at the root: follow its goto edge to “s”.</title></g><g class="marble future" data-step="2"><circle cx="74" cy="32" r="7.0" class="m-blue" /><text x="74" y="36" text-anchor="middle">h</text><title>Read ‘h’ at “s”: follow its goto edge to “sh”.</title></g><g class="marble future" data-step="3"><circle cx="100" cy="32" r="10.0" class="m-green" /><text x="100" y="36" text-anchor="middle">e</text><title>Read ‘e’ at “sh”: follow its goto edge to “she”. Matches ending here: she, he.</title></g><g class="marble future" data-step="4"><circle cx="126" cy="32" r="7.0" class="m-violet" /><text x="126" y="36" text-anchor="middle">r</text><title>Read ‘r’ at “she”: it has no ‘r’ edge, so follow the failure link to the longest end of what was read that still starts a pattern, then the ‘r’ edge to “her”.</title></g><g class="marble future" data-step="5"><circle cx="152" cy="32" r="10.0" class="m-green" /><text x="152" y="36" text-anchor="middle">s</text><title>Read ‘s’ at “her”: follow its goto edge to “hers”. Matches ending here: hers.</title></g><line x1="9" y1="8" x2="9" y2="56" class="playhead" /></svg></div><input id="scrub-ahocorasick" class="scrub" type="range" min="0" max="6" value="0" aria-label="Scrub through the steps"><div class="tl-legend"><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-blue" /></svg>a goto edge</span><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-violet" /></svg>failure links first</span><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-green" /></svg>a match ends here</span></div></section></div></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>Many patterns, one pass</h2>
+  <p>An Aho–Corasick automaton finds every occurrence of every pattern in a text in one pass, in time proportional to the text’s length plus the number of matches, however many patterns there are. It suits scanning for a list of keywords, banned words, signatures or dictionary terms, where searching for each pattern in turn would read the text once per pattern.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>A trie that knows where to fall back</h2>
+  <p>The goto edges are a trie of the patterns: each state spells a prefix of some pattern. Each state also has a failure link to the state for the longest proper ending of its letters that is itself a prefix of a pattern. Reading a letter, the scan follows the goto edge for it if there is one; if not, it follows failure links until a state has one, or it reaches the root. The text pointer never moves back.</p>
+  <p>A match is reported wherever a pattern ends at the current state, or at any state its failure links reach, since those spell endings of what was just read. Aho and Corasick described the automaton in 1975 for searching bibliographies.</p>
+
+  <h2><small>Where it breaks</small>A fixed set of patterns</h2>
+  <p>The automaton is built for one set of patterns; adding a pattern means building it again. For a single pattern, a simpler search such as Knuth–Morris–Pratt or the standard library’s does the same with less setup. When the text is fixed and the patterns change, index the text instead, with a suffix array or a suffix tree.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The operations above, in GrafluentCollections</h2>
+  <pre id="code" data-loading aria-busy="true" aria-label="Swift code"><span><span class="k">import</span> <span class="t">Tries</span>
+
+<span class="k">let</span> patterns = [<span class="s">"he"</span>, <span class="s">"she"</span>, <span class="s">"his"</span>, <span class="s">"hers"</span>]
+<span class="k">let</span> text = <span class="s">"ushers"</span>
+
+<span class="k">let</span> automaton = <span class="t">AhoCorasickAutomaton</span>&lt;<span class="t">Character</span>&gt;(patterns: patterns)
+<span class="k">let</span> states = automaton.stateCount  <span class="c">// 10</span>
+<span class="k">let</span> matches = <span class="t">Array</span>(automaton.matches(<span class="k">in</span>: text))
+<span class="k">let</span> found = matches.map { <span class="s">"\(patterns[$0.patternIndex]) at \($0.range)"</span> }  <span class="c">// ["she at 1..&lt;4", "he at 2..&lt;4", "hers at 2..&lt;6"]</span>
+
+<span class="k">let</span> states = automaton.statesView
+<span class="k">var</span> gotos = <span class="t">Array</span>(repeating: [<span class="t">Character</span>: <span class="t">Int</span>](), count: states.vertexCount)
+<span class="k">var</span> failures = <span class="t">Array</span>(repeating: <span class="t">Int</span>?.none, count: states.vertexCount)
+<span class="k">for</span> edge <span class="k">in</span> <span class="n">0</span> ..&lt; states.edgeCount {
+    <span class="k">let</span> source = states.source(ofEdgeAt: edge), target = states.target(ofEdgeAt: edge)
+    <span class="k">if</span> <span class="k">let</span> symbol = states.symbol(ofEdgeAt: edge) {
+        gotos[source][symbol] = target  <span class="c">// a goto edge</span>
+    } <span class="k">else</span> {
+        failures[source] = target  <span class="c">// a failure link</span>
+    }
+}
+<span class="k">let</span> links = failures.count { $<span class="n">0</span> != <span class="k">nil</span> }  <span class="c">// 9</span>
+</span></pre>
+</section>
+<nav class="pager" aria-label="Pages"><a class="prev" href="trie.html"><span>Previous</span>Tries and radix trees</a><a class="next" href="./#contents"><span>Next</span>Contents</a></nav>
+</div>
+<script>
+  if (!location.hash) window.scrollTo(0, 0);
+  // Until the reader scrolls, keep the page at its top while the fonts and the interactive parts
+  // come in. `pinned` is read again once the interactive parts have mounted.
+  let pinned = !location.hash;
+  if (pinned) {
+    const release = () => { pinned = false; };
+    for (const kind of ["wheel", "touchstart", "keydown", "mousedown"]) addEventListener(kind, release, { once: true, passive: true });
+    const pin = new ResizeObserver(() => { if (pinned) window.scrollTo(0, 0); });
+    pin.observe(document.body);
+    setTimeout(() => { pinned = false; pin.disconnect(); }, 3000);
+  }
+  document.getElementById("theme").addEventListener("click", () => {
+    const root = document.documentElement;
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("explore-theme", root.dataset.theme); } catch {}
+  });
+</script>
+<script type="module">
+  // GrafluentCollections and the interface run as WebAssembly; this loads them.
+  import { init } from "./index.js";
+  // The page's first frame is already drawn; these views mount in its place. Return to the top
+  // once they are drawn, unless the link named a section or the reader has scrolled.
+  const toTop = () => { if (pinned) window.scrollTo(0, 0); };
+  init().then(() => requestAnimationFrame(() => requestAnimationFrame(toTop))).catch((error) => {
+    console.error("The explorer failed to start:", error);
+    for (const part of document.querySelectorAll("[data-loading]")) { part.removeAttribute("data-loading"); part.removeAttribute("aria-busy"); }
+    const app = document.getElementById("app");
+    if (app) app.textContent = "The interactive part of this page could not start in this browser.";
+  });
+</script>
+</body>
+</html>

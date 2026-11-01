@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tries and radix trees · Explore GrafluentCollections</title>
+<meta name="description" content="Insert words into a real Trie and RadixTree side by side, and ask each for the words with a prefix and the longest word a text starts with.">
+<script>
+  // The theme the reader picked last time, before anything is drawn.
+  try { const t = localStorage.getItem("explore-theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+  // A new page opens at its top, even where the host keeps the previous page's scroll position.
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%231d4f9c%22/%3E%3Cpath d=%22M9 22L16 9l7 13z%22 fill=%22none%22 stroke=%22white%22 stroke-width=%222.5%22/%3E%3Ccircle cx=%229%22 cy=%2222%22 r=%223.5%22 fill=%22white%22/%3E%3Ccircle cx=%2216%22 cy=%229%22 r=%223.5%22 fill=%22white%22/%3E%3Ccircle cx=%2223%22 cy=%2222%22 r=%223.5%22 fill=%22white%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="explore.css">
+<link rel="modulepreload" href="index.js">
+<link rel="preload" href="Explore.wasm" as="fetch" type="application/wasm" crossorigin>
+</head>
+<body data-page="trie">
+<div class="wrap">
+  <nav class="topbar" aria-label="Site">
+    <a class="home" href="./">Explore <b>GrafluentCollections</b></a>
+    <span class="spacer"></span>
+    <details class="menu"><summary><span class="burger" aria-hidden="true"></span><span class="mlabel">All pages</span></summary>
+      <nav class="mpanel" aria-label="All pages"><a class="mhome" href="./">Contents</a>
+        <div class="mgroup"><span>Search trees</span><a href="avl.html">AVL trees</a><a href="redblack.html">Red–black trees</a><a href="treap.html">Treaps</a><a href="splay.html">Splay trees</a><a href="btree.html">B-trees</a><a href="skiplist.html">Skip lists</a></div>
+        <div class="mgroup"><span>Strings</span><a href="trie.html" aria-current="page">Tries and radix trees</a><a href="ahocorasick.html">Aho–Corasick</a><i>Suffix arrays and trees (soon)</i></div>
+        <div class="mgroup"><span>Logic</span><i>Decision diagrams (soon)</i></div>
+        <div class="mgroup"><span>Ranges</span><i>Fenwick trees (soon)</i><i>Segment trees (soon)</i><i>Interval trees (soon)</i></div>
+        <div class="mgroup"><span>Space</span><i>k-d trees and quadtrees (soon)</i></div>
+        <div class="mgroup"><span>Text</span><i>Ropes (soon)</i></div>
+        <div class="mgroup"><span>History</span><i>Persistent trees (soon)</i><i>LRU caches (soon)</i></div>
+      </nav>
+    </details>
+    <a href="../documentation/">Docs</a>
+    <button type="button" class="theme" id="theme" aria-label="Switch between light and dark">◐<span class="tlabel"> Theme</span></button>
+  </nav>
+<header class="sign">
+  <h1>Tries and radix trees</h1>
+  <p class="question">How do you find every word that starts with “rom” without looking at the others?</p>
+</header>
+<p class="example lead">Example: romane, romanus and romulus all start with “rom”, so a trie spells r, o, m once and branches after it, and every word under that branch starts with “rom”. A radix tree puts “om” on a single edge, since no word parts between the o and the m.</p>
+
+<div id="app" data-loading aria-busy="true"><div><section class="panel controls" aria-label="Your words and queries"><label class="field" for="trie-text">Words to insert <input id="trie-text" type="text" value="romane romanus romulus rubens ruber rubicon rubicundus" maxlength="120" spellcheck="false" autocomplete="off"></label><label class="field" for="trie-prefix">Words starting with <input id="trie-prefix" type="text" value="rom" maxlength="12" spellcheck="false" autocomplete="off"></label><label class="field" for="trie-query">Longest word that starts <input id="trie-query" type="text" value="rubiconian" maxlength="12" spellcheck="false" autocomplete="off"></label></section><section class="lab" aria-label="The trie and the radix tree"><div class="panel stage"><span class="label">Trie: 1 vertices</span><svg class="canvas" viewBox="0 0 680 58" role="img" aria-label="The trie after 0 words: 1 vertices, one letter on each edge"><g class="node " data-node="0" tabindex="-1" role="presentation" aria-label=""><circle cx="340.0" cy="28.0" r="7.0" /></g></svg><span class="label">Radix tree: 1 vertices</span><svg class="canvas" viewBox="0 0 680 58" role="img" aria-label="The radix tree after 0 words: 1 vertices, a run of letters on each edge"><g class="node " data-node="0" tabindex="-1" role="presentation" aria-label=""><circle cx="340.0" cy="28.0" r="7.0" /></g></svg><div class="legend"><span><i class="dot done"></i>a word ends here</span><span><i class="dot match"></i>starts with “rom”</span><span><i class="dot current"></i>the longest word “rubiconian” starts with</span></div></div><div class="side"><div class="panel" aria-live="polite"><span class="label">Word 0 of 7</span><p class="narration">A trie spells each word one letter per edge, so words that start the same share the start. A radix tree merges every chain of single children into one edge holding a run of letters.</p></div><div class="panel"><span class="label">Words starting with “rom”</span><p class="narration">None</p></div><div class="panel"><span class="label">Longest word “rubiconian” starts with</span><p class="narration">None</p></div></div></section><section class="panel controls" aria-label="Playback"><div class="buttons"><button type="button" aria-label="Step back">◀ Back</button><button type="button" class="primary">▶ Play</button><button type="button">Step ▶</button><button type="button">Reset</button></div><div class="timeline-scroll"><svg class="timeline" width="300" viewBox="0 0 300 64" aria-label="Timeline of events"><line x1="8" y1="32" x2="292" y2="32" class="axis" /><g class="marble future" data-step="0"><circle cx="22" cy="32" r="10.0" class="m-blue" /><text x="22" y="36" text-anchor="middle">ro</text><title>Insert “romane”. It shares nothing with the words before it, so the trie adds 6 vertices, one per letter after that. The radix tree hangs one vertex off the end, its edge holding the rest of the word.</title></g><g class="marble future" data-step="1"><circle cx="48" cy="32" r="10.0" class="m-blue" /><text x="48" y="36" text-anchor="middle">ro</text><title>Insert “romanus”. It shares “roman” with the words before it, so the trie adds 2 vertices, one per letter after that. The radix tree splits an edge where the words part, so the shared part ends at a new vertex, and hangs the rest of “romanus” off it.</title></g><g class="marble future" data-step="2"><circle cx="74" cy="32" r="10.0" class="m-blue" /><text x="74" y="36" text-anchor="middle">ro</text><title>Insert “romulus”. It shares “rom” with the words before it, so the trie adds 4 vertices, one per letter after that. The radix tree splits an edge where the words part, so the shared part ends at a new vertex, and hangs the rest of “romulus” off it.</title></g><g class="marble future" data-step="3"><circle cx="100" cy="32" r="10.0" class="m-blue" /><text x="100" y="36" text-anchor="middle">ru</text><title>Insert “rubens”. It shares “r” with the words before it, so the trie adds 5 vertices, one per letter after that. The radix tree splits an edge where the words part, so the shared part ends at a new vertex, and hangs the rest of “rubens” off it.</title></g><g class="marble future" data-step="4"><circle cx="126" cy="32" r="10.0" class="m-blue" /><text x="126" y="36" text-anchor="middle">ru</text><title>Insert “ruber”. It shares “rube” with the words before it, so the trie adds 1 vertex, one per letter after that. The radix tree splits an edge where the words part, so the shared part ends at a new vertex, and hangs the rest of “ruber” off it.</title></g><g class="marble future" data-step="5"><circle cx="152" cy="32" r="10.0" class="m-blue" /><text x="152" y="36" text-anchor="middle">ru</text><title>Insert “rubicon”. It shares “rub” with the words before it, so the trie adds 4 vertices, one per letter after that. The radix tree splits an edge where the words part, so the shared part ends at a new vertex, and hangs the rest of “rubicon” off it.</title></g><g class="marble future" data-step="6"><circle cx="178" cy="32" r="10.0" class="m-blue" /><text x="178" y="36" text-anchor="middle">ru</text><title>Insert “rubicundus”. It shares “rubic” with the words before it, so the trie adds 5 vertices, one per letter after that. The radix tree splits an edge where the words part, so the shared part ends at a new vertex, and hangs the rest of “rubicundus” off it.</title></g><line x1="9" y1="8" x2="9" y2="56" class="playhead" /></svg></div><input id="scrub-trie" class="scrub" type="range" min="0" max="7" value="0" aria-label="Scrub through the steps"><div class="tl-legend"><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-blue" /></svg>insert a word</span></div></section></div></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>Questions about prefixes</h2>
+  <p>A trie keeps a set of sequences, such as words, so that looking one up costs one step per symbol, however many words there are. It answers the questions a hash set can’t: every word that starts with a prefix, and the longest word that a text starts with, the question a router asks of a path or a tokenizer of its input. A radix tree answers the same questions with fewer vertices.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>Spell the words down a tree</h2>
+  <p>Each edge of a trie appends one symbol, so each vertex spells a prefix, and words that start alike share the vertices of their common start. A vertex is marked where a word ends. To find the words with a prefix, walk down the prefix’s letters; every marked vertex below is an answer. To find the longest word a text starts with, walk down the text’s letters and remember the last marked vertex passed.</p>
+  <p>Long words make long chains of vertices with a single child. A radix tree merges each such chain into one edge that holds a run of symbols, so it has a vertex only where words part or end. Inserting a word that leaves an edge partway splits the edge there. Fredkin named the trie in 1960; Morrison’s PATRICIA (1968) is the radix tree’s ancestor.</p>
+
+  <h2><small>Where it breaks</small>Many small vertices</h2>
+  <p>A trie spends a vertex per symbol of every word not shared with another, and a lookup follows a link per symbol, which costs more memory and more scattered reads than hashing the whole word once. When only exact lookups matter, a hash set is faster. When the words share little, a radix tree saves most of the vertices; when the alphabet is large, each vertex’s choice among its children costs more.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The operations above, in GrafluentCollections</h2>
+  <pre id="code" data-loading aria-busy="true" aria-label="Swift code"><span><span class="k">import</span> <span class="t">Trees</span>
+<span class="k">import</span> <span class="t">Tries</span>
+
+<span class="k">let</span> words = [<span class="s">"romane"</span>, <span class="s">"romanus"</span>, <span class="s">"romulus"</span>, <span class="s">"rubens"</span>, <span class="s">"ruber"</span>, <span class="s">"rubicon"</span>, <span class="s">"rubicundus"</span>]
+
+<span class="k">var</span> trie = <span class="t">Trie</span>&lt;<span class="t">Character</span>&gt;()
+<span class="k">var</span> radix = <span class="t">RadixTree</span>&lt;<span class="t">Character</span>&gt;()
+<span class="k">var</span> history = [(trie, radix)]
+<span class="k">for</span> word <span class="k">in</span> words {
+    trie.insert(word)
+    radix.insert(word)
+    history.append((trie, radix))
+}
+<span class="k">let</span> vertices = <span class="t">PrefixTree</span>(trie).arborescence.vertexCount  <span class="c">// 28</span>
+<span class="k">let</span> radixVertices = <span class="t">Arborescence</span>(radix).vertexCount  <span class="c">// 14</span>
+
+<span class="k">let</span> prefix = <span class="s">"rom"</span>
+<span class="k">let</span> text = <span class="s">"rubiconian"</span>
+
+<span class="k">let</span> matches = trie.elements(withPrefix: prefix).map { <span class="t">String</span>($<span class="n">0</span>) }  <span class="c">// ["romane", "romanus", "romulus"]</span>
+<span class="k">let</span> longest = trie.longestPrefix(of: text).map { <span class="t">String</span>($<span class="n">0</span>) }  <span class="c">// "rubicon"</span>
+</span></pre>
+</section>
+<nav class="pager" aria-label="Pages"><a class="prev" href="skiplist.html"><span>Previous</span>Skip lists</a><a class="next" href="ahocorasick.html"><span>Next</span>Aho–Corasick</a></nav>
+</div>
+<script>
+  if (!location.hash) window.scrollTo(0, 0);
+  // Until the reader scrolls, keep the page at its top while the fonts and the interactive parts
+  // come in. `pinned` is read again once the interactive parts have mounted.
+  let pinned = !location.hash;
+  if (pinned) {
+    const release = () => { pinned = false; };
+    for (const kind of ["wheel", "touchstart", "keydown", "mousedown"]) addEventListener(kind, release, { once: true, passive: true });
+    const pin = new ResizeObserver(() => { if (pinned) window.scrollTo(0, 0); });
+    pin.observe(document.body);
+    setTimeout(() => { pinned = false; pin.disconnect(); }, 3000);
+  }
+  document.getElementById("theme").addEventListener("click", () => {
+    const root = document.documentElement;
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("explore-theme", root.dataset.theme); } catch {}
+  });
+</script>
+<script type="module">
+  // GrafluentCollections and the interface run as WebAssembly; this loads them.
+  import { init } from "./index.js";
+  // The page's first frame is already drawn; these views mount in its place. Return to the top
+  // once they are drawn, unless the link named a section or the reader has scrolled.
+  const toTop = () => { if (pinned) window.scrollTo(0, 0); };
+  init().then(() => requestAnimationFrame(() => requestAnimationFrame(toTop))).catch((error) => {
+    console.error("The explorer failed to start:", error);
+    for (const part of document.querySelectorAll("[data-loading]")) { part.removeAttribute("data-loading"); part.removeAttribute("aria-busy"); }
+    const app = document.getElementById("app");
+    if (app) app.textContent = "The interactive part of this page could not start in this browser.";
+  });
+</script>
+</body>
+</html>

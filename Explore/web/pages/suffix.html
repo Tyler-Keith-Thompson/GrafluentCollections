@@ -1,0 +1,28 @@
+<!-- title: Suffix arrays and trees · Explore GrafluentCollections -->
+<!-- description: Index a text with a real SuffixArray and SuffixTree and find patterns in both: a binary search over sorted suffixes, and a walk down from the root. -->
+<header class="sign">
+  <h1>Suffix arrays and trees</h1>
+  <p class="question">How do you find any substring of a text without scanning the text?</p>
+</header>
+<p class="example lead">Example: find “ana” in “banana”. In the suffix array, the suffixes that start with “ana” sort next to each other, “ana$” and then “anana$”, so two binary searches bracket them. In the suffix tree, the walk from the root spells out “a” and then “na”, and the two leaves below that point are the occurrences, at 3 and 1.</p>
+
+<div id="app"></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>An index of every substring</h2>
+  <p>Both structures index a fixed text so that any pattern can be found in time that depends on the pattern, not the text. They also answer questions that are hard without them: the longest repeated substring, the longest substring two texts share, and how many distinct substrings there are. Genome search, full-text indexes, data compression and plagiarism detection rely on them.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>Every substring starts some suffix</h2>
+  <p>A substring is a prefix of some suffix, so indexing the suffixes indexes everything. The suffix array sorts the suffixes and keeps only where each one starts, a single integer per position, so the ones starting with a pattern sit in one block that binary search finds. Beside it, the longest common prefix of each neighbouring pair shows where suffixes share a start.</p>
+  <p>The suffix tree is the trie of all the suffixes with each chain of single children merged into one labelled edge. A pattern is a walk down from the root, one symbol at a time, and every leaf below where it ends is an occurrence. Its leaves, read left to right, are the suffix array. GrafluentCollections builds the tree in linear time with Ukkonen’s algorithm and the array with SA-IS.</p>
+
+  <h2><small>Where it breaks</small>Memory, and change</h2>
+  <p>A suffix tree takes many times the memory of its text, and even the array needs an integer per symbol. Both are built for a fixed text, so an edit means rebuilding. A text that changes often, or a search that runs only once, is better served by a direct scan or, for many patterns at once, an Aho–Corasick automaton.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The searches above, in GrafluentCollections</h2>
+  <pre id="code" aria-label="Swift code"></pre>
+</section>

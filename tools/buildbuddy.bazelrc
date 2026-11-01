@@ -6,4 +6,7 @@ build --bes_backend=grpcs://remote.buildbuddy.io
 build --remote_cache=grpcs://remote.buildbuddy.io
 # Compressed (zstd) transfers to and from the cache.
 build --remote_cache_compression
+# Download only the outputs of the targets asked for (and what tests need to run), never the
+# intermediate ones, which stay in the remote cache.
+build --remote_download_toplevel
 common --credential_helper=remote.buildbuddy.io=%workspace%/tools/buildbuddy-credentials

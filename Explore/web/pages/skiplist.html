@@ -1,0 +1,28 @@
+<!-- title: Skip lists · Explore GrafluentCollections -->
+<!-- description: Insert, look up and remove keys in a real SkipList and watch each search ride the upper levels before dropping down. -->
+<header class="sign">
+  <h1>Skip lists</h1>
+  <p class="question">Can a sorted linked list be searched as fast as a balanced tree?</p>
+</header>
+<p class="example lead">Example: look up 60. The search starts on the top level, takes long strides while the next key is smaller, and drops a level each time the next key would overshoot, reaching 60 without walking the bottom list.</p>
+
+<div id="app"></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>A sorted set without rebalancing</h2>
+  <p>A skip list keeps keys in order and finds, inserts or removes one in a number of steps that grows, on average, with the logarithm of the count. It never rotates or rebalances anything: an insertion links the new key in on a few levels, and a removal unlinks it. That makes it simple to get right and easy to walk in order.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>Express lanes, chosen by coin toss</h2>
+  <p>The bottom level is an ordinary sorted linked list of every key. Each key also gets a tower: with probability 1/4 it reaches the level above, with probability 1/4 of that the next one, and so on. Each level is a sorted list of the keys whose towers reach it, about a quarter as many as the level below. A search starts at the head on the top level, moves right while the next key is smaller than the one it wants, and drops a level otherwise.</p>
+  <p>The heights are random, so no input order can make the list slow; only bad luck can, and long runs of it are very unlikely. Pugh described the structure in 1990. Press “New towers” to run the same operations with other heights.</p>
+
+  <h2><small>Where it breaks</small>Pointers everywhere</h2>
+  <p>Each step of a search follows a link to wherever the next key lives, so it touches more scattered memory than a B-tree, which reads keys packed in a row. The bound is an expected one rather than a worst case. When every operation must be fast, or the set is read far more than it is changed, a balanced tree or a B-tree does better.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The operations above, in GrafluentCollections</h2>
+  <pre id="code" aria-label="Swift code"></pre>
+</section>

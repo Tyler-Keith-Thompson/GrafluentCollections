@@ -5,8 +5,8 @@ avl|AVL trees|Search trees|A sorted set that keeps itself balanced by rotating.|
 redblack|Red–black trees|Search trees|Balance kept by colours, with fewer rotations.|page
 treap|Treaps|Search trees|A search tree shaped by random priorities, split and joined.|page
 splay|Splay trees|Search trees|Recently used keys move to the top.|page
-btree|B-trees|Search trees|Many keys per node, so the tree stays shallow.|soon
-skiplist|Skip lists|Search trees|Express lanes over a sorted list.|soon
+btree|B-trees|Search trees|Many keys per node, so the tree stays shallow.|page
+skiplist|Skip lists|Search trees|Express lanes over a sorted list.|page
 trie|Tries and radix trees|Strings|Keys spelled out one character at a time, shared prefixes once.|soon
 ahocorasick|Aho–Corasick|Strings|Every pattern found in one pass over the text.|soon
 suffix|Suffix arrays and trees|Strings|Every substring of a text, indexed.|soon

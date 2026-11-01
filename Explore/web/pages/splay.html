@@ -1,5 +1,5 @@
 <!-- title: Splay trees · Explore GrafluentCollections -->
-<!-- description: Insert, look up and remove keys in a real SplayTree and watch each key it touches rotate to the root. -->
+<!-- description: Insert, look up, remove, split and join keys in a real SplayTree and watch each key it touches rotate to the root. -->
 <header class="sign">
   <h1>Splay trees</h1>
   <p class="question">What if a search tree reshaped itself around what you just asked for?</p>
@@ -16,7 +16,7 @@
 <section class="prose">
   <h2><small>The idea</small>Rotate in pairs, to the root</h2>
   <p>A splay tree records nothing about balance. After each search it splays: it rotates the key it found up to the root two levels at a time. When the key and its parent lean the same way, it rotates the grandparent first and then the parent; when they zig-zag, it rotates the parent and then the grandparent. The paired rotations are what matter. Besides lifting the key, they roughly halve the depth of every key on the path it came along, so a deep chain does not last.</p>
-  <p>Inserting splays the new key to the root. Removing splays the key up, takes it off, and joins its two subtrees under the largest key on the left. A search for a key that isn’t there splays the last key it reached. Sleator and Tarjan described the tree in 1985 and proved the average bound.</p>
+  <p>Inserting splays the new key to the root. Removing splays the key up, takes it off, and joins its two subtrees under the largest key on the left. A search for a key that isn’t there splays the last key it reached. Splitting at a key splays it, or its nearest neighbour, to the root, where the keys below it are one subtree to cut off; joining splays the lower tree’s largest key to its root, which then has no right child, and hangs the upper tree there. Type a key with a slash, such as /35, to split there and join again. Sleator and Tarjan described the tree in 1985 and proved the average bound.</p>
 
   <h2><small>Where it breaks</small>Reads that write</h2>
   <p>A single operation can take as long as the tree is deep. A lookup that splays rearranges the tree, so it needs the tree mutable, and threads that share one need a lock around every such read. When every operation must be fast, or reads are spread evenly over the keys, an AVL or red–black tree is the safer choice.</p>

@@ -1,0 +1,29 @@
+<!-- title: B-trees · Explore GrafluentCollections -->
+<!-- description: Insert and remove keys in a real BTreeDictionary and watch full nodes split, keys move up, and thin nodes borrow or merge. -->
+<header class="sign">
+  <h1>B-trees</h1>
+  <p class="question">How do you keep a sorted set shallow when every step down costs a trip to memory?</p>
+</header>
+<p class="example lead">Example: insert 10 to 70 in steps of 10, then 25, 35, 45 and 55. The eighth key overfills the root, which splits around 40: 40 becomes the new root over two leaves, and the tree gains its second level at the top.</p>
+
+<div id="app"></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>Sorted keys, few steps down</h2>
+  <p>A B-tree keeps keys in order like a balanced binary tree, but each node holds many keys in a row. A search reads one node per level and finds its way inside the node with a short scan, so it visits far fewer nodes than a binary tree, and each node it reads is one contiguous block. That suits caches in memory as much as blocks on disk. Ordered scans and range queries walk whole nodes at a time.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>Split when full, merge when thin</h2>
+  <p>Every node but the root holds between <i>t</i> − 1 and 2<i>t</i> − 1 keys, and a node with <i>k</i> keys has <i>k</i> + 1 children, one for each gap. Every leaf is at the same depth. A new key goes into its leaf. If the leaf was already full, it splits into two around its middle key, and the middle key moves up into the parent, which may split in turn. When the root splits, its middle key becomes a new root, and that is the only way the tree grows taller.</p>
+  <p>Removing a key from a leaf can leave the leaf one key short. It borrows a key through the parent from a sibling that can spare one, or else merges with a sibling, taking the key between them down from the parent. A key in an inner node is replaced by the key just before it, taken from a leaf. Bayer and McCreight described the tree in 1970.</p>
+  <p>GrafluentCollections sizes nodes in bytes, about 512 bytes of elements each, so the number of keys per node depends on how large the elements are. The table above keeps a 64-byte row per key, which makes <i>t</i> = 4: from 3 to 7 keys per node. With 8-byte integer keys alone, a node holds up to 63.</p>
+
+  <h2><small>Where it breaks</small>Moving keys within a node</h2>
+  <p>Inserting into or removing from a node shifts the keys after it, so a single update costs time in proportion to the node’s size, not just the depth. When updates far outnumber reads and scans, a red–black tree moves less. Keeping many versions of the set calls for a persistent tree instead, which shares unchanged nodes between versions.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The operations above, in GrafluentCollections</h2>
+  <pre id="code" aria-label="Swift code"></pre>
+</section>

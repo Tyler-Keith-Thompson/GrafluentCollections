@@ -19,7 +19,9 @@ contents and the menu without a link.
 | `avl` | `AVLTree`: `insert(_:)`, `remove(_:)`, `height`; `BinaryTree(_:)` for the shape, with `inorder`, `parent(of:)`, `left(of:)`, `right(of:)`, `depth(of:)` |
 | `redblack` | `RedBlackTree`: `insert(_:)`, `remove(_:)`, `height`, `color(of:)`; `BinaryTree(_:)` for the shape |
 | `treap` | `Treap`: `init(using:)` with a seeded generator, `insert(_:)`, `remove(_:)`, `height`, `priority(of:)`; `BinaryTree(_:)` for the shape |
-| `splay` | `SplayTree`: `insert(_:)`, `remove(_:)`, `access(_:)`, `height`; `BinaryTree(_:)` for the shape |
+| `splay` | `SplayTree`: `insert(_:)`, `remove(_:)`, `access(_:)`, `split(at:)`, `join(_:)`, `height`; `BinaryTree(_:)` for the shape |
+| `btree` | `BTreeDictionary`: subscript stores, `removeValue(forKey:)`, `height`; `RootedTree(_:)` for the nodes, with `preorder`, `postorder`, `children(of:)`, `depth(of:)` |
+| `skiplist` | `SkipList`: `init(using:)` with a seeded generator, `insert(_:)`, `remove(_:)`, `contains(_:)`; `layersView` for the towers |
 
 ## Requirements
 

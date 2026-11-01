@@ -13,6 +13,8 @@ func mountPage(_ page: String) -> Bool {
     case "redblack": RedBlackPage.mount()
     case "treap": TreapPage.mount()
     case "splay": SplayPage.mount()
+    case "btree": BTreePage.mount()
+    case "skiplist": SkipListPage.mount()
     default: return false
     }
     return true

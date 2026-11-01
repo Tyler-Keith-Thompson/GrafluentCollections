@@ -17,6 +17,9 @@ contents and the menu without a link.
 | Page | Runs |
 |---|---|
 | `avl` | `AVLTree`: `insert(_:)`, `remove(_:)`, `height`; `BinaryTree(_:)` for the shape, with `inorder`, `parent(of:)`, `left(of:)`, `right(of:)`, `depth(of:)` |
+| `redblack` | `RedBlackTree`: `insert(_:)`, `remove(_:)`, `height`, `color(of:)`; `BinaryTree(_:)` for the shape |
+| `treap` | `Treap`: `init(using:)` with a seeded generator, `insert(_:)`, `remove(_:)`, `height`, `priority(of:)`; `BinaryTree(_:)` for the shape |
+| `splay` | `SplayTree`: `insert(_:)`, `remove(_:)`, `access(_:)`, `height`; `BinaryTree(_:)` for the shape |
 
 ## Requirements
 

@@ -218,6 +218,17 @@ extension Treap {
         }
     }
 
+    /// The random priority of the vertex holding `element`, or nil when the treap doesn't hold
+    /// it. No vertex has a higher priority than its parent, so the element with the highest
+    /// priority is the root.
+    ///
+    /// - Complexity: O(log *n*) expected.
+    @inlinable
+    public func priority(of element: Element) -> Int? {
+        let slot = _core.slot(of: element)
+        return slot < 0 ? nil : Int(_core.nodes[Int(slot)].balance)
+    }
+
     /// Splits the treap into the elements below `element` and the rest.
     ///
     /// The lower part keeps this treap's priorities; the upper one draws a new seed from them.

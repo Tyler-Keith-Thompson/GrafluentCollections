@@ -1,0 +1,28 @@
+<!-- title: Splay trees · Explore GrafluentCollections -->
+<!-- description: Insert, look up and remove keys in a real SplayTree and watch each key it touches rotate to the root. -->
+<header class="sign">
+  <h1>Splay trees</h1>
+  <p class="question">What if a search tree reshaped itself around what you just asked for?</p>
+</header>
+<p class="example lead">Example: insert 10 to 70 in order, which leaves a chain, then look up 10. The lookup brings 10 to the root and folds the chain roughly in half on the way.</p>
+
+<div id="app"></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>Hot keys near the top</h2>
+  <p>A splay tree keeps keys in order and moves every key it touches to the root. Keys that are used often stay near the top, so a workload that keeps returning to a few keys, or that walks through them in order, runs faster than the logarithm of the count suggests. Any long sequence of operations still costs a logarithm per operation on average. It also splits and joins at a key.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>Rotate in pairs, to the root</h2>
+  <p>A splay tree records nothing about balance. After each search it splays: it rotates the key it found up to the root two levels at a time. When the key and its parent lean the same way, it rotates the grandparent first and then the parent; when they zig-zag, it rotates the parent and then the grandparent. The paired rotations are what matter. Besides lifting the key, they roughly halve the depth of every key on the path it came along, so a deep chain does not last.</p>
+  <p>Inserting splays the new key to the root. Removing splays the key up, takes it off, and joins its two subtrees under the largest key on the left. A search for a key that isn’t there splays the last key it reached. Sleator and Tarjan described the tree in 1985 and proved the average bound.</p>
+
+  <h2><small>Where it breaks</small>Reads that write</h2>
+  <p>A single operation can take as long as the tree is deep. A lookup that splays rearranges the tree, so it needs the tree mutable, and threads that share one need a lock around every such read. When every operation must be fast, or reads are spread evenly over the keys, an AVL or red–black tree is the safer choice.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The operations above, in GrafluentCollections</h2>
+  <pre id="code" aria-label="Swift code"></pre>
+</section>

@@ -76,6 +76,26 @@ public struct RedBlackTree<Element: Comparable> {
         _core.slot(of: element) >= 0
     }
 
+    /// The colour of a vertex of a red–black tree.
+    @frozen
+    public enum Color: Hashable, Sendable {
+        case red
+        case black
+    }
+
+    /// The colour of the vertex holding `element`, or nil when the tree doesn't hold it.
+    ///
+    /// The root is black, no red vertex has a red child, and every path from the root to an
+    /// empty link passes the same number of black vertices. Which vertices are red depends on
+    /// the order of the insertions and removals that built the tree, not only on its elements.
+    /// - Complexity: O(log *n*).
+    @inlinable
+    public func color(of element: Element) -> Color? {
+        let slot = _core.slot(of: element)
+        guard slot >= 0 else { return nil }
+        return _core.nodes[Int(slot)].balance == 0 ? .black : .red
+    }
+
     /// The index of the first element not less than `element`, or `endIndex` when every element
     /// is less. O(log *n*).
     @inlinable

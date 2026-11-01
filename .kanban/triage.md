@@ -390,6 +390,12 @@ of a hand-written loop over arrays.
   reused; other symbol types keep the chain alone. Contiguous sorted rows with binary search
   (D14's layout) were not built, since they make every insertion move a row; RadixTree remains
   the pick for long shared prefixes.
+- D35. Red–black colours and treap priorities are public reads (2026-11-01):
+  `RedBlackTree.color(of:) -> RedBlackTree.Color?` and `Treap.priority(of:) -> Int?`, nil for an
+  element the tree doesn't hold. They let callers draw the trees and check the invariants
+  without the `package` core; the balance fields stay internal and nothing can set them. Splay
+  trees need no such read, since their shape alone is the state. AVL balance factors are not
+  exposed: they follow from the shape.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

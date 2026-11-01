@@ -2,9 +2,9 @@
 # listed in the contents with a link and joined to its neighbours by previous/next links; a
 # `soon` row is listed without a link until its page exists.
 avl|AVL trees|Search trees|A sorted set that keeps itself balanced by rotating.|page
-redblack|Red–black trees|Search trees|Balance kept by colours, with fewer rotations.|soon
-treap|Treaps|Search trees|A search tree shaped by random priorities, split and joined.|soon
-splay|Splay trees|Search trees|Recently used keys move to the top.|soon
+redblack|Red–black trees|Search trees|Balance kept by colours, with fewer rotations.|page
+treap|Treaps|Search trees|A search tree shaped by random priorities, split and joined.|page
+splay|Splay trees|Search trees|Recently used keys move to the top.|page
 btree|B-trees|Search trees|Many keys per node, so the tree stays shallow.|soon
 skiplist|Skip lists|Search trees|Express lanes over a sorted list.|soon
 trie|Tries and radix trees|Strings|Keys spelled out one character at a time, shared prefixes once.|soon

@@ -1,0 +1,28 @@
+<!-- title: Treaps · Explore GrafluentCollections -->
+<!-- description: Insert and remove keys in a real Treap and watch random priorities give it the shape of a random search tree, whatever order the keys arrive in. -->
+<header class="sign">
+  <h1>Treaps</h1>
+  <p class="question">Can a coin toss keep a search tree balanced?</p>
+</header>
+<p class="example lead">Example: insert 1 to 8 in order. A plain search tree would become a chain eight levels deep. In a treap each key draws a random priority, and the tree comes out as shallow as if the keys had arrived shuffled.</p>
+
+<div id="app"></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>A sorted set that splits and joins</h2>
+  <p>A treap keeps keys in order and finds, inserts or removes any one of them in an expected number of steps that grows with the logarithm of the count. Its strength is cutting and gluing: split it at a key into the keys below and the rest, or join two treaps whose keys don’t interleave, each in the same logarithmic time. That suits ranges handed out and returned, or a sequence edited in pieces.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>A search tree and a heap at once</h2>
+  <p>Read left to right, the keys are in order, as in any search tree. Read top to bottom, the priorities only go down: no key has a higher priority than the one above it, as in a heap. For a given set of keys and priorities only one tree satisfies both, the one you would get by inserting the keys from highest priority to lowest. With random priorities that is a random insertion order, so the expected depth of every key is logarithmic, whatever order the keys really came in.</p>
+  <p>Inserting walks down by key until it meets a key of lower priority, then splits that subtree at the new key and hangs the halves under it. Removing joins the key’s two subtrees, the root of higher priority on top at each step. Seidel and Aragon described the treap in 1989. The priorities here come from a seeded generator, so the same seed gives the same tree; <em>New priorities</em> tries another.</p>
+
+  <h2><small>Where it breaks</small>Expected, not guaranteed</h2>
+  <p>The bounds are averages over the coin tosses: an unlucky draw can make one tree deep, though a long chain is vanishingly unlikely. When you need a worst-case bound on every operation, use an AVL or red–black tree. When the same few keys are read again and again, a splay tree moves them to the top.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The operations above, in GrafluentCollections</h2>
+  <pre id="code" aria-label="Swift code"></pre>
+</section>

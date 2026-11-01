@@ -10,6 +10,9 @@ import JavaScriptKit
 func mountPage(_ page: String) -> Bool {
     switch page {
     case "avl": AVLPage.mount()
+    case "redblack": RedBlackPage.mount()
+    case "treap": TreapPage.mount()
+    case "splay": SplayPage.mount()
     default: return false
     }
     return true

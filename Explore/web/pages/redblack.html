@@ -1,0 +1,29 @@
+<!-- title: Red–black trees · Explore GrafluentCollections -->
+<!-- description: Insert and remove keys in a real RedBlackTree and watch it recolour and rotate to keep every path's count of black keys the same. -->
+<header class="sign">
+  <h1>Red–black trees</h1>
+  <p class="question">How can a search tree stay shallow while rotating less than an AVL tree?</p>
+</header>
+<p class="example lead">Example: insert 10, 20 and 30. The 30 goes in red under a red 20, which the rules forbid, so one rotation lifts 20 to the top, black, with two red children.</p>
+
+<div id="app"></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>A sorted set that changes often</h2>
+  <p>A red–black tree keeps keys in order and finds, inserts or removes any one of them in a number of steps that grows with the logarithm of the count. Choose it over an AVL tree when the set changes about as often as it is read: an insertion rotates at most twice and a removal at most three times, however large the tree.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>Count only the black keys</h2>
+  <p>Every key is red or black. The root is black. A red key never has a red child. And every path from the root down to an empty spot passes the same number of black keys. The red keys can only sit between black ones, so no path is more than twice as long as any other, and the height stays under twice the logarithm of the count.</p>
+  <p>A new key goes in red as a leaf, which keeps the black counts equal. If its parent is red too, the tree repairs the clash: when the parent’s sibling is also red, both turn black and the grandparent turns red, which may move the clash two levels up. Otherwise one or two rotations end it there. Removing a black key leaves one path a black key short, and a similar short list of recolourings and rotations makes it up.</p>
+  <p>Guibas and Sedgewick described the scheme in 1978. Which keys end up red depends on the order of the operations, not only on which keys are in the tree.</p>
+
+  <h2><small>Where it breaks</small>A looser height</h2>
+  <p>The tree can be up to twice as tall as a perfect one, against about 1.44 times for an AVL tree, so a read-heavy workload walks a little further. When most reads go to a few keys, a splay tree keeps them near the top. On disk, or for long ordered scans, a B-tree touches far fewer blocks.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The operations above, in GrafluentCollections</h2>
+  <pre id="code" aria-label="Swift code"></pre>
+</section>

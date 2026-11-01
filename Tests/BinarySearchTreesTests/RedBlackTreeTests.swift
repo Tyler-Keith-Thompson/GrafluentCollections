@@ -9,6 +9,54 @@ import Trees
 
 @Suite("RedBlackTree: hand-worked cases")
 struct RedBlackTreeTests {
+    @Test("After seeded inserts and removes, color(of:) shows a black root, no red vertex with a red child, and one black count on every path")
+    func colorInvariants() {
+        var rng = SeededRandomNumberGenerator(seed: 40)
+        var tree = RedBlackTree<Int>()
+        for step in 0 ..< 600 {
+            let key = Int.random(in: 0 ..< 200, using: &rng)
+            if step % 3 == 2 {
+                tree.remove(key)
+            } else {
+                tree.insert(key)
+            }
+            guard let shape = BinaryTree(tree) else { continue }
+            #expect(tree.color(of: shape.root) == .black)
+            // The number of black vertices from `key` down to each empty link below it, or nil
+            // when two paths disagree or a red vertex has a red child.
+            func blackHeight(_ key: Int?) -> Int? {
+                guard let key else { return 0 }
+                let isRed = tree.color(of: key) == .red
+                for child in [shape.left(of: key), shape.right(of: key)] {
+                    if isRed, let child, tree.color(of: child) == .red { return nil }
+                }
+                guard let left = blackHeight(shape.left(of: key)), let right = blackHeight(shape.right(of: key)), left == right else { return nil }
+                return left + (isRed ? 0 : 1)
+            }
+            #expect(blackHeight(shape.root) != nil)
+        }
+    }
+
+    @Test("color(of:) reads each vertex's colour: inserting 1, 2, 3 leaves 2 black on top of two red leaves")
+    func colors() {
+        var tree = RedBlackTree<Int>()
+        tree.insert(1)
+        let black: RedBlackTree<Int>.Color? = .black, red: RedBlackTree<Int>.Color? = .red
+        #expect(tree.color(of: 1) == black)
+        tree.insert(2)
+        tree.insert(3)
+        #expect(tree.color(of: 2) == black)
+        #expect(tree.color(of: 1) == red)
+        #expect(tree.color(of: 3) == red)
+        // A fourth key under 3 makes 1 and 3 black and the new leaf red.
+        tree.insert(4)
+        #expect(tree.color(of: 1) == black)
+        #expect(tree.color(of: 3) == black)
+        #expect(tree.color(of: 4) == red)
+        #expect(tree.color(of: 5) == nil)
+        #expect(RedBlackTree<Int>().color(of: 1) == nil)
+    }
+
     @Test("Inserting 3, 2, 1 rotates right once: 2 at the root, 1 left, 3 right")
     func leftLeftRotation() throws {
         var tree = RedBlackTree<Int>()

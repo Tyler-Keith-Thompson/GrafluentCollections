@@ -11,6 +11,33 @@ import Trees
 
 @Suite("Treap: hand-worked cases")
 struct TreapTests {
+    @Test("priority(of:) reads each vertex's priority: no vertex outranks its parent, the root ranks highest, and a seeded treap repeats them")
+    func priorities() {
+        var rng = SeededRandomNumberGenerator(seed: 41)
+        var treap = Treap<Int>(using: &rng)
+        for key in [50, 20, 80, 10, 30, 70, 90, 60, 40] {
+            treap.insert(key)
+        }
+        treap.remove(30)
+        let shape = BinaryTree(treap)!
+        for key in treap {
+            if let parent = shape.parent(of: key), let mine = treap.priority(of: key), let theirs = treap.priority(of: parent) {
+                #expect(mine <= theirs)
+            }
+        }
+        let highest = treap.map { treap.priority(of: $0)! }.max()
+        #expect(treap.priority(of: shape.root) == highest)
+        #expect(treap.priority(of: 30) == nil)
+        var again = SeededRandomNumberGenerator(seed: 41)
+        var copy = Treap<Int>(using: &again)
+        for key in [50, 20, 80, 10, 30, 70, 90, 60, 40] {
+            copy.insert(key)
+        }
+        for key in treap {
+            #expect(copy.priority(of: key) == treap.priority(of: key))
+        }
+    }
+
     @Test("Inserting keeps the elements in ascending order and reports what was inserted")
     func insert() {
         var rng = SeededRandomNumberGenerator(seed: 1)

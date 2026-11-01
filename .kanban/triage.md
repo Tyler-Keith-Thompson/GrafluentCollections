@@ -326,6 +326,14 @@ of a hand-written loop over arrays.
   links, so the module list is the overview's table rather than a Topics group. The
   `docc convert` rule discards docc's output, so its warnings are checked by running docc by
   hand in the `swift:6.3` image; the umbrella catalog has none.
+- D27. In-order iteration walks the tree with an inline spine stack, not slot order or threads
+  (2026-11-01): the iterator keeps its first 64 spine entries in a fixed tuple, which holds the
+  whole spine of any AVL or red–black tree, and spills deeper entries of a treap or splay tree
+  into an array. What a step costs beyond that is the walk itself (a pop and two link loads
+  per element). Iterating slots in rank order would only help a tree that was bulk-built and
+  never changed, and would need a flag kept right through every insert, remove, split and
+  join of five types and `IntervalTree`. Threaded successor links would cost every balancing
+  scheme's rotations. Neither is worth that for iteration alone.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

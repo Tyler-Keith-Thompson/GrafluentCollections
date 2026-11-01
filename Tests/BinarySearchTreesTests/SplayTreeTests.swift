@@ -22,6 +22,19 @@ struct SplayTreeTests {
         #expect(tree.count == 6)
     }
 
+    @Test("Iterating a tree higher than 64 visits every element in ascending order")
+    func iterateDeepTree() {
+        var tree = SplayTree<Int>()
+        let count = 200
+        for element in 0 ..< count {
+            tree.insert(element)
+        }
+        let minimumHeight = 65
+        let expected = Array(0 ..< count)
+        #expect(tree.height >= minimumHeight)
+        #expect(Array(tree) == expected)
+    }
+
     @Test("Removing a leaf, a vertex with one child and the root each leaves the rest in order")
     func remove() {
         var tree = SplayTree(1 ... 7)

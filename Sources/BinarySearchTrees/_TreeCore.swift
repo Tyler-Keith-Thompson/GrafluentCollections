@@ -570,35 +570,58 @@ extension _TreeCore {
 
     // MARK: Iteration
 
-    /// The slots in key order, by an explicit stack of the left spine.
+    /// The slots in key order, by an explicit stack of the left spine. The first 64 entries live
+    /// inline, which holds the whole spine of every AVL and red–black tree; a treap or splay tree
+    /// higher than that spills the deeper entries into an array.
     @frozen
     @usableFromInline
     package struct InorderSlots {
         @usableFromInline let nodes: ContiguousArray<_TreeNode<Key>>
-        @usableFromInline var stack: ContiguousArray<Int32>
+        @usableFromInline var spine: (Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32)
+        @usableFromInline var depth: Int
+        @usableFromInline var spill: ContiguousArray<Int32>
 
         @inlinable
         package init(_ core: _TreeCore) {
             nodes = core.nodes
-            stack = []
-            // No AVL or red–black tree is higher than twice the bits of its count; a higher treap
-            // grows the stack.
-            stack.reserveCapacity(2 &* (Int.bitWidth &- core.count.leadingZeroBitCount))
-            var x = core.root
+            spine = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+            depth = 0
+            spill = []
+            descend(from: core.root)
+        }
+
+        /// Pushes `x` and its chain of left descendants.
+        @inlinable @inline(__always)
+        mutating func descend(from x: Int32) {
+            var x = x
             while x >= 0 {
-                stack.append(x)
+                if depth < 64 {
+                    let depth = depth
+                    withUnsafeMutableBytes(of: &spine) {
+                        $0.storeBytes(of: x, toByteOffset: depth &* MemoryLayout<Int32>.stride, as: Int32.self)
+                    }
+                } else {
+                    spill.append(x)
+                }
+                depth &+= 1
                 x = nodes[Int(x)].left
             }
         }
 
         @inlinable
         package mutating func next() -> Int32? {
-            guard let x = stack.popLast() else { return nil }
-            var y = nodes[Int(x)].right
-            while y >= 0 {
-                stack.append(y)
-                y = nodes[Int(y)].left
+            guard depth > 0 else { return nil }
+            depth &-= 1
+            let x: Int32
+            if depth < 64 {
+                let depth = depth
+                x = withUnsafeBytes(of: &spine) {
+                    $0.load(fromByteOffset: depth &* MemoryLayout<Int32>.stride, as: Int32.self)
+                }
+            } else {
+                x = spill.removeLast()
             }
+            descend(from: nodes[Int(x)].right)
             return x
         }
     }

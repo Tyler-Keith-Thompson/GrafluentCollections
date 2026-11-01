@@ -1,6 +1,6 @@
 # ``SpatialTrees``
 
-Trees over points in space that find the points nearest a query, or within a radius or a box.
+Trees over points and boxes in space that find the points nearest a query or within a radius or a box, and the boxes that overlap.
 
 ## Overview
 
@@ -51,6 +51,21 @@ map.remove("café", at: [10, 20])
 Their cells convert to Grafluent's `RootedTree` with `RootedTree(_:)`, so Grafluent draws the
 subdivision.
 
+An ``MXCIFQuadtree`` and an ``MXCIFOctree`` hold elements over boxes. Each element hangs on the
+smallest cell that wholly contains its box, so a box straddling a cell's centre line stays at
+that cell, and cells are made on the way down and freed when they empty. Searches find the
+boxes containing a point, those overlapping a box, and every overlapping pair, as
+``SpatialBoxItem`` and ``OverlappingPair`` values. Boxes include their faces, so touching boxes
+overlap.
+
+```swift
+var plan = MXCIFQuadtree<String>(bounds: BoundingBox(lower: [0, 0], upper: [100, 100]))
+plan.insert("hall", in: BoundingBox(lower: [10, 10], upper: [60, 20]))
+plan.insert("office", in: BoundingBox(lower: [10, 20], upper: [30, 40]))
+plan.items(containing: [20, 15]).map(\.element)   // ["hall"]
+plan.overlappingPairs().count                     // 1
+```
+
 ## Topics
 
 ### k-d trees
@@ -63,3 +78,10 @@ subdivision.
 - ``Quadtree``
 - ``Octree``
 - ``SpatialItem``
+
+### Boxes
+
+- ``MXCIFQuadtree``
+- ``MXCIFOctree``
+- ``SpatialBoxItem``
+- ``OverlappingPair``

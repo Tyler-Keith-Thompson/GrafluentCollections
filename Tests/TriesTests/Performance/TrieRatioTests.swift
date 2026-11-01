@@ -1,7 +1,7 @@
 // Lookups in a Trie against the standard library's Set<String>: 10⁵ seeded random lowercase
 // words of 3 to 10 letters and 10⁵ probes, half of them present. A Set hashes each probe once;
-// the trie walks one vertex per UTF-8 byte, so it must stay within 15× of the Set. The gap
-// measured on a laptop is about 6×, so the bound leaves room for a busy machine. The two
+// the trie walks one vertex per UTF-8 byte, so it must stay within 4× of the Set. The gap
+// measured on a laptop is about 1.5×, so the bound leaves room for a busy machine. The two
 // sides are timed in alternating rounds, each keeping its fastest of seven. The timing runs only
 // in an optimized build; a debug build checks on 10³ words that both sides agree.
 
@@ -11,7 +11,7 @@ import Tries
 
 @Suite("Trie lookups against Set<String>")
 struct TrieRatioTests {
-    @Test("Trie<UInt8>: contains(_:) over UTF-8 stays within 15× of Set<String>", .timeLimit(.minutes(1)))
+    @Test("Trie<UInt8>: contains(_:) over UTF-8 stays within 4× of Set<String>", .timeLimit(.minutes(1)))
     func lookupsKeepPaceWithSet() async {
         await Task {
             #if DEBUG
@@ -55,7 +55,7 @@ struct TrieRatioTests {
             }
             #expect(sink != 1)
             let slowdown = libraryTime / baselineTime
-            #expect(slowdown < 15, "Trie lookups were \(slowdown)× as slow as Set<String>'s")
+            #expect(slowdown < 4, "Trie lookups were \(slowdown)× as slow as Set<String>'s")
             #endif
         }.value
     }

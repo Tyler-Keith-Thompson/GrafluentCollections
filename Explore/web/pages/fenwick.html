@@ -1,0 +1,28 @@
+<!-- title: Fenwick trees · Explore GrafluentCollections -->
+<!-- description: Take prefix sums and add to values in a real FenwickTree and watch which cells each one reads or changes. -->
+<header class="sign">
+  <h1>Fenwick trees</h1>
+  <p class="question">How do you keep running totals current when any value can change?</p>
+</header>
+<p class="example lead">Example: the sum of the first seven values, indices 0 to 6, reads only three cells. Cell 6 holds value 6, cell 5 holds values 4 and 5, and cell 3 holds values 0 to 3. Adding to value 2 changes three cells too: 2, 3 and 7, the cells whose ranges include it.</p>
+
+<div id="app"></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>Totals that update in a few steps</h2>
+  <p>A Fenwick tree holds a list of numbers and answers “what do the first <i>i</i> add up to?” and “what do the values from <i>a</i> to <i>b</i> add up to?” while values keep changing. An array of running totals answers instantly but rewrites everything after a change; the plain values change instantly but must be added up on every question. A Fenwick tree does both in a number of steps that grows with the logarithm of the count: frequency tables, ranks and cumulative counts.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>Ranges cut by binary</h2>
+  <p>There is one cell per value, in one flat array, and no pointers. Cell <i>i</i> holds the sum of a run of values ending at <i>i</i>. The run’s length is a power of two, set by the low bits of <i>i</i> + 1: odd-numbered positions hold one value, others two, four or eight. A prefix sum reads its own cell and then jumps to the cell just below the range it read, until it falls off the start. An add writes its own cell and then moves to <code>i | (i + 1)</code>, the next cell whose range covers it, until it passes the end. Both walks take one step per bit. Fenwick described the structure in 1994 for arithmetic coding.</p>
+  <p>The arrows drawn are the second walk: the update tree, which <code>Arborescence(tree)</code> gives as a graph. Edit the values or the operations above and step through again.</p>
+
+  <h2><small>Where it breaks</small>Sums, not minimums</h2>
+  <p>A range sum is the difference of two prefix sums, which needs subtraction. A minimum or maximum has no inverse, so a Fenwick tree can’t give one over an arbitrary range. A segment tree can, and it also supports adding to a whole range at once, at the cost of twice the memory.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The operations above, in GrafluentCollections</h2>
+  <pre id="code" aria-label="Swift code"></pre>
+</section>

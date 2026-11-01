@@ -17,6 +17,7 @@ func mountPage(_ page: String) -> Bool {
     case "skiplist": SkipListPage.mount()
     case "trie": TriePage.mount()
     case "ahocorasick": AhoCorasickPage.mount()
+    case "fenwick": FenwickPage.mount()
     default: return false
     }
     return true

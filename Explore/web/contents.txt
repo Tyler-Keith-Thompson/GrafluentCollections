@@ -11,7 +11,7 @@ trie|Tries and radix trees|Strings|Keys spelled out one character at a time, sha
 ahocorasick|Aho–Corasick|Strings|Every pattern found in one pass over the text.|page
 suffix|Suffix arrays and trees|Strings|Every substring of a text, indexed.|soon
 decisiondiagrams|Decision diagrams|Logic|A Boolean function as a shared graph of choices.|soon
-fenwick|Fenwick trees|Ranges|Running totals that update in a few steps.|soon
+fenwick|Fenwick trees|Ranges|Running totals that update in a few steps.|page
 segmenttree|Segment trees|Ranges|Sums and minimums over any range, with range updates.|soon
 intervaltree|Interval trees|Ranges|Which intervals overlap a point or a range.|soon
 kdtree|k-d trees and quadtrees|Space|Nearest neighbours and boxes in two dimensions.|soon

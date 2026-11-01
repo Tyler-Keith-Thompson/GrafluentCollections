@@ -1,6 +1,6 @@
 # ``Tries``
 
-Tries over sequences of any `Hashable` symbols, with prefix queries.
+Tries over sequences of any `Hashable` symbols, with prefix queries, and multi-pattern matching.
 
 ## Overview
 
@@ -36,6 +36,16 @@ A trie's shape converts to Grafluent's `PrefixTree` with `PrefixTree(_:)`, and a
 an `Arborescence` of its vertices' prefixes with `Arborescence(_:)` (import Grafluent's `Trees`
 module beside this one).
 
+An ``AhoCorasickAutomaton`` (Aho and Corasick, 1975) finds every occurrence of any of a set of
+patterns in one pass over a text, in O(*n* + *z*) for *n* symbols and *z* matches: a trie of the
+patterns with failure links. Its ``AhoCorasickAutomaton/statesView`` is the automaton as a
+`DirectedGraph`.
+
+```swift
+let automaton = AhoCorasickAutomaton(patterns: ["he", "she", "his", "hers"])
+automaton.matches(in: "ushers").map(\.patternIndex)   // [1, 0, 3]
+```
+
 ## Topics
 
 ### Sets of sequences
@@ -47,3 +57,7 @@ module beside this one).
 
 - ``TrieDictionary``
 - ``RadixTreeDictionary``
+
+### Pattern matching
+
+- ``AhoCorasickAutomaton``

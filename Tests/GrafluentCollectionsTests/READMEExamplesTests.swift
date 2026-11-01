@@ -72,6 +72,10 @@ struct READMEExamplesTests {
         let paths = RadixTree(["/usr/bin", "/usr/lib", "/var/log"])
         let underUsr: Int = 2
         #expect(paths.elements(withPrefix: "/usr/").count == underUsr)
+
+        let automaton = AhoCorasickAutomaton(patterns: ["he", "she", "his", "hers"])
+        let found: [Int] = [1, 0, 3]
+        #expect(automaton.matches(in: "ushers").map(\.patternIndex) == found)
     }
 
     @Test("Usage: a skip list and its levels")

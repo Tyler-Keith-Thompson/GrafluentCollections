@@ -162,6 +162,12 @@ of a hand-written loop over arrays.
 - D10. A compressed trie converts to `Arborescence` with each vertex's prefix as its vertex
   (2026-10-31): `Arborescence<[Symbol]>` for a `RadixTree`, so an edge's label is the child's
   prefix past its parent's and no edge map is needed.
+- D11. An automaton over `Hashable` symbols numbers its alphabet and keeps a dense transition
+  table only while it is small (2026-10-31): `AhoCorasickAutomaton` maps each pattern symbol to
+  an index (a 256-entry table when `Symbol` is `UInt8`), a symbol no pattern has to one shared
+  index that leads to the root, and builds a states × alphabet table when it fits in 2²² entries,
+  following failure links otherwise. Matches are a lazy `MatchesView`, reported by where they
+  end and longest first, with ranges as symbol offsets.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

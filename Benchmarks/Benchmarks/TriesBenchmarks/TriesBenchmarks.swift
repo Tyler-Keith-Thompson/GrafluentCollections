@@ -239,4 +239,83 @@ let benchmarks: @Sendable () -> Void = {
         }
         benchmark.stopMeasurement()
     }
+
+    // 1000 patterns of four to eight lowercase letters, and a text of 10⁵ letters and spaces with
+    // a pattern planted about every 200 symbols.
+    let patterns = (0 ..< 1_000).map { _ in String((0 ..< 4 + next(below: 5)).map { _ in Character(Unicode.Scalar(UInt8(97 + next(below: 26)))) }) }
+    var haystack = ""
+    while haystack.utf8.count < 100_000 {
+        if next(below: 200) == 0 {
+            haystack += patterns[next(below: patterns.count)]
+        } else {
+            haystack.append(next(below: 6) == 0 ? " " : Character(Unicode.Scalar(UInt8(97 + next(below: 26)))))
+        }
+    }
+    let haystackBytes = Array(haystack.utf8)
+    let patternBytes = patterns.map { Array($0.utf8) }
+
+    // Every pattern, counted, keyed by its bytes, and the lengths there are: the hand-written
+    // multi-pattern search, a lookup per length at every offset.
+    var patternCounts: [ArraySlice<UInt8>: Int] = [:]
+    for pattern in patternBytes {
+        patternCounts[pattern[...], default: 0] += 1
+    }
+    let patternLengths = Array(Set(patternBytes.map(\.count))).sorted()
+
+    Benchmark("Tries: BASELINE dictionary lookup of every pattern length at every offset") { benchmark in
+        for _ in benchmark.scaledIterations {
+            var found = 0
+            for end in 1 ... haystackBytes.count {
+                for length in patternLengths where length <= end {
+                    found &+= patternCounts[haystackBytes[end &- length ..< end], default: 0]
+                }
+            }
+            blackHole(found)
+        }
+    }
+
+    Benchmark("Tries: AhoCorasickAutomaton<UInt8>.init(patterns:)") { benchmark in
+        for _ in benchmark.scaledIterations {
+            blackHole(AhoCorasickAutomaton(patterns: patternBytes))
+        }
+    }
+
+    Benchmark("Tries: AhoCorasickAutomaton<UInt8>.matches(in:) over UTF-8") { benchmark in
+        let automaton = AhoCorasickAutomaton(patterns: patternBytes)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            var found = 0
+            for _ in automaton.matches(in: haystack.utf8) {
+                found &+= 1
+            }
+            blackHole(found)
+        }
+        benchmark.stopMeasurement()
+    }
+
+    Benchmark("Tries: AhoCorasickAutomaton<Character>.matches(in:)") { benchmark in
+        let automaton = AhoCorasickAutomaton(patterns: patterns)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            var found = 0
+            for _ in automaton.matches(in: haystack) {
+                found &+= 1
+            }
+            blackHole(found)
+        }
+        benchmark.stopMeasurement()
+    }
+
+    Benchmark("Tries: AhoCorasickAutomaton<UInt8>.matches(in:) over a byte array") { benchmark in
+        let automaton = AhoCorasickAutomaton(patterns: patternBytes)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            var found = 0
+            for _ in automaton.matches(in: haystackBytes) {
+                found &+= 1
+            }
+            blackHole(found)
+        }
+        benchmark.stopMeasurement()
+    }
 }

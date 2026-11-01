@@ -3,13 +3,14 @@
 load("//tools:docc.bzl", "docc_archive")
 load("//tools:swift_rules.bzl", "swift_library")
 
-# Tries over sequences of any Hashable symbols, with prefix queries: Trie, TrieDictionary, RadixTree, RadixTreeDictionary.
+# Tries over sequences of any Hashable symbols, with prefix queries, and multi-pattern matching: Trie, TrieDictionary, RadixTree, RadixTreeDictionary, AhoCorasickAutomaton.
 swift_library(
     name = "Tries",
     srcs = glob(["**/*.swift"]),
     module_name = "Tries",
     deps = [
         "//Sources/CollectionErrors",
+        "@swiftpkg_grafluent//:GraphProtocols",
         "@swiftpkg_grafluent//:Trees",
     ],
     visibility = ["//visibility:public"],

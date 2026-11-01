@@ -20,6 +20,7 @@ swift_library(
         "//Sources/SpatialTrees",
         "//Sources/Ropes",
         "//Sources/PersistentTrees",
+        "//Sources/Caches",
     ],
     visibility = ["//visibility:public"],
 )
@@ -41,6 +42,7 @@ docc_archive(
         "//Sources/SpatialTrees:SpatialTreesDocumentation",
         "//Sources/Ropes:RopesDocumentation",
         "//Sources/PersistentTrees:PersistentTreesDocumentation",
+        "//Sources/Caches:CachesDocumentation",
     ],
     tags = ["manual"],
     visibility = ["//visibility:public"],

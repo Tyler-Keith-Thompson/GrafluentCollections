@@ -39,7 +39,7 @@ MOCKING = "mockable/Mockable"
 # (name, group, description, dependencies)
 MODULES = [
     # Shared
-    ("CollectionErrors", "Shared", "The typed errors the collections throw: IndexOutOfRange, DuplicateKey, OverlappingKeys, EmptyRange, NotANumber, OutOfBounds.", []),
+    ("CollectionErrors", "Shared", "The typed errors the collections throw: IndexOutOfRange, DuplicateKey, OverlappingKeys, EmptyRange, NotANumber, OutOfBounds, NegativeCapacity.", []),
     # Search trees
     ("BinarySearchTrees", "Search trees", "Balanced binary search trees as sorted sets and dictionaries: AVLTree, AVLDictionary, RedBlackTree, Treap, SplayTree.", ["CollectionErrors", "grafluent/Trees"]),
     ("BTrees", "Search trees", "B-trees as sorted sets and dictionaries with many elements per node: BTree, BTreeDictionary.", ["CollectionErrors", "grafluent/Trees"]),
@@ -56,6 +56,8 @@ MODULES = [
     # Sequences and persistence
     ("Ropes", "Sequences and persistence", "Sequences stored as balanced trees of chunks, with edits anywhere in O(log n): Rope.", ["CollectionErrors", "grafluent/Trees"]),
     ("PersistentTrees", "Sequences and persistence", "Balanced search trees that keep every version, sharing structure between them: PersistentTreeSet, PersistentTreeDictionary.", ["CollectionErrors", "grafluent/Trees"]),
+    # Caches
+    ("Caches", "Caches", "Bounded dictionaries that evict by recency: LRUCache.", ["CollectionErrors", "grafluent/Trees"]),
 ]
 
 # Executables: (name, description, dependencies). Each is an `.executableTarget` and product in
@@ -76,6 +78,7 @@ TEST_TARGETS = [
     ("RangeTreesTests", ["RangeTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     ("SpatialTreesTests", ["SpatialTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     ("RopesTests", ["Ropes", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
+    ("CachesTests", ["Caches", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     ("PersistentTreesTests", ["PersistentTrees", "BinarySearchTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     (f"{PROJECT}Tests", [PROJECT, "grafluent/Trees"]),
 ]
@@ -101,6 +104,7 @@ TEST_SIZES = {name: "medium" for name in [
 PERFORMANCE_TESTS = [
     "BinarySearchTreesTests",
     "BTreesTests",
+    "CachesTests",
     "DecisionDiagramsTests",
     "PersistentTreesTests",
     "RangeTreesTests",

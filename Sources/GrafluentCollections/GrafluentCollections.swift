@@ -13,3 +13,4 @@
 @_exported import SpatialTrees
 @_exported import Ropes
 @_exported import PersistentTrees
+@_exported import Caches

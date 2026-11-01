@@ -106,5 +106,14 @@ let package = Package(
             path: "Benchmarks/PersistentTreesBenchmarks",
             plugins: [.plugin(name: "BenchmarkPlugin", package: "benchmark")]
         ),
+        .executableTarget(
+            name: "CachesBenchmarks",
+            dependencies: [
+                .product(name: "Benchmark", package: "benchmark"),
+                .product(name: "Caches", package: "GrafluentCollections"),
+            ],
+            path: "Benchmarks/CachesBenchmarks",
+            plugins: [.plugin(name: "BenchmarkPlugin", package: "benchmark")]
+        ),
     ]
 )

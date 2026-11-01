@@ -3,7 +3,7 @@
 load("//tools:docc.bzl", "docc_archive")
 load("//tools:swift_rules.bzl", "swift_library")
 
-# The typed errors the collections throw: IndexOutOfRange, DuplicateKey, OverlappingKeys, EmptyRange, NotANumber, OutOfBounds.
+# The typed errors the collections throw: IndexOutOfRange, DuplicateKey, OverlappingKeys, EmptyRange, NotANumber, OutOfBounds, NegativeCapacity.
 swift_library(
     name = "CollectionErrors",
     srcs = glob(["**/*.swift"]),

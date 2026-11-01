@@ -24,6 +24,7 @@ let products: [Product] = [
     .library(name: "SpatialTrees", targets: ["SpatialTrees"]),
     .library(name: "Ropes", targets: ["Ropes"]),
     .library(name: "PersistentTrees", targets: ["PersistentTrees"]),
+    .library(name: "Caches", targets: ["Caches"]),
 ]
 
 let dependencies: [Package.Dependency] = [
@@ -50,9 +51,11 @@ let targets: [Target] = [
     // Sequences and persistence
     .target(name: "Ropes", dependencies: ["CollectionErrors", .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
     .target(name: "PersistentTrees", dependencies: ["CollectionErrors", .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
+    // Caches
+    .target(name: "Caches", dependencies: ["CollectionErrors", .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
 
     // Umbrella: `import GrafluentCollections` imports every module.
-    .target(name: "GrafluentCollections", dependencies: ["CollectionErrors", "BinarySearchTrees", "BTrees", "SkipLists", "Tries", "SuffixStructures", "DecisionDiagrams", "RangeTrees", "SpatialTrees", "Ropes", "PersistentTrees"], exclude: bazelFiles),
+    .target(name: "GrafluentCollections", dependencies: ["CollectionErrors", "BinarySearchTrees", "BTrees", "SkipLists", "Tries", "SuffixStructures", "DecisionDiagrams", "RangeTrees", "SpatialTrees", "Ropes", "PersistentTrees", "Caches"], exclude: bazelFiles),
 
     // Shared fixtures (data only) for every test target.
     .target(name: "GrafluentCollectionsTestSupport", path: "Tests/GrafluentCollectionsTestSupport", exclude: bazelFiles),
@@ -66,6 +69,7 @@ let targets: [Target] = [
     .testTarget(name: "RangeTreesTests", dependencies: ["RangeTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], exclude: ["BUILD.bazel", "Performance"]),
     .testTarget(name: "SpatialTreesTests", dependencies: ["SpatialTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], exclude: ["BUILD.bazel", "Performance"]),
     .testTarget(name: "RopesTests", dependencies: ["Ropes", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], exclude: ["BUILD.bazel", "Performance"]),
+    .testTarget(name: "CachesTests", dependencies: ["Caches", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], exclude: ["BUILD.bazel", "Performance"]),
     .testTarget(name: "PersistentTreesTests", dependencies: ["PersistentTrees", "BinarySearchTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], exclude: ["BUILD.bazel", "Performance"]),
     .testTarget(name: "GrafluentCollectionsTests", dependencies: ["GrafluentCollections", .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
 
@@ -78,6 +82,7 @@ let targets: [Target] = [
     .testTarget(name: "RangeTreesPerformanceTests", dependencies: ["RangeTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], path: "Tests/RangeTreesTests/Performance"),
     .testTarget(name: "SpatialTreesPerformanceTests", dependencies: ["SpatialTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], path: "Tests/SpatialTreesTests/Performance"),
     .testTarget(name: "RopesPerformanceTests", dependencies: ["Ropes", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], path: "Tests/RopesTests/Performance"),
+    .testTarget(name: "CachesPerformanceTests", dependencies: ["Caches", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], path: "Tests/CachesTests/Performance"),
     .testTarget(name: "PersistentTreesPerformanceTests", dependencies: ["PersistentTrees", "BinarySearchTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], path: "Tests/PersistentTreesTests/Performance"),
 ]
 

@@ -19,3 +19,4 @@ throw it.
 - ``EmptyRange``
 - ``NotANumber``
 - ``OutOfBounds``
+- ``NegativeCapacity``

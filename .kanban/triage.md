@@ -276,6 +276,17 @@ of a hand-written loop over arrays.
   `SetAlgebra` and `Dictionary` mutating spellings, which path-copy too; in-place mutation of
   uniquely referenced vertices is left for later. Iteration holds unretained references under
   the root it keeps alive.
+- D23. An LRU cache is one flat array of entries linked by Int32 indices, beside a Dictionary
+  (2026-11-01): `LRUCache<Key: Hashable, Value>` in module `Caches` stores key, value, previous
+  and next per entry in one array; a removal moves the last entry into the hole, so there is no
+  free list and no stale value is kept alive, and an eviction when full reuses the tail's slot.
+  A new key costs one hash for lookup and insertion together. Capacity 0 is allowed and holds
+  nothing (every stored entry is evicted at once, as Python's `lru_cache(maxsize=0)`); a negative
+  capacity traps, and `init(checkedCapacity:)` throws the new `NegativeCapacity`. The reading
+  subscript is a `mutating get` that promotes; `peek(_:)` and `contains(_:)` do not.
+  `insert(_:forKey:)` returns the evicted `Entry`, `updateValue(_:forKey:)` the replaced value.
+  Hit and miss counters were left out, since they would cost every read. LFU and ARC variants
+  wait for a caller.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

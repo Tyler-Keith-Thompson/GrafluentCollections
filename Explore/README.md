@@ -29,6 +29,7 @@ contents and the menu without a link.
 | `intervaltree` | `IntervalTree`: `insert(_:value:)`, `remove(_:)`, `containing(_:)`, `overlapping(_:)`, subscript by in-order position; `BinaryTree(_:)` for the shape, with `left(of:)`, `right(of:)`, `parent(of:)`, `depth(of:)` |
 | `kdtree` | `KDTree`: `init(_:)`, `nearestIndex(to:)`, `indices(in:)`; `Quadtree`: `init(bounds:bucketCapacity:)`, `insert(_:at:)`, `nearest(to:)`, `items(in:)`; `BinaryTree(_:)` for the k-d tree's splits and `RootedTree(_:)` for the quadtree's cells |
 | `suffix` | `SuffixArray`: `init(_:)`, `positions`, `longestCommonPrefixes`, `occurrences(of:)`; `SuffixTree`: `init(_:)`, `children(of:)`, `parent(of:)`, `isLeaf(_:)`, `edgeLabel(of:)`, `pathLabel(of:)`, `occurrences(of:)`, `longestRepeatedSubstring` |
+| `decisiondiagrams` | `BinaryDecisionDiagram`: `variable(_:)`, `and(_:_:)`, `or(_:_:)`, `xor(_:_:)`, `not(_:)`, `evaluate(_:at:)`, `satisfyingAssignmentCount(of:)`, `tableVertexCount`; `graphView` for the vertices and edges, with `variable(of:)` and `isHighEdge(at:)` |
 
 ## Requirements
 

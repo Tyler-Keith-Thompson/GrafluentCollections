@@ -22,6 +22,7 @@ func mountPage(_ page: String) -> Bool {
     case "intervaltree": IntervalTreePage.mount()
     case "kdtree": KDTreePage.mount()
     case "suffix": SuffixPage.mount()
+    case "decisiondiagrams": DecisionDiagramsPage.mount()
     default: return false
     }
     return true

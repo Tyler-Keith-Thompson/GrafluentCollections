@@ -1,0 +1,28 @@
+<!-- title: Decision diagrams · Explore GrafluentCollections -->
+<!-- description: Build Boolean formulas in a real BinaryDecisionDiagram table and see each one as a graph of tests, sharing vertices with the formulas before it. -->
+<header class="sign">
+  <h1>Decision diagrams</h1>
+  <p class="question">How do you store a Boolean function of many variables without writing out its whole truth table?</p>
+</header>
+<p class="example lead">Example: a &amp; b | c &amp; d. The diagram tests a, and when a is false it skips b and tests c straight away. Its last test, of d, is the very vertex the earlier formula c | d built, because the shared table never makes the same test twice.</p>
+
+<div id="app"></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>Functions you can compare and count</h2>
+  <p>A reduced ordered binary decision diagram stores a Boolean function so that equal functions are stored identically: checking whether two circuits do the same thing becomes comparing two numbers. It also counts the assignments that make a function true, finds one, and combines functions with any operator. Hardware verification, model checking, configuration solvers and access-control analysis all depend on it.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>A decision tree, with the duplicates merged</h2>
+  <p>Start from the full decision tree that asks every variable in a fixed order, a then b then c, with true or false at the leaves. Then apply two rules until nothing changes: merge any two tests that ask the same variable and lead to the same places, and remove any test whose two answers lead to the same place. What is left is the function’s unique diagram (Bryant, 1986).</p>
+  <p>GrafluentCollections keeps every function in one shared table, so a test that one formula builds is reused by every later formula that needs it. The tinted vertices above are those reuses. The table’s <code>graphView</code> is the graph drawn here, and any Grafluent algorithm can run over it.</p>
+
+  <h2><small>Where it breaks</small>Order matters, sometimes enormously</h2>
+  <p>The size of a diagram depends on the variable order. Some functions are tiny in one order and exponentially large in another, and a few, like integer multiplication, are large in every order. Choosing a good order is hard in general. When it goes badly, SAT solvers, which never build the whole function, often do better.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The formulas above, in GrafluentCollections</h2>
+  <pre id="code" aria-label="Swift code"></pre>
+</section>

@@ -49,7 +49,7 @@ MODULES = [
     # Suffix structures
     ("SuffixStructures", "Suffix structures", "Structures over a text's suffixes that answer substring queries: SuffixArray, SuffixTree, SuffixAutomaton.", ["grafluent/GraphProtocols", "grafluent/Trees"]),
     # Decision diagrams
-    ("DecisionDiagrams", "Decision diagrams", "Canonical diagrams of Boolean functions: BinaryDecisionDiagram.", ["CollectionErrors", "grafluent/GraphProtocols"]),
+    ("DecisionDiagrams", "Decision diagrams", "Canonical diagrams of Boolean functions and families of sets: BinaryDecisionDiagram, ZeroSuppressedDecisionDiagram.", ["CollectionErrors", "grafluent/GraphProtocols"]),
     # Range and spatial trees
     ("RangeTrees", "Range and spatial trees", "Trees over a sequence that answer range queries: FenwickTree.", ["CollectionErrors", "grafluent/Trees"]),
 ]

@@ -84,4 +84,46 @@ let benchmarks: @Sendable () -> Void = {
         }
         benchmark.stopMeasurement()
     }
+
+    // The independent sets of a path of n vertices: every subset, less those holding both ends of
+    // an edge.
+    func pathIndependentSets(_ n: Int) -> (ZeroSuppressedDecisionDiagram, ZeroSuppressedDecisionDiagram.Family) {
+        var diagram = ZeroSuppressedDecisionDiagram(elementCount: n)
+        var sets = diagram.unit
+        for v in 0 ..< n {
+            sets = diagram.join(sets, diagram.union(diagram.unit, diagram.single(v)))
+        }
+        for v in 0 ..< n - 1 {
+            let adjacent = diagram.including(v, in: diagram.including(v + 1, in: sets))
+            sets = diagram.subtracting(adjacent, from: sets)
+        }
+        return (diagram, sets)
+    }
+
+    // The hand-written form: every subset of a 20-vertex path as a bit mask, checked for two
+    // adjacent vertices.
+    Benchmark("DecisionDiagrams: BASELINE brute-force independent sets of a 20-vertex path") { benchmark in
+        for _ in benchmark.scaledIterations {
+            let n = 20
+            var count = 0
+            for mask in 0 ..< 1 << n where mask & (mask >> 1) == 0 {
+                count += 1
+            }
+            blackHole(count)
+        }
+    }
+
+    Benchmark("DecisionDiagrams: ZeroSuppressedDecisionDiagram independent sets of a 20-vertex path") { benchmark in
+        for _ in benchmark.scaledIterations {
+            let (diagram, sets) = pathIndependentSets(20)
+            blackHole(diagram.count(of: sets))
+        }
+    }
+
+    Benchmark("DecisionDiagrams: ZeroSuppressedDecisionDiagram independent sets of a 200-vertex path") { benchmark in
+        for _ in benchmark.scaledIterations {
+            let (diagram, sets) = pathIndependentSets(200)
+            blackHole(diagram.count(of: sets))
+        }
+    }
 }

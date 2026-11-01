@@ -3,7 +3,7 @@
 load("//tools:docc.bzl", "docc_archive")
 load("//tools:swift_rules.bzl", "swift_library")
 
-# Canonical diagrams of Boolean functions: BinaryDecisionDiagram.
+# Canonical diagrams of Boolean functions and families of sets: BinaryDecisionDiagram, ZeroSuppressedDecisionDiagram.
 swift_library(
     name = "DecisionDiagrams",
     srcs = glob(["**/*.swift"]),

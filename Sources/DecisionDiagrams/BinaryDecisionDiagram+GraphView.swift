@@ -43,20 +43,20 @@ extension BinaryDecisionDiagram {
         }
 
         @inlinable
-        public var vertices: Range<Int> { 0 ..< _diagram._variables.count }
+        public var vertices: Range<Int> { 0 ..< _diagram._table.count }
 
         @inlinable
         public var edges: Edges { Edges(self) }
 
         @inlinable
-        public var vertexCount: Int { _diagram._variables.count }
+        public var vertexCount: Int { _diagram._table.count }
 
         @inlinable
-        public var edgeCount: Int { 2 &* (_diagram._variables.count &- 2) }
+        public var edgeCount: Int { 2 &* (_diagram._table.count &- 2) }
 
         @inlinable
         public func contains(_ vertex: Int) -> Bool {
-            vertex >= 0 && vertex < _diagram._variables.count
+            vertex >= 0 && vertex < _diagram._table.count
         }
 
         /// The vertex's low child and then its high child, or nothing for a constant.
@@ -69,7 +69,7 @@ extension BinaryDecisionDiagram {
         /// constant.
         @inlinable
         public func outEdges(of vertex: Int) -> [Int] {
-            guard vertex > 1 && vertex < _diagram._variables.count else { return [] }
+            guard vertex > 1 && vertex < _diagram._table.count else { return [] }
             let low = 2 &* (vertex &- 2)
             return [low, low &+ 1]
         }
@@ -80,7 +80,7 @@ extension BinaryDecisionDiagram {
         @inlinable
         public func target(ofEdgeAt position: Int) -> Int {
             let source = position / 2 &+ 2
-            return Int(position & 1 == 1 ? _diagram._highs[source] : _diagram._lows[source])
+            return Int(position & 1 == 1 ? _diagram._table.highs[source] : _diagram._table.lows[source])
         }
 
         /// Whether the edge is its source's high edge, taken when the source's variable is true.
@@ -100,7 +100,7 @@ extension BinaryDecisionDiagram {
         @inlinable
         public func variable(of vertex: Int) -> Int? {
             precondition(contains(vertex), "The vertex is not in the diagram")
-            return vertex <= 1 ? nil : Int(_diagram._variables[vertex])
+            return vertex <= 1 ? nil : Int(_diagram._table.variables[vertex])
         }
     }
 }

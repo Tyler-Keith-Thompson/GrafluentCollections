@@ -195,6 +195,14 @@ of a hand-written loop over arrays.
   rule out. The variable count is fixed when the table is made; variables are tested in index
   order. Operators are four-bit truth tables, so `apply` covers all sixteen. Satisfying
   assignments are counted in `Double`, exact below 2⁵³. The table keeps every vertex it makes.
+- D16. A zero-suppressed decision diagram follows D15 over families of sets (2026-11-01):
+  `ZeroSuppressedDecisionDiagram` shares the binary diagram's vertex arrays, unique table and
+  computed table, and differs only in its reduction rule (no vertex whose high child is the empty
+  family). A `Family` is a root vertex; the constants are `empty` (∅) and `unit` ({∅}). The
+  operations are the set operations, `join` and `meet` (pairwise unions and intersections),
+  `including`/`excluding` (filters, the element kept), and `minimalSets`/`maximalSets` by
+  Knuth's nonsuperset and nonsubset recursions. Counts are `Double`, as in D15. Sets are read
+  through a lazy `setsView(of:)`, each set ascending.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

@@ -26,15 +26,24 @@ bytes is cheaper than comparing `Character`s. When the symbols are `Comparable`,
 its children sorted, so iteration is in lexicographic order; otherwise children come in the order
 they were added.
 
-A trie's shape converts to Grafluent's `PrefixTree` with `PrefixTree(_:)` (import Grafluent's
-`Trees` module beside this one).
+A ``RadixTree`` and a ``RadixTreeDictionary`` hold the same keys and answer the same queries,
+with the same names, in a radix tree (Morrison, 1968): every chain of vertices with one child and
+no key is merged into one edge labelled with all its symbols, so there is a vertex per key and per
+branching point rather than per symbol. They suit keys with long shared prefixes, such as file
+paths or URLs, and build faster and in less memory than a trie of the same keys.
+
+A trie's shape converts to Grafluent's `PrefixTree` with `PrefixTree(_:)`, and a radix tree's to
+an `Arborescence` of its vertices' prefixes with `Arborescence(_:)` (import Grafluent's `Trees`
+module beside this one).
 
 ## Topics
 
 ### Sets of sequences
 
 - ``Trie``
+- ``RadixTree``
 
 ### Dictionaries keyed by sequences
 
 - ``TrieDictionary``
+- ``RadixTreeDictionary``

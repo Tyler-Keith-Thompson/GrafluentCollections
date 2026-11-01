@@ -3,7 +3,7 @@
 load("//tools:docc.bzl", "docc_archive")
 load("//tools:swift_rules.bzl", "swift_library")
 
-# Tries over sequences of any Hashable symbols, with prefix queries: Trie, TrieDictionary.
+# Tries over sequences of any Hashable symbols, with prefix queries: Trie, TrieDictionary, RadixTree, RadixTreeDictionary.
 swift_library(
     name = "Tries",
     srcs = glob(["**/*.swift"]),

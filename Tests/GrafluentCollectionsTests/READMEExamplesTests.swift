@@ -68,6 +68,10 @@ struct READMEExamplesTests {
         #expect(words.elements(withPrefix: "car").map { String($0) } == withCar)
         #expect(words.longestPrefix(of: "carton").map { String($0) } == longest)
         #expect(words.hasPrefix("do"))
+
+        let paths = RadixTree(["/usr/bin", "/usr/lib", "/var/log"])
+        let underUsr: Int = 2
+        #expect(paths.elements(withPrefix: "/usr/").count == underUsr)
     }
 
     @Test("Usage: a skip list and its levels")

@@ -45,7 +45,7 @@ MODULES = [
     ("BTrees", "Search trees", "B-trees as sorted sets and dictionaries with many elements per node: BTree, BTreeDictionary.", ["CollectionErrors", "grafluent/Trees"]),
     ("SkipLists", "Search trees", "Skip lists as sorted sets, with their levels as a directed graph: SkipList.", ["CollectionErrors", "grafluent/GraphProtocols"]),
     # Tries
-    ("Tries", "Tries", "Tries over sequences of any Hashable symbols, with prefix queries: Trie, TrieDictionary.", ["CollectionErrors", "grafluent/Trees"]),
+    ("Tries", "Tries", "Tries over sequences of any Hashable symbols, with prefix queries: Trie, TrieDictionary, RadixTree, RadixTreeDictionary.", ["CollectionErrors", "grafluent/Trees"]),
     # Range and spatial trees
     ("RangeTrees", "Range and spatial trees", "Trees over a sequence that answer range queries: FenwickTree.", ["CollectionErrors", "grafluent/Trees"]),
 ]

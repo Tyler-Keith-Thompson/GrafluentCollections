@@ -143,4 +143,100 @@ let benchmarks: @Sendable () -> Void = {
             blackHole(counts)
         }
     }
+
+    // 10⁵ file paths with long shared prefixes: four to seven components, each drawn from a few
+    // dozen names, under a handful of roots.
+    let roots = ["/usr/local/lib/", "/Users/someone/Library/Caches/", "/var/folders/xy/"]
+    let components = (0 ..< 40).map { "component\($0)" }
+    func path() -> String {
+        var path = roots[next(below: roots.count)]
+        for k in 0 ..< 3 + next(below: 4) {
+            if k > 0 { path += "/" }
+            path += components[next(below: components.count)]
+        }
+        return path
+    }
+    let paths = (0 ..< 100_000).map { _ in path() }
+    let pathProbes = (0 ..< 10_000).map { k in k % 2 == 0 ? paths[next(below: paths.count)] : path() }
+    let pathSet = Set(paths)
+
+    Benchmark("Tries: BASELINE Set<String>.contains(_:) on paths") { benchmark in
+        for _ in benchmark.scaledIterations {
+            var found = 0
+            for probe in pathProbes where pathSet.contains(probe) {
+                found &+= 1
+            }
+            blackHole(found)
+        }
+    }
+
+    Benchmark("Tries: Trie<UInt8>.contains(_:) on paths over UTF-8") { benchmark in
+        let trie = Trie(paths.map(\.utf8))
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            var found = 0
+            for probe in pathProbes where trie.contains(probe.utf8) {
+                found &+= 1
+            }
+            blackHole(found)
+        }
+        benchmark.stopMeasurement()
+    }
+
+    Benchmark("Tries: RadixTree<UInt8>.contains(_:) on paths over UTF-8") { benchmark in
+        let tree = RadixTree(paths.map(\.utf8))
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            var found = 0
+            for probe in pathProbes where tree.contains(probe.utf8) {
+                found &+= 1
+            }
+            blackHole(found)
+        }
+        benchmark.stopMeasurement()
+    }
+
+    Benchmark("Tries: Trie<UInt8>.init(_:) on paths over UTF-8") { benchmark in
+        for _ in benchmark.scaledIterations {
+            blackHole(Trie(paths.map(\.utf8)))
+        }
+    }
+
+    Benchmark("Tries: RadixTree<UInt8>.init(_:) on paths over UTF-8") { benchmark in
+        for _ in benchmark.scaledIterations {
+            blackHole(RadixTree(paths.map(\.utf8)))
+        }
+    }
+
+    Benchmark("Tries: RadixTree<UInt8>.remove(_:) then insert(_:) on paths") { benchmark in
+        var tree = RadixTree(paths.map(\.utf8))
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            for probe in pathProbes {
+                if tree.remove(probe.utf8) != nil {
+                    tree.insert(probe.utf8)
+                } else {
+                    tree.insert(probe.utf8)
+                    tree.remove(probe.utf8)
+                }
+            }
+        }
+        benchmark.stopMeasurement()
+        blackHole(tree)
+    }
+
+    Benchmark("Tries: RadixTree<Character>.elements(withPrefix:)") { benchmark in
+        let tree = RadixTree(words)
+        benchmark.startMeasurement()
+        for _ in benchmark.scaledIterations {
+            var total = 0
+            for prefix in prefixes {
+                for key in tree.elements(withPrefix: prefix) {
+                    total &+= key.count
+                }
+            }
+            blackHole(total)
+        }
+        benchmark.stopMeasurement()
+    }
 }

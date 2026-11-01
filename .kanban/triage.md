@@ -159,6 +159,9 @@ of a hand-written loop over arrays.
   iteration is lexicographic, and in insertion order otherwise, with one type rather than a
   `Comparable` variant. A trie is a `Sequence` with an O(1) `count`, not a `Collection`, since
   its keys have no cheap position.
+- D10. A compressed trie converts to `Arborescence` with each vertex's prefix as its vertex
+  (2026-10-31): `Arborescence<[Symbol]>` for a `RadixTree`, so an edge's label is the child's
+  prefix past its parent's and no edge map is needed.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

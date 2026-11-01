@@ -18,6 +18,7 @@ swift_library(
         "//Sources/DecisionDiagrams",
         "//Sources/RangeTrees",
         "//Sources/SpatialTrees",
+        "//Sources/Ropes",
     ],
     visibility = ["//visibility:public"],
 )
@@ -37,6 +38,7 @@ docc_archive(
         "//Sources/DecisionDiagrams:DecisionDiagramsDocumentation",
         "//Sources/RangeTrees:RangeTreesDocumentation",
         "//Sources/SpatialTrees:SpatialTreesDocumentation",
+        "//Sources/Ropes:RopesDocumentation",
     ],
     tags = ["manual"],
     visibility = ["//visibility:public"],

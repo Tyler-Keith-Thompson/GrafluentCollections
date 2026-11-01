@@ -22,6 +22,7 @@ let products: [Product] = [
     .library(name: "DecisionDiagrams", targets: ["DecisionDiagrams"]),
     .library(name: "RangeTrees", targets: ["RangeTrees"]),
     .library(name: "SpatialTrees", targets: ["SpatialTrees"]),
+    .library(name: "Ropes", targets: ["Ropes"]),
 ]
 
 let dependencies: [Package.Dependency] = [
@@ -45,9 +46,11 @@ let targets: [Target] = [
     // Range and spatial trees
     .target(name: "RangeTrees", dependencies: ["CollectionErrors", "BinarySearchTrees", .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
     .target(name: "SpatialTrees", dependencies: ["CollectionErrors", .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
+    // Sequences and persistence
+    .target(name: "Ropes", dependencies: ["CollectionErrors", .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
 
     // Umbrella: `import GrafluentCollections` imports every module.
-    .target(name: "GrafluentCollections", dependencies: ["CollectionErrors", "BinarySearchTrees", "BTrees", "SkipLists", "Tries", "SuffixStructures", "DecisionDiagrams", "RangeTrees", "SpatialTrees"], exclude: bazelFiles),
+    .target(name: "GrafluentCollections", dependencies: ["CollectionErrors", "BinarySearchTrees", "BTrees", "SkipLists", "Tries", "SuffixStructures", "DecisionDiagrams", "RangeTrees", "SpatialTrees", "Ropes"], exclude: bazelFiles),
 
     // Shared fixtures (data only) for every test target.
     .target(name: "GrafluentCollectionsTestSupport", path: "Tests/GrafluentCollectionsTestSupport", exclude: bazelFiles),
@@ -60,6 +63,7 @@ let targets: [Target] = [
     .testTarget(name: "DecisionDiagramsTests", dependencies: ["DecisionDiagrams", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "GraphProtocols", package: "grafluent")], exclude: ["BUILD.bazel", "Performance"]),
     .testTarget(name: "RangeTreesTests", dependencies: ["RangeTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], exclude: ["BUILD.bazel", "Performance"]),
     .testTarget(name: "SpatialTreesTests", dependencies: ["SpatialTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], exclude: ["BUILD.bazel", "Performance"]),
+    .testTarget(name: "RopesTests", dependencies: ["Ropes", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], exclude: ["BUILD.bazel", "Performance"]),
     .testTarget(name: "GrafluentCollectionsTests", dependencies: ["GrafluentCollections", .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
 
     // Speed-reliant tests, split from the target of the same module (PERFORMANCE_TESTS in scripts/modules.py).
@@ -70,6 +74,7 @@ let targets: [Target] = [
     .testTarget(name: "DecisionDiagramsPerformanceTests", dependencies: ["DecisionDiagrams", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "GraphProtocols", package: "grafluent")], path: "Tests/DecisionDiagramsTests/Performance"),
     .testTarget(name: "RangeTreesPerformanceTests", dependencies: ["RangeTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], path: "Tests/RangeTreesTests/Performance"),
     .testTarget(name: "SpatialTreesPerformanceTests", dependencies: ["SpatialTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], path: "Tests/SpatialTreesTests/Performance"),
+    .testTarget(name: "RopesPerformanceTests", dependencies: ["Ropes", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], path: "Tests/RopesTests/Performance"),
 ]
 
 let package = Package(

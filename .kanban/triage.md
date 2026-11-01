@@ -247,6 +247,20 @@ of a hand-written loop over arrays.
   breadth-first order. The boxes variant (items at the deepest cell containing them) is a
   backlog item of its own; the Morton-coded linear layout was not used, since it makes
   insertion O(n).
+- D21. A rope is an AVL tree of ContiguousArray chunks with integer offsets (2026-11-01):
+  `Rope<Element>` in module `Ropes` is a `RandomAccessCollection`, `MutableCollection` and
+  `RangeReplaceableCollection` indexed by offsets `0 ..< count`. Vertices live in one flat array
+  (chunk, children, height, subtree element count); each chunk is its own copy-on-write
+  `ContiguousArray` of up to about 2 KB (at least 16 elements), so copies share unchanged chunks
+  and `append(contentsOf:)`, `+` and `extracting(_:)` share whole chunks. An AVL of chunks was
+  chosen over a B-tree of chunks: the tree has n/c vertices, so its depth is small either way, and
+  the AVL reuses the rotation pattern already in the library. A small insertion into a full
+  chunk splits it in half, or starts a new chunk at a chunk's end so appends fill chunks; large
+  insertions become chunks of their own. `split(at:)` is spelled `extracting(_:)` (the standard
+  library's name for a sub-range copy). `SubSequence` stays `Slice<Rope>`, since offsets in a
+  slice must match its base. Removals do not merge small neighbouring chunks yet, and the
+  summary-monoid hook (BigString-style metrics) is left for a later item. swift-collections'
+  `_RopeModule` is not public API, so it could not be used.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

@@ -11,3 +11,4 @@
 @_exported import DecisionDiagrams
 @_exported import RangeTrees
 @_exported import SpatialTrees
+@_exported import Ropes

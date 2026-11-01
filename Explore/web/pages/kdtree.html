@@ -1,0 +1,28 @@
+<!-- title: k-d trees and quadtrees · Explore GrafluentCollections -->
+<!-- description: Ask a real KDTree and a real Quadtree for the nearest point and for the points in a box, side by side over the same points, and see how much of the plane each one skips. -->
+<header class="sign">
+  <h1>k-d trees and quadtrees</h1>
+  <p class="question">Which point is nearest, without measuring the distance to every one?</p>
+</header>
+<p class="example lead">Example: the point nearest (60, 50). The k-d tree walks down to the query’s side of each split, finds a near candidate, and crosses back over a split line only when the line is nearer than the candidate. The quadtree opens its cells nearest first and stops as soon as the next cell is farther away than the best point found.</p>
+
+<div id="app"></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>Searching space</h2>
+  <p>Both structures hold points in the plane and answer the questions a flat list answers only by checking everything. They find the nearest point to a spot, the k nearest, the points within a radius, and the points inside a box. Maps, games, collision checks, clustering and image search all ask them, and the same ideas extend to three dimensions and beyond.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>Cut the plane, then skip</h2>
+  <p>A k-d tree (Bentley, 1975) splits the points at the median <i>x</i>, then splits each half at the median <i>y</i>, alternating down to single points. Every cut passes through a point, so the tree is balanced, and it is built once from a fixed set. A search goes down the side the query is on, then backs out. It crosses a split line only when the line is closer than the best answer so far, since nothing beyond a farther line can beat it.</p>
+  <p>A quadtree (Finkel and Bentley, 1974) cuts space rather than points. Each cell is cut into four equal quarters once it holds more than a few points. It accepts points one at a time, and crowded areas get small cells while empty ones stay large. A search opens the cells that could hold an answer. Both shapes come from GrafluentCollections as Grafluent trees: <code>BinaryTree(kdTree)</code> and <code>RootedTree(quadtree)</code>.</p>
+
+  <h2><small>Where it breaks</small>Many dimensions, or clustered points</h2>
+  <p>In a few dimensions the pruning skips most of the space. In dozens of dimensions almost every region lies near the query, so the search ends up checking nearly every point. Approximate methods take over there. A quadtree over tightly clustered points grows deep, narrow branches, and a k-d tree has to be rebuilt to stay balanced as points arrive.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The queries above, in GrafluentCollections</h2>
+  <pre id="code" aria-label="Swift code"></pre>
+</section>

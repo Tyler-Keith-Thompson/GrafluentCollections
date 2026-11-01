@@ -27,6 +27,7 @@ contents and the menu without a link.
 | `fenwick` | `FenwickTree`: `init(_:)`, `prefixSum(through:)`, `add(_:at:)`, `sum(in:)`; `Arborescence(_:)` for the update tree, with `parent(of:)` and `root` |
 | `segmenttree` | `LazySegmentTree` over `Sum` and `Minimum` with an add-to-range `MonoidAction`: `init(_:)`, `combined(in:)`, `apply(_:in:)`; `BinaryTree(_:)` for the shape, with `preorder`, `left(of:)`, `right(of:)` |
 | `intervaltree` | `IntervalTree`: `insert(_:value:)`, `remove(_:)`, `containing(_:)`, `overlapping(_:)`, subscript by in-order position; `BinaryTree(_:)` for the shape, with `left(of:)`, `right(of:)`, `parent(of:)`, `depth(of:)` |
+| `kdtree` | `KDTree`: `init(_:)`, `nearestIndex(to:)`, `indices(in:)`; `Quadtree`: `init(bounds:bucketCapacity:)`, `insert(_:at:)`, `nearest(to:)`, `items(in:)`; `BinaryTree(_:)` for the k-d tree's splits and `RootedTree(_:)` for the quadtree's cells |
 
 ## Requirements
 

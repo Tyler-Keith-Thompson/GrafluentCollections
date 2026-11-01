@@ -534,3 +534,18 @@ figure.fig { margin: 0; }
 .bars .bar.found { fill: var(--danger); }
 .bars .band { fill: var(--signal); opacity: .25; }
 .bars .tick { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
+
+/* k-d tree and quadtree: two squares of the plane, split lines and cells, the query on both. */
+.plane .ptitle { font-family: var(--display); font-weight: 800; font-size: 14px; fill: var(--muted); }
+.plane .frame { fill: none; stroke: var(--rule); stroke-width: 2; }
+.plane .split { stroke: var(--road); stroke-width: 1.5; }
+.plane .split.seen { stroke: var(--signal); stroke-width: 3; }
+.plane .skipped { fill: var(--rule); opacity: .45; }
+.plane .cell { fill: none; stroke: var(--road); stroke-width: 1.5; }
+.plane .cell.opened { fill: var(--signal); fill-opacity: .14; stroke: var(--signal); }
+.plane .pt { fill: var(--ink); }
+.plane .pt.seen { fill: var(--signal); }
+.plane .pt.found { fill: var(--danger); }
+.plane .spot { fill: none; stroke: var(--danger); stroke-width: 2.5; }
+.plane .reach { fill: none; stroke: var(--danger); stroke-width: 1.5; stroke-dasharray: 4 4; }
+.plane .qbox { fill: var(--danger); fill-opacity: .1; stroke: var(--danger); stroke-width: 2; }

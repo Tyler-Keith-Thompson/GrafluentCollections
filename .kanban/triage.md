@@ -334,6 +334,12 @@ of a hand-written loop over arrays.
   never changed, and would need a flag kept right through every insert, remove, split and
   join of five types and `IntervalTree`. Threaded successor links would cost every balancing
   scheme's rotations. Neither is worth that for iteration alone.
+- D28. AVL repairs stop rebalancing where a subtree keeps its height (2026-11-01): after an
+  insert or remove, each vertex up the path is rebalanced until its subtree's height comes out
+  unchanged; above that point heights cannot change, so each vertex only adjusts its size by
+  one and recomputes its augmentation summary. The summary is still recomputed on every
+  vertex of the path, because a removal's successor swap changes a key on the path, which can
+  change an interval tree's largest upper bound even where no height moves.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

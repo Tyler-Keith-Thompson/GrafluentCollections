@@ -19,7 +19,8 @@ package typealias _AVLBalancing = _AugmentedAVLBalancing<_NoAugmentation>
 
 /// AVL balancing (Adelson-Velsky and Landis, 1962): each vertex records its height in vertices,
 /// and the heights of its two subtrees differ by at most one. Every vertex on the path is
-/// rebalanced on the way back up, with one or two rotations where the difference reaches two.
+/// rebalanced on the way back up, with one or two rotations where the difference reaches two,
+/// until a subtree's height comes out as it was; above that only sizes and summaries change.
 /// Every vertex whose children change is updated, so `Augmentation` keeps a summary of each
 /// subtree.
 @usableFromInline
@@ -40,7 +41,7 @@ package enum _AugmentedAVLBalancing<Augmentation: _TreeAugmentation>: _TreeBalan
         _ depth: Int,
         inserted slot: Int32
     ) -> Int32 {
-        _rebalancePath(nodes, path, wentRight, depth, child: slot)
+        _rebalancePath(nodes, path, wentRight, depth, child: slot, sizeChange: 1)
     }
 
     @inlinable
@@ -52,7 +53,7 @@ package enum _AugmentedAVLBalancing<Augmentation: _TreeAugmentation>: _TreeBalan
         child: Int32,
         removed: Int32
     ) -> Int32 {
-        _rebalancePath(nodes, path, wentRight, depth, child: child)
+        _rebalancePath(nodes, path, wentRight, depth, child: child, sizeChange: -1)
     }
 
     /// The height of the tree whose root is `root`: the root's record. O(1).
@@ -120,23 +121,38 @@ package enum _AugmentedAVLBalancing<Augmentation: _TreeAugmentation>: _TreeBalan
     }
 
     /// Hangs `child` where the path ended, then rebalances each vertex of the path from the bottom
-    /// up; returns the new root.
+    /// up until a subtree keeps its height; above that the heights are as they were, so each
+    /// vertex's size changes by `sizeChange` and its summary is recomputed. Returns the new root.
     @inlinable
     static func _rebalancePath<Key>(
         _ nodes: UnsafeMutableBufferPointer<_TreeNode<Key>>,
         _ path: UnsafeMutableBufferPointer<Int32>,
         _ wentRight: UnsafeMutableBufferPointer<Bool>,
         _ depth: Int,
-        child: Int32
+        child: Int32,
+        sizeChange: Int32
     ) -> Int32 {
         var child = child
         var i = depth
         while i > 0 {
             i &-= 1
             let parent = path[i]
+            let heightBefore = nodes[Int(parent)].balance
             _Tree.hang(nodes, parent, right: wentRight[i], child)
             child = _rebalance(nodes, parent)
+            if nodes[Int(child)].balance == heightBefore {
+                break
+            }
         }
-        return child
+        guard i > 0 else { return child }
+        // The subtree below path[i − 1] kept its height; hang its (possibly rotated) root.
+        _Tree.hang(nodes, path[i &- 1], right: wentRight[i &- 1], child)
+        while i > 0 {
+            i &-= 1
+            let x = path[i]
+            nodes[Int(x)].size &+= sizeChange
+            Augmentation.update(nodes, x)
+        }
+        return path[0]
     }
 }

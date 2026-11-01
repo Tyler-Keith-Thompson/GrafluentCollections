@@ -436,6 +436,46 @@ struct AVLTreeTests {
         }
     }
 
+    @Test("Every vertex's recorded height and size match its subtree's after every seeded insert and remove", .tags(.randomized))
+    func recordsMatchSubtrees() {
+        var rng = SeededRandomNumberGenerator(seed: 3)
+        var tree = AVLTree<Int>()
+        var reference = Set<Int>()
+        for step in 0 ..< 3_000 {
+            let element = Int.random(in: 0 ..< 300, using: &rng)
+            if Bool.random(using: &rng) || step < 300 {
+                tree.insert(element)
+                reference.insert(element)
+            } else {
+                #expect(tree.remove(element) == reference.remove(element))
+            }
+            let nodes = tree._core.nodes
+            var heights = [Int32](repeating: 0, count: nodes.count)
+            var sizes = [Int32](repeating: 0, count: nodes.count)
+            // A postorder walk: a vertex is finished once both children are.
+            var stack: [(slot: Int32, childrenDone: Bool)] = tree._core.root < 0 ? [] : [(tree._core.root, false)]
+            var mismatches = 0
+            while let (x, childrenDone) = stack.popLast() {
+                let node = nodes[Int(x)]
+                if !childrenDone {
+                    stack.append((x, true))
+                    if node.left >= 0 { stack.append((node.left, false)) }
+                    if node.right >= 0 { stack.append((node.right, false)) }
+                    continue
+                }
+                let leftHeight = node.left < 0 ? 0 : heights[Int(node.left)]
+                let rightHeight = node.right < 0 ? 0 : heights[Int(node.right)]
+                heights[Int(x)] = Swift.max(leftHeight, rightHeight) + 1
+                sizes[Int(x)] = (node.left < 0 ? 0 : sizes[Int(node.left)]) + (node.right < 0 ? 0 : sizes[Int(node.right)]) + 1
+                if node.balance != heights[Int(x)] || node.size != sizes[Int(x)] || abs(leftHeight - rightHeight) > 1 {
+                    mismatches += 1
+                }
+            }
+            #expect(mismatches == 0, "a recorded height or size is wrong at step \(step)")
+        }
+        #expect(Array(tree) == reference.sorted())
+    }
+
     @Test("The checked spellings throw IndexOutOfRange outside the indices")
     func checkedThrows() {
         var tree: AVLTree = [1, 2, 3]

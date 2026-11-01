@@ -6,4 +6,5 @@
 @_exported import BinarySearchTrees
 @_exported import BTrees
 @_exported import SkipLists
+@_exported import Tries
 @_exported import RangeTrees

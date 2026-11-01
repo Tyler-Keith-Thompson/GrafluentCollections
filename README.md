@@ -108,10 +108,23 @@ print(queue.lowerBound(20))   // 2
 print(queue.layersView.vertices.filter { $0.level == 0 }.map(\.element))  // [10, 15, 20, 30]
 ```
 
+A `Trie` is a set of sequences, such as words, that answers prefix queries, and a
+`TrieDictionary` a dictionary keyed by them:
+
+```swift
+import GrafluentCollections
+
+let words = Trie(["car", "cart", "cat", "dog"])
+print(words.elements(withPrefix: "car").map { String($0) })  // ["car", "cart"]
+print(String(words.longestPrefix(of: "carton")!))            // cart
+print(words.hasPrefix("do"))                                  // true
+```
+
 ## Modules
 
 One module per family of structures. `BinarySearchTrees` (`AVLTree`, `AVLDictionary`, `RedBlackTree`, `Treap`, `SplayTree`),
-`BTrees` (`BTree`, `BTreeDictionary`), `SkipLists` (`SkipList`) and `RangeTrees` (`FenwickTree`) have shipped; the others are planned. The backlog tracks each planned structure, and `.kanban/triage.md` says what belongs
+`BTrees` (`BTree`, `BTreeDictionary`), `SkipLists` (`SkipList`),
+`Tries` (`Trie`, `TrieDictionary`) and `RangeTrees` (`FenwickTree`) have shipped; the others are planned. The backlog tracks each planned structure, and `.kanban/triage.md` says what belongs
 here.
 
 | Group | Modules |

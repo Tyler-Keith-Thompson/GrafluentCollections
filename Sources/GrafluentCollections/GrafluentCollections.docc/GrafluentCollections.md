@@ -28,5 +28,6 @@ print(scores.sum(in: 2 ..< 6))       // 19
 - ``BinarySearchTrees``
 - ``BTrees``
 - ``SkipLists``
+- ``Tries``
 - ``RangeTrees``
 - ``CollectionErrors``

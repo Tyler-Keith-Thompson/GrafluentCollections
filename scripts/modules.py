@@ -44,6 +44,8 @@ MODULES = [
     ("BinarySearchTrees", "Search trees", "Balanced binary search trees as sorted sets and dictionaries: AVLTree, AVLDictionary, RedBlackTree, Treap, SplayTree.", ["CollectionErrors", "grafluent/Trees"]),
     ("BTrees", "Search trees", "B-trees as sorted sets and dictionaries with many elements per node: BTree, BTreeDictionary.", ["CollectionErrors", "grafluent/Trees"]),
     ("SkipLists", "Search trees", "Skip lists as sorted sets, with their levels as a directed graph: SkipList.", ["CollectionErrors", "grafluent/GraphProtocols"]),
+    # Tries
+    ("Tries", "Tries", "Tries over sequences of any Hashable symbols, with prefix queries: Trie, TrieDictionary.", ["CollectionErrors", "grafluent/Trees"]),
     # Range and spatial trees
     ("RangeTrees", "Range and spatial trees", "Trees over a sequence that answer range queries: FenwickTree.", ["CollectionErrors", "grafluent/Trees"]),
 ]
@@ -60,6 +62,7 @@ TEST_TARGETS = [
     ("BinarySearchTreesTests", ["BinarySearchTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     ("BTreesTests", ["BTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     ("SkipListsTests", ["SkipLists", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/GraphProtocols"]),
+    ("TriesTests", ["Tries", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     ("RangeTreesTests", ["RangeTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     (f"{PROJECT}Tests", [PROJECT, "grafluent/Trees"]),
 ]

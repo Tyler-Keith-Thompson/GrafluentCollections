@@ -43,6 +43,15 @@ let package = Package(
             plugins: [.plugin(name: "BenchmarkPlugin", package: "benchmark")]
         ),
         .executableTarget(
+            name: "TriesBenchmarks",
+            dependencies: [
+                .product(name: "Benchmark", package: "benchmark"),
+                .product(name: "Tries", package: "GrafluentCollections"),
+            ],
+            path: "Benchmarks/TriesBenchmarks",
+            plugins: [.plugin(name: "BenchmarkPlugin", package: "benchmark")]
+        ),
+        .executableTarget(
             name: "RangeTreesBenchmarks",
             dependencies: [
                 .product(name: "Benchmark", package: "benchmark"),

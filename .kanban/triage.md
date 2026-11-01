@@ -154,6 +154,11 @@ of a hand-written loop over arrays.
 - D8. A multiway tree converts to `RootedTree` with a node's elements, in order, as its vertex
   (owner, 2026-10-31): `RootedTree<[Element]>` for a `BTree` and `RootedTree<[Key]>` for a
   `BTreeDictionary`, so a vertex is what a node holds, not a key chosen to stand for it.
+- D9. A collection over `Hashable` symbols orders them when they are `Comparable`, found at run
+  time (2026-10-31): a trie keeps each vertex's children sorted when `Symbol: Comparable`, so
+  iteration is lexicographic, and in insertion order otherwise, with one type rather than a
+  `Comparable` variant. A trie is a `Sequence` with an O(1) `count`, not a `Collection`, since
+  its keys have no cheap position.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

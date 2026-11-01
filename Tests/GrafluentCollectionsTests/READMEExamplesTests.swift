@@ -60,6 +60,16 @@ struct READMEExamplesTests {
         #expect(readings.popFirst() == first)
     }
 
+    @Test("Usage: a trie's prefix queries")
+    func trie() {
+        let words = Trie(["car", "cart", "cat", "dog"])
+        let withCar: [String] = ["car", "cart"]
+        let longest: String = "cart"
+        #expect(words.elements(withPrefix: "car").map { String($0) } == withCar)
+        #expect(words.longestPrefix(of: "carton").map { String($0) } == longest)
+        #expect(words.hasPrefix("do"))
+    }
+
     @Test("Usage: a skip list and its levels")
     func skipList() {
         var queue: SkipList = [30, 10, 20]

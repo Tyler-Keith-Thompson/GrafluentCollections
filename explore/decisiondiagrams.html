@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decision diagrams · Explore GrafluentCollections</title>
+<meta name="description" content="Build Boolean formulas in a real BinaryDecisionDiagram table and see each one as a graph of tests, sharing vertices with the formulas before it.">
+<script>
+  // The theme the reader picked last time, before anything is drawn.
+  try { const t = localStorage.getItem("explore-theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+  // A new page opens at its top, even where the host keeps the previous page's scroll position.
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%231d4f9c%22/%3E%3Cpath d=%22M9 22L16 9l7 13z%22 fill=%22none%22 stroke=%22white%22 stroke-width=%222.5%22/%3E%3Ccircle cx=%229%22 cy=%2222%22 r=%223.5%22 fill=%22white%22/%3E%3Ccircle cx=%2216%22 cy=%229%22 r=%223.5%22 fill=%22white%22/%3E%3Ccircle cx=%2223%22 cy=%2222%22 r=%223.5%22 fill=%22white%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="explore.css">
+<link rel="modulepreload" href="index.js">
+<link rel="preload" href="Explore.wasm" as="fetch" type="application/wasm" crossorigin>
+</head>
+<body data-page="decisiondiagrams">
+<div class="wrap">
+  <nav class="topbar" aria-label="Site">
+    <a class="home" href="./">Explore <b>GrafluentCollections</b></a>
+    <span class="spacer"></span>
+    <details class="menu"><summary><span class="burger" aria-hidden="true"></span><span class="mlabel">All pages</span></summary>
+      <nav class="mpanel" aria-label="All pages"><a class="mhome" href="./">Contents</a>
+        <div class="mgroup"><span>Search trees</span><a href="avl.html">AVL trees</a><a href="redblack.html">Red–black trees</a><a href="treap.html">Treaps</a><a href="splay.html">Splay trees</a><a href="btree.html">B-trees</a><a href="skiplist.html">Skip lists</a></div>
+        <div class="mgroup"><span>Strings</span><a href="trie.html">Tries and radix trees</a><a href="ahocorasick.html">Aho–Corasick</a><a href="suffix.html">Suffix arrays and trees</a></div>
+        <div class="mgroup"><span>Logic</span><a href="decisiondiagrams.html" aria-current="page">Decision diagrams</a></div>
+        <div class="mgroup"><span>Ranges</span><a href="fenwick.html">Fenwick trees</a><a href="segmenttree.html">Segment trees</a><a href="intervaltree.html">Interval trees</a></div>
+        <div class="mgroup"><span>Space</span><a href="kdtree.html">k-d trees and quadtrees</a></div>
+        <div class="mgroup"><span>Text</span><a href="rope.html">Ropes</a></div>
+        <div class="mgroup"><span>History</span><a href="persistent.html">Persistent trees</a><a href="lru.html">LRU caches</a></div>
+      </nav>
+    </details>
+    <a href="../documentation/">Docs</a>
+    <button type="button" class="theme" id="theme" aria-label="Switch between light and dark">◐<span class="tlabel"> Theme</span></button>
+  </nav>
+<header class="sign">
+  <h1>Decision diagrams</h1>
+  <p class="question">How do you store a Boolean function of many variables without writing out its whole truth table?</p>
+</header>
+<p class="example lead">Example: a &amp; b | c &amp; d. The diagram tests a, and when a is false it skips b and tests c straight away. Its last test, of d, is the very vertex the earlier formula c | d built, because the shared table never makes the same test twice.</p>
+
+<div id="app" data-loading aria-busy="true"><div><section class="panel controls" aria-label="Your formulas and assignment"><label class="field" for="decisiondiagrams-text">Formulas over a to e, separated by ; (! not, &amp; and, ^ xor, | or) <input id="decisiondiagrams-text" type="text" value="a &amp; b; c | d; a &amp; b | c &amp; d; (a ^ b) &amp; (c ^ d); a ^ b ^ c ^ d ^ e; !(a &amp; b) | e" maxlength="200" spellcheck="false" autocomplete="off"></label><label class="field" for="decisiondiagrams-assignment">The variables that are true <input id="decisiondiagrams-assignment" type="text" value="ad" maxlength="10" spellcheck="false" autocomplete="off"></label></section><section class="lab" aria-label="The decision diagram"><div class="panel stage"><p class="empty">The table starts with only the two constants. Press Step to build the first formula.</p><div class="legend"><span><i class="dot selected"></i>the assignment’s path</span><span><i class="dot done"></i>reused from an earlier formula</span></div><p class="legend">Each circle tests a variable: the dashed edge is taken when it is false, the solid one when it is true. T and F are the constants.</p></div><div class="side"><div class="panel" aria-live="polite"><span class="label">Formula 0 of 6</span><p class="narration">A decision diagram is a Boolean function drawn as a graph of tests, each asking one variable, in a fixed order. It merges any two tests that ask the same thing and lead the same way, and drops any test whose answer doesn’t matter. That leaves exactly one diagram per function.</p></div><div class="panel"><span class="label">The table</span><div class="stat"><div><span class="num">0</span>tests in this formula</div><div class="good"><span class="num">2</span>vertices in the shared table</div><div><span class="num">–</span>of 32 assignments true</div></div></div></div></section><section class="panel controls" aria-label="Playback"><div class="buttons"><button type="button" aria-label="Step back">◀ Back</button><button type="button" class="primary">▶ Play</button><button type="button">Step ▶</button><button type="button">Reset</button></div><div class="timeline-scroll"><svg class="timeline" width="300" viewBox="0 0 300 64" aria-label="Timeline of events"><line x1="8" y1="32" x2="292" y2="32" class="axis" /><g class="marble future" data-step="0"><circle cx="22" cy="32" r="9.0" class="m-red" /><text x="22" y="36" text-anchor="middle">1</text><title>a &amp; b: 2 tests above the constants. None of its tests were in the table before. It is true for 8 of the 32 assignments. With a and d true and the rest false, the path from the root reaches false.</title></g><g class="marble future" data-step="1"><circle cx="48" cy="32" r="9.0" class="m-green" /><text x="48" y="36" text-anchor="middle">2</text><title>c | d: 2 tests above the constants. None of its tests were in the table before. It is true for 24 of the 32 assignments. With a and d true and the rest false, the path from the root reaches true.</title></g><g class="marble future" data-step="2"><circle cx="74" cy="32" r="9.0" class="m-red" /><text x="74" y="36" text-anchor="middle">3</text><title>a &amp; b | c &amp; d: 4 tests above the constants. 1 of its tests was already in the table from an earlier formula, and building it reused that vertex rather than making a copy. It is true for 14 of the 32 assignments. With a and d true and the rest false, the path from the root reaches false.</title></g><g class="marble future" data-step="3"><circle cx="100" cy="32" r="9.0" class="m-green" /><text x="100" y="36" text-anchor="middle">4</text><title>(a ^ b) &amp; (c ^ d): 6 tests above the constants. 1 of its tests was already in the table from an earlier formula, and building it reused that vertex rather than making a copy. It is true for 8 of the 32 assignments. With a and d true and the rest false, the path from the root reaches true.</title></g><g class="marble future" data-step="4"><circle cx="126" cy="32" r="9.0" class="m-red" /><text x="126" y="36" text-anchor="middle">5</text><title>a ^ b ^ c ^ d ^ e: 9 tests above the constants. None of its tests were in the table before. It is true for 16 of the 32 assignments. With a and d true and the rest false, the path from the root reaches false.</title></g><g class="marble future" data-step="5"><circle cx="152" cy="32" r="9.0" class="m-green" /><text x="152" y="36" text-anchor="middle">6</text><title>!(a &amp; b) | e: 3 tests above the constants. 1 of its tests was already in the table from an earlier formula, and building it reused that vertex rather than making a copy. It is true for 28 of the 32 assignments. With a and d true and the rest false, the path from the root reaches true.</title></g><line x1="9" y1="8" x2="9" y2="56" class="playhead" /></svg></div><input id="scrub-decisiondiagrams" class="scrub" type="range" min="0" max="6" value="0" aria-label="Scrub through the steps"><div class="tl-legend"><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-green" /></svg>true for the assignment</span><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-red" /></svg>false for it</span></div></section></div></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>Functions you can compare and count</h2>
+  <p>A reduced ordered binary decision diagram stores a Boolean function so that equal functions are stored identically: checking whether two circuits do the same thing becomes comparing two numbers. It also counts the assignments that make a function true, finds one, and combines functions with any operator. Hardware verification, model checking, configuration solvers and access-control analysis all depend on it.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>A decision tree, with the duplicates merged</h2>
+  <p>Start from the full decision tree that asks every variable in a fixed order, a then b then c, with true or false at the leaves. Then apply two rules until nothing changes: merge any two tests that ask the same variable and lead to the same places, and remove any test whose two answers lead to the same place. What is left is the function’s unique diagram (Bryant, 1986).</p>
+  <p>GrafluentCollections keeps every function in one shared table, so a test that one formula builds is reused by every later formula that needs it. The tinted vertices above are those reuses. The table’s <code>graphView</code> is the graph drawn here, and any Grafluent algorithm can run over it.</p>
+
+  <h2><small>Where it breaks</small>Order matters, sometimes enormously</h2>
+  <p>The size of a diagram depends on the variable order. Some functions are tiny in one order and exponentially large in another, and a few, like integer multiplication, are large in every order. Choosing a good order is hard in general. When it goes badly, SAT solvers, which never build the whole function, often do better.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The formulas above, in GrafluentCollections</h2>
+  <pre id="code" data-loading aria-busy="true" aria-label="Swift code"><span><span class="k">import</span> <span class="t">DecisionDiagrams</span>
+
+<span class="c">/// A Boolean formula over variables numbered from 0.</span>
+indirect <span class="k">enum</span> <span class="t">Formula</span>: <span class="t">Equatable</span> {
+    <span class="k">case</span> variable(<span class="t">Int</span>)
+    <span class="k">case</span> not(<span class="t">Formula</span>)
+    <span class="k">case</span> and(<span class="t">Formula</span>, <span class="t">Formula</span>)
+    <span class="k">case</span> xor(<span class="t">Formula</span>, <span class="t">Formula</span>)
+    <span class="k">case</span> or(<span class="t">Formula</span>, <span class="t">Formula</span>)
+}
+
+<span class="k">let</span> formulas: [<span class="t">Formula</span>] = [.and(.variable(<span class="n">0</span>), .variable(<span class="n">1</span>)), .or(.variable(<span class="n">2</span>), .variable(<span class="n">3</span>)), .or(.and(.variable(<span class="n">0</span>), .variable(<span class="n">1</span>)), .and(.variable(<span class="n">2</span>), .variable(<span class="n">3</span>))), .and(.xor(.variable(<span class="n">0</span>), .variable(<span class="n">1</span>)), .xor(.variable(<span class="n">2</span>), .variable(<span class="n">3</span>))), .xor(.xor(.xor(.xor(.variable(<span class="n">0</span>), .variable(<span class="n">1</span>)), .variable(<span class="n">2</span>)), .variable(<span class="n">3</span>)), .variable(<span class="n">4</span>)), .or(.not(.and(.variable(<span class="n">0</span>), .variable(<span class="n">1</span>))), .variable(<span class="n">4</span>))]
+
+<span class="k">var</span> diagram = <span class="t">BinaryDecisionDiagram</span>(variableCount: <span class="n">5</span>)
+<span class="k">func</span> build(_ formula: <span class="t">Formula</span>) -&gt; <span class="t">BinaryDecisionDiagram</span>.<span class="t">Function</span> {
+    <span class="k">switch</span> formula {
+    <span class="k">case</span> .variable(<span class="k">let</span> index): diagram.variable(index)
+    <span class="k">case</span> .not(<span class="k">let</span> f): diagram.not(build(f))
+    <span class="k">case</span> .and(<span class="k">let</span> f, <span class="k">let</span> g): diagram.and(build(f), build(g))
+    <span class="k">case</span> .xor(<span class="k">let</span> f, <span class="k">let</span> g): diagram.xor(build(f), build(g))
+    <span class="k">case</span> .or(<span class="k">let</span> f, <span class="k">let</span> g): diagram.or(build(f), build(g))
+    }
+}
+<span class="k">var</span> functions: [<span class="t">BinaryDecisionDiagram</span>.<span class="t">Function</span>] = []
+<span class="k">var</span> tableBefore: [<span class="t">Int</span>] = []
+<span class="k">for</span> formula <span class="k">in</span> formulas {
+    tableBefore.append(diagram.tableVertexCount)
+    functions.append(build(formula))
+}
+<span class="k">let</span> vertices = diagram.tableVertexCount  <span class="c">// 38</span>
+</span></pre>
+</section>
+<nav class="pager" aria-label="Pages"><a class="prev" href="suffix.html"><span>Previous</span>Suffix arrays and trees</a><a class="next" href="fenwick.html"><span>Next</span>Fenwick trees</a></nav>
+</div>
+<script>
+  if (!location.hash) window.scrollTo(0, 0);
+  // Until the reader scrolls, keep the page at its top while the fonts and the interactive parts
+  // come in. `pinned` is read again once the interactive parts have mounted.
+  let pinned = !location.hash;
+  if (pinned) {
+    const release = () => { pinned = false; };
+    for (const kind of ["wheel", "touchstart", "keydown", "mousedown"]) addEventListener(kind, release, { once: true, passive: true });
+    const pin = new ResizeObserver(() => { if (pinned) window.scrollTo(0, 0); });
+    pin.observe(document.body);
+    setTimeout(() => { pinned = false; pin.disconnect(); }, 3000);
+  }
+  document.getElementById("theme").addEventListener("click", () => {
+    const root = document.documentElement;
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("explore-theme", root.dataset.theme); } catch {}
+  });
+</script>
+<script type="module">
+  // GrafluentCollections and the interface run as WebAssembly; this loads them.
+  import { init } from "./index.js";
+  // The page's first frame is already drawn; these views mount in its place. Return to the top
+  // once they are drawn, unless the link named a section or the reader has scrolled.
+  const toTop = () => { if (pinned) window.scrollTo(0, 0); };
+  init().then(() => requestAnimationFrame(() => requestAnimationFrame(toTop))).catch((error) => {
+    console.error("The explorer failed to start:", error);
+    for (const part of document.querySelectorAll("[data-loading]")) { part.removeAttribute("data-loading"); part.removeAttribute("aria-busy"); }
+    const app = document.getElementById("app");
+    if (app) app.textContent = "The interactive part of this page could not start in this browser.";
+  });
+</script>
+</body>
+</html>

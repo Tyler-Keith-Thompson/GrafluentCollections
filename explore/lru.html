@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LRU caches · Explore GrafluentCollections</title>
+<meta name="description" content="Store and look up entries in a real LRUCache with a small capacity and watch the recency order and each eviction.">
+<script>
+  // The theme the reader picked last time, before anything is drawn.
+  try { const t = localStorage.getItem("explore-theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+  // A new page opens at its top, even where the host keeps the previous page's scroll position.
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%231d4f9c%22/%3E%3Cpath d=%22M9 22L16 9l7 13z%22 fill=%22none%22 stroke=%22white%22 stroke-width=%222.5%22/%3E%3Ccircle cx=%229%22 cy=%2222%22 r=%223.5%22 fill=%22white%22/%3E%3Ccircle cx=%2216%22 cy=%229%22 r=%223.5%22 fill=%22white%22/%3E%3Ccircle cx=%2223%22 cy=%2222%22 r=%223.5%22 fill=%22white%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="explore.css">
+<link rel="modulepreload" href="index.js">
+<link rel="preload" href="Explore.wasm" as="fetch" type="application/wasm" crossorigin>
+</head>
+<body data-page="lru">
+<div class="wrap">
+  <nav class="topbar" aria-label="Site">
+    <a class="home" href="./">Explore <b>GrafluentCollections</b></a>
+    <span class="spacer"></span>
+    <details class="menu"><summary><span class="burger" aria-hidden="true"></span><span class="mlabel">All pages</span></summary>
+      <nav class="mpanel" aria-label="All pages"><a class="mhome" href="./">Contents</a>
+        <div class="mgroup"><span>Search trees</span><a href="avl.html">AVL trees</a><a href="redblack.html">Red–black trees</a><a href="treap.html">Treaps</a><a href="splay.html">Splay trees</a><a href="btree.html">B-trees</a><a href="skiplist.html">Skip lists</a></div>
+        <div class="mgroup"><span>Strings</span><a href="trie.html">Tries and radix trees</a><a href="ahocorasick.html">Aho–Corasick</a><a href="suffix.html">Suffix arrays and trees</a></div>
+        <div class="mgroup"><span>Logic</span><a href="decisiondiagrams.html">Decision diagrams</a></div>
+        <div class="mgroup"><span>Ranges</span><a href="fenwick.html">Fenwick trees</a><a href="segmenttree.html">Segment trees</a><a href="intervaltree.html">Interval trees</a></div>
+        <div class="mgroup"><span>Space</span><a href="kdtree.html">k-d trees and quadtrees</a></div>
+        <div class="mgroup"><span>Text</span><a href="rope.html">Ropes</a></div>
+        <div class="mgroup"><span>History</span><a href="persistent.html">Persistent trees</a><a href="lru.html" aria-current="page">LRU caches</a></div>
+      </nav>
+    </details>
+    <a href="../documentation/">Docs</a>
+    <button type="button" class="theme" id="theme" aria-label="Switch between light and dark">◐<span class="tlabel"> Theme</span></button>
+  </nav>
+<header class="sign">
+  <h1>LRU caches</h1>
+  <p class="question">When a cache is full, which entry should it forget?</p>
+</header>
+<p class="example lead">Example: a cache with room for three holds a, b and c. Looking up a moves it to the front, so when d arrives the cache forgets b, the entry used longest ago, and not a, the oldest one stored.</p>
+
+<div id="app" data-loading aria-busy="true"><div><section class="panel controls" aria-label="Your capacity and operations"><label class="field" for="lru-capacity">Capacity, 1 to 8 <input id="lru-capacity" type="text" value="3" maxlength="2" inputmode="numeric" autocomplete="off"></label><label class="field" for="lru-operations">key=value stores, key? looks up <input id="lru-operations" type="text" value="a=1 b=2 c=3 a? d=4 b? c? e=5 a? f=6 d? e=7" maxlength="160" spellcheck="false" autocomplete="off"></label></section><section class="lab" aria-label="The cache"><div class="panel stage"><span class="label">The entries, most recent first</span><p class="empty">The cache starts empty. Step to store the first entry.</p><div class="legend"><span><i class="dot selected"></i>the entry this step stored or read</span><span><i class="dot current"></i>the entry evicted</span></div><p class="legend">Above each entry its key; inside, its value. The arrows run from each entry to the next less recently used, the path RootedTree(cache) gives.</p></div><div class="side"><div class="panel" aria-live="polite"><span class="label">Operation 0 of 12</span><p class="narration">A cache with room for 3 entries. Every store and every hit moves its entry to the front; when a store finds the cache full, the entry at the back, the least recently used, goes.</p></div><div class="panel"><span class="label">So far</span><div class="stat"><div class="good"><span class="num">0</span>hits</div><div><span class="num">0</span>misses</div><div class="bad"><span class="num">0</span>evictions</div></div></div></div></section><section class="panel controls" aria-label="Playback"><div class="buttons"><button type="button" aria-label="Step back">◀ Back</button><button type="button" class="primary">▶ Play</button><button type="button">Step ▶</button><button type="button">Reset</button></div><div class="timeline-scroll"><svg class="timeline" width="342" viewBox="0 0 342 64" aria-label="Timeline of events"><line x1="8" y1="32" x2="334" y2="32" class="axis" /><g class="marble future" data-step="0"><circle cx="22" cy="32" r="9.0" class="m-blue" /><text x="22" y="36" text-anchor="middle">a</text><title>Store 1 for a: there is room, so a goes in at the front as the most recent entry.</title></g><g class="marble future" data-step="1"><circle cx="48" cy="32" r="9.0" class="m-blue" /><text x="48" y="36" text-anchor="middle">b</text><title>Store 2 for b: there is room, so b goes in at the front as the most recent entry.</title></g><g class="marble future" data-step="2"><circle cx="74" cy="32" r="9.0" class="m-blue" /><text x="74" y="36" text-anchor="middle">c</text><title>Store 3 for c: there is room, so c goes in at the front as the most recent entry.</title></g><g class="marble future" data-step="3"><circle cx="100" cy="32" r="9.0" class="m-green" /><text x="100" y="36" text-anchor="middle">a</text><title>Look up a: a hit, 1. Reading it makes a the most recent entry, so it moves to the front, and the others keep their order.</title></g><g class="marble future" data-step="4"><circle cx="126" cy="32" r="9.0" class="m-red" /><text x="126" y="36" text-anchor="middle">d</text><title>Store 4 for d: the cache already holds 3, its capacity, so the least recently used entry, b = 2, is evicted, and d goes in at the front.</title></g><g class="marble future" data-step="5"><circle cx="152" cy="32" r="9.0" class="m-red" /><text x="152" y="36" text-anchor="middle">b</text><title>Look up b: a miss. The cache doesn’t hold it, so nothing moves. A program would now fetch the value the slow way and store it.</title></g><g class="marble future" data-step="6"><circle cx="178" cy="32" r="9.0" class="m-green" /><text x="178" y="36" text-anchor="middle">c</text><title>Look up c: a hit, 3. Reading it makes c the most recent entry, so it moves to the front, and the others keep their order.</title></g><g class="marble future" data-step="7"><circle cx="204" cy="32" r="9.0" class="m-red" /><text x="204" y="36" text-anchor="middle">e</text><title>Store 5 for e: the cache already holds 3, its capacity, so the least recently used entry, a = 1, is evicted, and e goes in at the front.</title></g><g class="marble future" data-step="8"><circle cx="230" cy="32" r="9.0" class="m-red" /><text x="230" y="36" text-anchor="middle">a</text><title>Look up a: a miss. The cache doesn’t hold it, so nothing moves. A program would now fetch the value the slow way and store it.</title></g><g class="marble future" data-step="9"><circle cx="256" cy="32" r="9.0" class="m-red" /><text x="256" y="36" text-anchor="middle">f</text><title>Store 6 for f: the cache already holds 3, its capacity, so the least recently used entry, d = 4, is evicted, and f goes in at the front.</title></g><g class="marble future" data-step="10"><circle cx="282" cy="32" r="9.0" class="m-red" /><text x="282" y="36" text-anchor="middle">d</text><title>Look up d: a miss. The cache doesn’t hold it, so nothing moves. A program would now fetch the value the slow way and store it.</title></g><g class="marble future" data-step="11"><circle cx="308" cy="32" r="9.0" class="m-blue" /><text x="308" y="36" text-anchor="middle">e</text><title>Store 7 for e: e is already there, so its value is replaced and it moves to the front. Nothing is evicted.</title></g><line x1="9" y1="8" x2="9" y2="56" class="playhead" /></svg></div><input id="scrub-lru" class="scrub" type="range" min="0" max="12" value="0" aria-label="Scrub through the steps"><div class="tl-legend"><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-blue" /></svg>store</span><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-green" /></svg>hit</span><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-red" /></svg>miss or eviction</span></div></section></div></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>Keeping the answers you are likely to need again</h2>
+  <p>A cache keeps the results of slow work, a disk read, a network request or a long computation, so asking again is fast. Memory is limited, so a full cache must drop something, and the entry used longest ago is a good guess at the one least needed: what a program used recently it tends to use again soon. Databases, operating systems, web servers and image loaders use LRU or close variants.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>A dictionary and a list</h2>
+  <p>A hash table finds an entry by its key in constant time. The entries are also linked in a list in order of use, most recent at the front. Every hit or store unlinks its entry and puts it at the front, and an eviction takes the entry at the back, so every operation is O(1).</p>
+  <p>GrafluentCollections keeps the entries in one flat array, the list’s links as indices into it, and a table from key to index. Iterating the cache goes from most to least recent without changing the order, and <code>RootedTree(cache)</code> gives the list as a path.</p>
+
+  <h2><small>Where it breaks</small>Scans and frequency</h2>
+  <p>One pass over more data than the cache holds pushes out everything, including entries used constantly, for data read once. And recency is not frequency: an entry used a thousand times yesterday goes before one used once a minute ago. Policies such as LFU, 2Q, ARC and W-TinyLFU weigh frequency too, at some cost in bookkeeping.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The operations above, in GrafluentCollections</h2>
+  <pre id="code" data-loading aria-busy="true" aria-label="Swift code"><span><span class="k">import</span> <span class="t">Caches</span>
+<span class="k">import</span> <span class="t">Trees</span>
+
+<span class="c">/// One operation of the page: store a value for a key, or look a key up.</span>
+<span class="k">enum</span> <span class="t">CacheOperation</span>: <span class="t">Equatable</span> {
+    <span class="k">case</span> insert(<span class="t">String</span>, value: <span class="t">Int</span>)
+    <span class="k">case</span> lookup(<span class="t">String</span>)
+}
+
+<span class="c">/// What an operation found or pushed out.</span>
+<span class="k">enum</span> <span class="t">CacheOutcome</span> {
+    <span class="k">case</span> stored(evicted: <span class="t">LRUCache</span>&lt;<span class="t">String</span>, <span class="t">Int</span>&gt;.<span class="t">Entry</span>?)
+    <span class="k">case</span> found(<span class="t">Int</span>?)
+}
+
+<span class="k">let</span> capacity = <span class="n">3</span>
+<span class="k">let</span> operations: [<span class="t">CacheOperation</span>] = [.insert(<span class="s">"a"</span>, value: <span class="n">1</span>), .insert(<span class="s">"b"</span>, value: <span class="n">2</span>), .insert(<span class="s">"c"</span>, value: <span class="n">3</span>), .lookup(<span class="s">"a"</span>), .insert(<span class="s">"d"</span>, value: <span class="n">4</span>), .lookup(<span class="s">"b"</span>), .lookup(<span class="s">"c"</span>), .insert(<span class="s">"e"</span>, value: <span class="n">5</span>), .lookup(<span class="s">"a"</span>), .insert(<span class="s">"f"</span>, value: <span class="n">6</span>), .lookup(<span class="s">"d"</span>), .insert(<span class="s">"e"</span>, value: <span class="n">7</span>)]
+
+<span class="k">var</span> cache = <span class="t">LRUCache</span>&lt;<span class="t">String</span>, <span class="t">Int</span>&gt;(capacity: capacity)
+<span class="k">var</span> history = [cache]
+<span class="k">var</span> outcomes: [<span class="t">CacheOutcome</span>] = []
+<span class="k">for</span> operation <span class="k">in</span> operations {
+    <span class="k">switch</span> operation {
+    <span class="k">case</span> .insert(<span class="k">let</span> key, <span class="k">let</span> value):
+        outcomes.append(.stored(evicted: cache.insert(value, forKey: key)))
+    <span class="k">case</span> .lookup(<span class="k">let</span> key):
+        outcomes.append(.found(cache[key]))
+    }
+    history.append(cache)
+}
+<span class="k">let</span> recency = cache.map(\.key)  <span class="c">// ["e", "f", "c"]</span>
+
+<span class="k">let</span> path = <span class="t">RootedTree</span>(cache)
+<span class="k">let</span> depth = path.map { $<span class="n">0</span>.height }  <span class="c">// 2</span>
+</span></pre>
+</section>
+<nav class="pager" aria-label="Pages"><a class="prev" href="persistent.html"><span>Previous</span>Persistent trees</a><a class="next" href="./#contents"><span>Next</span>Contents</a></nav>
+</div>
+<script>
+  if (!location.hash) window.scrollTo(0, 0);
+  // Until the reader scrolls, keep the page at its top while the fonts and the interactive parts
+  // come in. `pinned` is read again once the interactive parts have mounted.
+  let pinned = !location.hash;
+  if (pinned) {
+    const release = () => { pinned = false; };
+    for (const kind of ["wheel", "touchstart", "keydown", "mousedown"]) addEventListener(kind, release, { once: true, passive: true });
+    const pin = new ResizeObserver(() => { if (pinned) window.scrollTo(0, 0); });
+    pin.observe(document.body);
+    setTimeout(() => { pinned = false; pin.disconnect(); }, 3000);
+  }
+  document.getElementById("theme").addEventListener("click", () => {
+    const root = document.documentElement;
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("explore-theme", root.dataset.theme); } catch {}
+  });
+</script>
+<script type="module">
+  // GrafluentCollections and the interface run as WebAssembly; this loads them.
+  import { init } from "./index.js";
+  // The page's first frame is already drawn; these views mount in its place. Return to the top
+  // once they are drawn, unless the link named a section or the reader has scrolled.
+  const toTop = () => { if (pinned) window.scrollTo(0, 0); };
+  init().then(() => requestAnimationFrame(() => requestAnimationFrame(toTop))).catch((error) => {
+    console.error("The explorer failed to start:", error);
+    for (const part of document.querySelectorAll("[data-loading]")) { part.removeAttribute("data-loading"); part.removeAttribute("aria-busy"); }
+    const app = document.getElementById("app");
+    if (app) app.textContent = "The interactive part of this page could not start in this browser.";
+  });
+</script>
+</body>
+</html>

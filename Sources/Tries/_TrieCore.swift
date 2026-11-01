@@ -25,7 +25,7 @@ package struct _TrieCore<Symbol: Hashable, Value> {
         firstChildren = [-1]
         nextSiblings = [-1]
         counts = [0]
-        values = [nil]
+        values = ContiguousArray(repeating: nil, count: 1)
     }
 
     /// The number of keys.

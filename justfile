@@ -61,6 +61,22 @@ docs:
 # The checkout of BenchmarkHarness whose benchmark-harness tool records simulated baselines.
 BENCHMARK_HARNESS := env("BENCHMARK_HARNESS", home_directory() / "workspace" / "BenchmarkHarness")
 
+[doc('Fuzz with libFuzzer, time-boxed, e.g. just fuzz, or just fuzz FuzzTries -t 600')]
+fuzz *args="":
+    python3 {{PROJECT_ROOT}}/scripts/fuzz.py run {{args}}
+
+[doc('Replay every fuzz corpus once, after a change')]
+fuzz-regress *args="":
+    python3 {{PROJECT_ROOT}}/scripts/fuzz.py regress {{args}}
+
+[doc('Replay and minimize one crash, e.g. just fuzz-repro FuzzTries Fuzz/Crashes/FuzzTries/crash-…')]
+fuzz-repro target input:
+    python3 {{PROJECT_ROOT}}/scripts/fuzz.py repro {{target}} {{input}}
+
+[doc('Differential testing against Python references, e.g. just diff, just diff --section tries, or just diff --cases 3000 --seed 7')]
+diff *args="":
+    python3 {{PROJECT_ROOT}}/scripts/differential.py {{args}}
+
 [doc('Run the benchmarks, e.g. just bench, or just bench --target GreetingsBenchmarks')]
 bench *args="":
     cd {{PROJECT_ROOT}}/Benchmarks && {{SWIFT}} package --allow-writing-to-package-directory benchmark {{args}}

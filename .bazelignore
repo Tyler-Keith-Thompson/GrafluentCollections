@@ -13,8 +13,10 @@ bazel-bin
 bazel-out
 bazel-testlogs
 
-# The benchmark package is SwiftPM-only.
+# The benchmark, fuzz and differential packages are SwiftPM-only.
 Benchmarks
+Fuzz
+Differential
 
 # Overlays the bootstrap script copies over the template (server type); not built in place.
 templates

@@ -391,7 +391,7 @@ struct _Orthtree<Point: SIMD, Element> where Point.Scalar: FloatingPoint {
     /// The cells, renumbered from the root in breadth-first order, as each one's parent.
     @inlinable
     func cellParents() -> [Int?] {
-        var parents: [Int?] = [nil]
+        var parents = [Int?](repeating: nil, count: 1)
         var queue = [0]
         var cursor = 0
         while cursor < queue.count {

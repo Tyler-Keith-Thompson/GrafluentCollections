@@ -36,7 +36,7 @@ package struct _RadixCore<Symbol: Hashable, Value> {
         firstChildren = [-1]
         nextSiblings = [-1]
         counts = [0]
-        values = [nil]
+        values = ContiguousArray(repeating: nil, count: 1)
         liveSymbols = 0
     }
 

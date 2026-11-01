@@ -9,6 +9,22 @@ import Trees
 
 @Suite("TrieDictionary: hand-worked cases")
 struct TrieDictionaryTests {
+    @Test("A value stored for the empty key of an empty dictionary is its root's, and read back")
+    func emptyKeyOfEmptyDictionary() {
+        // From FuzzTries: the first store into a fresh dictionary copies its storage, which once
+        // started from a static literal that AddressSanitizer reported read past its end.
+        var empty = TrieDictionary<UInt8, Int>()
+        let none: Int? = nil
+        #expect(empty.updateValue(1, forKey: [UInt8]()) == none)
+        let one: Int? = 1
+        #expect(empty[[UInt8]()] == one)
+        let count = 1
+        #expect(empty.count == count)
+        var radix = RadixTreeDictionary<UInt8, Int>()
+        #expect(radix.updateValue(1, forKey: [UInt8]()) == none)
+        #expect(radix[[UInt8]()] == one)
+    }
+
     @Test("The subscript reads, stores and removes values by key")
     func subscriptReadsAndWrites() {
         var routes = TrieDictionary<Character, String>()

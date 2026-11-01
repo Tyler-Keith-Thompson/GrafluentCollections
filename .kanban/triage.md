@@ -301,6 +301,19 @@ of a hand-written loop over arrays.
   baselines stay comparable; `BenchmarkWorkloads` (SplitMix64, `IntegerWorkload`) serves new
   targets. Every module has a release ratio test; a ratio that the library loses (the trie
   against `Set<String>`) is bounded as a slowdown and filed.
+- D25. Fuzz and differential harnesses follow Grafluent's layout, with local corpora
+  (2026-11-01): `Fuzz/` holds one libFuzzer target per module (not per structure: a module's
+  structures share a target, chosen by the first byte), each checking every public answer
+  against a naive model after every operation, built with swiftly's 6.3.3 toolchain and
+  AddressSanitizer by `scripts/fuzz.py` (`just fuzz`, `just fuzz-regress`, `just fuzz-repro`).
+  Corpora stay local, as in Grafluent, rather than committed: thousands of inputs per target
+  would churn the history, and a crash is kept as a regression test instead. `Differential/` is
+  an executable that answers JSON cases per section, and `scripts/differential.py` (`just
+  diff`) compares it with pinned Python references run through `uv`: sortedcontainers, pygtrie,
+  pyahocorasick, dd, intervaltree, scipy's cKDTree, cachetools; the suffix structures compare
+  with Python's own sort and scans. ZDDs, range-sum trees, octrees and ropes have no maintained
+  Python reference and are covered by fuzzing alone. The differential executable builds with
+  SwiftPM only (no Bazel target), since it is a local tool. No CI job runs either harness.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

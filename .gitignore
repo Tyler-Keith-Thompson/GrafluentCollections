@@ -23,6 +23,11 @@ xcuserdata/
 # macOS
 .DS_Store
 
+# Fuzzing (see Fuzz/README.md): the corpus is a local cache; a crash becomes a test, then goes.
+/Fuzz/Corpus/
+/Fuzz/Crashes/
+/Differential/Failures/
+
 # Python
 __pycache__/
 

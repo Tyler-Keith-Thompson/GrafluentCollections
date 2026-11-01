@@ -1,0 +1,9 @@
+# BuildBuddy's remote cache and build results. tools/bazel reads this file when the login Keychain
+# holds a BuildBuddy API key (`just buildbuddy-key`); the credential helper hands Bazel that key
+# for each request to BuildBuddy.
+build --bes_results_url=https://app.buildbuddy.io/invocation/
+build --bes_backend=grpcs://remote.buildbuddy.io
+build --remote_cache=grpcs://remote.buildbuddy.io
+# Compressed (zstd) transfers to and from the cache.
+build --remote_cache_compression
+common --credential_helper=remote.buildbuddy.io=%workspace%/tools/buildbuddy-credentials

@@ -27,7 +27,8 @@ Tests/<Module>Tests/             One test target per module; Performance/ holds 
 Tests/GrafluentCollectionsTests/          The README examples, verbatim
 Tests/GrafluentCollectionsTestSupport/    Shared test fixtures (data only)
 scripts/modules.py               The module graph
-tools/                           Bazel rule wrappers (warnings as errors, Swift 6 mode), DocC rules
+tools/                           Bazel rule wrappers (warnings as errors, Swift 6 mode), DocC rules;
+                                 tools/bazel turns BuildBuddy on when the Keychain holds its key
 Explore/                         The browser explorer: pages that run the library as WebAssembly
 ```
 
@@ -78,6 +79,7 @@ Every shell command gets a timeout. macOS has no `timeout`; use
 | `just generate` | Xcode project from the Bazel graph |
 | `just wasi-test [-c release] [--targets X,Y]` | SwiftPM tests on wasm32-wasi under wasmtime: a 32-bit `Int` |
 | `just explore` | The explorer into `Explore/dist` (`EXPLORE_XCODE=/Applications/Xcode-26.2.0.app` when the newest Xcode's SDK crashes the toolchain) |
+| `just buildbuddy-key`, `just ci-secrets` | Store the BuildBuddy key in the Keychain (once per Mac; builds then use the remote cache); set it as this repository's Actions secret with `gh` |
 | `just template-update` | Merge the project template's changes since `.template.json`'s commit; resolve conflicts, then `just modules`, `just test` |
 | `bazel query 'rdeps(//Tests/..., //Sources/X)'` | Test targets affected by a change to X |
 
@@ -90,6 +92,8 @@ Every shell command gets a timeout. macOS has no `timeout`; use
 - Run suites through Bazel, not `swift test --filter`.
 - First-party warnings are errors (`tools/swift_rules.bzl`); dependencies build quietly. Fix the
   warning, never suppress it.
+- Exit tests (`#expect(processExitsWith:)`) go in files of their own, apart from the other tests:
+  builds for platforms that cannot start a child process leave those files out.
 
 ## Building blocks
 
@@ -172,13 +176,17 @@ the toolchain crashes on the manifest against a newer Xcode's SDK, pass `--xcode
 | Integer arithmetic that could overflow, or anything platform-conditional | `just wasi-test -c release --targets XTests` (a 32-bit `Int`) |
 | A change meant to be faster | `just bench-simulated-compare --target <Module>Benchmarks`, not `just bench-compare` |
 
-### Before a push
+### Pushing
 
-Every push to `main` releases a patch version, and CI minutes are scarce, so batch pushes.
+Push finished work to `main` yourself; don't wait to be asked, and never end a task with
+finished commits unpushed. Every push to `main` releases a patch version, and CI minutes are
+scarce, so push once per batch rather than once per commit: when the work the owner gave you is
+done (the whole request, or Ready is empty when working the backlog), push everything it
+produced together.
 
 1. Verify the committed state in a clean worktree: `bazel test //...` in debug, then
    `--config=release`.
-2. Watch the Release and DocC workflows to green, and fix anything that breaks.
+2. Push, then watch the Release and DocC workflows to green, and fix anything that breaks.
 3. Don't add CI steps that rebuild without the owner's approval.
 
 ## House rules

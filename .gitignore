@@ -36,6 +36,7 @@ __pycache__/
 Benchmarks/.benchmarkBaselines/*/*
 !Benchmarks/.benchmarkBaselines/*/main/
 !Benchmarks/.benchmarkBaselines/*/simulated/
+
 *.swp
 
 # The explorer's build output (just explore).

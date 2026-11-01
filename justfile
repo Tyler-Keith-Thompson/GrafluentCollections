@@ -118,6 +118,30 @@ generate *args="":
 release:
     {{BAZEL_RELEASE}} build --config=release //...
 
+[doc('Store the BuildBuddy API key in the login Keychain (asks for it), once per Mac: every project from the template then builds with the remote cache (tools/bazel)')]
+buildbuddy-key:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    read -r -s -p "BuildBuddy API key (hidden): " key
+    echo
+    if [ -z "$key" ]; then
+        echo "No key entered; nothing stored" >&2
+        exit 1
+    fi
+    # Through security's own command reader, so the key never appears in a process's arguments.
+    printf 'add-generic-password -U -s buildbuddy -a api-key -l "BuildBuddy API key" -w %s\n' "$key" | security -i >/dev/null
+    echo "Stored. Builds use BuildBuddy from the next Bazel command."
+
+[doc('Set this repository’s BUILDBUDDY_API_KEY Actions secret from the Keychain with gh, so CI uses the remote cache too')]
+ci-secrets:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if ! key="$(security find-generic-password -s buildbuddy -a api-key -w 2>/dev/null)"; then
+        echo "No BuildBuddy API key in the Keychain; store it with just buildbuddy-key" >&2
+        exit 1
+    fi
+    printf '%s' "$key" | gh secret set BUILDBUDDY_API_KEY
+
 # The checkout of ProjectTemplate this project came from; .template.json records the commit.
 PROJECT_TEMPLATE := env("PROJECT_TEMPLATE", home_directory() / "workspace" / "ProjectTemplate")
 

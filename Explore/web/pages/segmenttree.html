@@ -1,0 +1,28 @@
+<!-- title: Segment trees · Explore GrafluentCollections -->
+<!-- description: Query sums and minimums over ranges of a real LazySegmentTree and add to whole ranges at once, watching which cells each operation touches. -->
+<header class="sign">
+  <h1>Segment trees</h1>
+  <p class="question">How do you answer “what is the smallest value from here to there?” when the values keep changing?</p>
+</header>
+<p class="example lead">Example: the range 2 to 9 of twelve values splits into three cells whose spans fit inside it, 2–3, 4–7 and 8–9. Their sums add up to the range’s sum, and the smallest of their minimums is the range’s minimum, so a query reads a handful of cells however long the range is.</p>
+
+<div id="app"></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>Any range, any combination</h2>
+  <p>A segment tree holds a list of values and combines any contiguous range of them: a sum, a minimum, a maximum, a product, or any other operation that is associative and has an identity (a monoid). It changes one value, or with lazy propagation adds to every value in a range, in a number of steps that grows with the logarithm of the count. Range minimum queries, sliding statistics, and scheduling all use it.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>Halve until it fits</h2>
+  <p>The values, padded to a power of two, are the leaves of a perfect binary tree, and each cell above holds the combination of its two children, so the root holds the whole list. To answer a range, start at the root: a cell inside the range contributes its total whole, a cell outside it is skipped, and a cell that straddles an end passes the question to its children. At most two cells per level straddle, so the walk stays short.</p>
+  <p>A range update walks the same way. It changes the totals of the covering cells at once and leaves the rest of the change <em>pending</em> on them, to be pushed down to their children only when a later operation needs to look below. That is the lazy part, and why each update costs no more than a query. This page runs two trees side by side, one of sums and one of minimums, over the same values and operations.</p>
+
+  <h2><small>Where it breaks</small>Memory and the constant</h2>
+  <p>The tree keeps about twice as many cells as values, and every operation walks from the root. When only sums and single-value changes are needed, a Fenwick tree does the same job in half the memory with a tighter loop. When the values never change, a sparse table answers minimums in one step.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The operations above, in GrafluentCollections</h2>
+  <pre id="code" aria-label="Swift code"></pre>
+</section>

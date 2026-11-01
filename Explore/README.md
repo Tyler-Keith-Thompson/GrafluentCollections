@@ -25,6 +25,7 @@ contents and the menu without a link.
 | `trie` | `Trie` and `RadixTree`: `insert(_:)`, `elements(withPrefix:)`, `longestPrefix(of:)`; `PrefixTree(_:)` and `Arborescence(_:)` for the shapes |
 | `ahocorasick` | `AhoCorasickAutomaton`: `init(patterns:)`, `stateCount`, `matches(in:)`; `statesView` for the goto edges and failure links, with `patternIndices(endingAt:)` |
 | `fenwick` | `FenwickTree`: `init(_:)`, `prefixSum(through:)`, `add(_:at:)`, `sum(in:)`; `Arborescence(_:)` for the update tree, with `parent(of:)` and `root` |
+| `segmenttree` | `LazySegmentTree` over `Sum` and `Minimum` with an add-to-range `MonoidAction`: `init(_:)`, `combined(in:)`, `apply(_:in:)`; `BinaryTree(_:)` for the shape, with `preorder`, `left(of:)`, `right(of:)` |
 
 ## Requirements
 

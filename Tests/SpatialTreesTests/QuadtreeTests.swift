@@ -157,20 +157,6 @@ struct QuadtreeTests {
         #expect(throws: OutOfBounds()) { try space.insert(0, checkedAt: [0, 0, -0.1]) }
     }
 
-    @Test("Points outside the bounds and a bucket capacity below one trap", .tags(.precondition))
-    func plainTraps() async {
-        await #expect(processExitsWith: .failure) {
-            var tree = Quadtree<Int>(bounds: BoundingBox(lower: [0, 0], upper: [1, 1]))
-            tree.insert(0, at: [2, 0])
-        }
-        await #expect(processExitsWith: .failure) {
-            _ = Quadtree<Int>(bounds: BoundingBox(lower: [0, 0], upper: [1, 1]), bucketCapacity: 0)
-        }
-        await #expect(processExitsWith: .failure) {
-            var space = Octree<Int>(bounds: BoundingBox(lower: [0, 0, 0], upper: [1, 1, 1]))
-            space.insert(0, at: [0, 0, 2])
-        }
-    }
 }
 
 @Suite("Quadtree: properties")

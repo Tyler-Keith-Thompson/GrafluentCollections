@@ -181,22 +181,6 @@ struct AhoCorasickAutomatonTests {
         #expect(throws: IndexOutOfRange()) { try automaton.patternLength(checkedAt: -1) }
     }
 
-    @Test("The plain spellings trap outside their ranges", .tags(.precondition))
-    func plainTraps() async {
-        await #expect(processExitsWith: .failure) {
-            let automaton = AhoCorasickAutomaton(patterns: ["ab"])
-            _ = automaton.patternLength(at: 1)
-        }
-        await #expect(processExitsWith: .failure) {
-            let automaton = AhoCorasickAutomaton(patterns: ["ab"])
-            _ = automaton.statesView.symbol(ofEdgeAt: 99)
-        }
-        await #expect(processExitsWith: .failure) {
-            let automaton = AhoCorasickAutomaton(patterns: ["ab"])
-            _ = automaton.statesView.patternIndices(endingAt: 5)
-        }
-    }
-
     @Test("Every match is an occurrence a naive scan finds, and the naive scan finds no others", .tags(.randomized))
     func matchesNaiveScan() async {
         let pattern = Gen.int(in: 0 ... 2).array(of: 0 ... 4)

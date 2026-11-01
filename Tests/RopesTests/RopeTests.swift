@@ -62,12 +62,14 @@ struct RopeTests {
 
     @Test("Edits at and across chunk boundaries keep the order")
     func chunkBoundaries() {
-        // Int chunks hold 256 elements, so 1,024 elements make four full chunks.
-        var rope = Rope(0 ..< 1_024)
-        var reference = Array(0 ..< 1_024)
+        // A chunk holds 2,048 bytes of elements: 256 Ints where Int is 64 bits, 512 where it is
+        // 32. Four chunks' worth makes four full chunks.
+        let chunk = 2_048 / MemoryLayout<Int>.stride
+        var rope = Rope(0 ..< 4 * chunk)
+        var reference = Array(0 ..< 4 * chunk)
         let fourChunks = 4
         #expect(BinaryTree(rope)?.vertexCount == fourChunks)
-        for offset in [256, 512, 768, 0, 1_024] {
+        for offset in [chunk, 2 * chunk, 3 * chunk, 0, 4 * chunk] {
             rope.insert(-offset, at: offset)
             reference.insert(-offset, at: offset)
         }
@@ -84,7 +86,8 @@ struct RopeTests {
 
     @Test("A copy shares every chunk but the one an edit touches")
     func copyOnWriteAtChunks() {
-        let original = Rope(0 ..< 2_560)
+        // Ten chunks of 2,048 bytes.
+        let original = Rope(0 ..< 10 * (2_048 / MemoryLayout<Int>.stride))
         var copy = original
         copy[1_000] = -1
         func chunkAddresses(_ rope: Rope<Int>) -> [UnsafeRawPointer?] {
@@ -104,7 +107,8 @@ struct RopeTests {
 
     @Test("The chunks convert to a balanced BinaryTree in sequence order")
     func binaryTree() throws {
-        let rope = Rope(0 ..< 256 * 7)
+        // Seven chunks of 2,048 bytes.
+        let rope = Rope(0 ..< 7 * (2_048 / MemoryLayout<Int>.stride))
         let tree = try #require(BinaryTree(rope))
         let seven = 7
         #expect(tree.vertexCount == seven)
@@ -142,29 +146,6 @@ struct RopeTests {
         #expect(try rope[checked: 2] == three)
     }
 
-    @Test("Offsets and ranges out of bounds trap", .tags(.precondition))
-    func plainTraps() async {
-        await #expect(processExitsWith: .failure) {
-            let rope: Rope = [1, 2, 3]
-            _ = rope[3]
-        }
-        await #expect(processExitsWith: .failure) {
-            var rope: Rope = [1, 2, 3]
-            rope.insert(0, at: 4)
-        }
-        await #expect(processExitsWith: .failure) {
-            var rope: Rope = [1, 2, 3]
-            rope.removeSubrange(2 ..< 4)
-        }
-        await #expect(processExitsWith: .failure) {
-            let rope: Rope = [1, 2, 3]
-            _ = rope.extracting(1 ..< 5)
-        }
-        await #expect(processExitsWith: .failure) {
-            var rope: Rope = [1, 2, 3]
-            rope[-1] = 0
-        }
-    }
 }
 
 @Suite("Rope: properties")

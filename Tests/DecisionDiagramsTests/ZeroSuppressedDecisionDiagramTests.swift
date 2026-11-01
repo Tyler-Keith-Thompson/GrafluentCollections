@@ -208,34 +208,6 @@ struct ZeroSuppressedDecisionDiagramTests {
         #expect(throws: IndexOutOfRange()) { try diagram.single(checked: -1) }
     }
 
-    @Test("Elements out of range and families from a larger table trap", .tags(.precondition))
-    func plainTraps() async {
-        await #expect(processExitsWith: .failure) {
-            var diagram = ZeroSuppressedDecisionDiagram(elementCount: 2)
-            _ = diagram.single(2)
-        }
-        await #expect(processExitsWith: .failure) {
-            var diagram = ZeroSuppressedDecisionDiagram(elementCount: 2)
-            _ = diagram.family([[0, 3]])
-        }
-        await #expect(processExitsWith: .failure) {
-            var diagram = ZeroSuppressedDecisionDiagram(elementCount: 2)
-            _ = diagram.including(-1, in: diagram.unit)
-        }
-        await #expect(processExitsWith: .failure) {
-            let diagram = ZeroSuppressedDecisionDiagram(elementCount: 2)
-            _ = diagram.contains([5], in: diagram.unit)
-        }
-        await #expect(processExitsWith: .failure) {
-            var big = ZeroSuppressedDecisionDiagram(elementCount: 4)
-            let f = big.family([[2, 3], [1]])
-            let small = ZeroSuppressedDecisionDiagram(elementCount: 4)
-            _ = small.count(of: f)
-        }
-        await #expect(processExitsWith: .failure) {
-            _ = ZeroSuppressedDecisionDiagram(elementCount: -1)
-        }
-    }
 }
 
 @Suite("ZeroSuppressedDecisionDiagram: properties")

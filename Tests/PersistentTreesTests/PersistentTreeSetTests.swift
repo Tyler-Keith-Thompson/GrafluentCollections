@@ -137,24 +137,6 @@ struct PersistentTreeSetTests {
         #expect(decoded == set)
     }
 
-    @Test("Invalid indices trap", .tags(.precondition))
-    func plainTraps() async {
-        await #expect(processExitsWith: .failure) {
-            let set: PersistentTreeSet = [1]
-            _ = set[1]
-        }
-        await #expect(processExitsWith: .failure) {
-            var set: PersistentTreeSet = [1]
-            set.remove(at: 1)
-        }
-        await #expect(processExitsWith: .failure) {
-            let dictionary: PersistentTreeDictionary = [1: "a"]
-            _ = dictionary[dictionary.endIndex]
-        }
-        await #expect(processExitsWith: .failure) {
-            _ = PersistentTreeDictionary(uniqueKeysWithValues: [(1, "a"), (1, "b")])
-        }
-    }
 }
 
 @Suite("PersistentTreeDictionary: hand-worked cases")

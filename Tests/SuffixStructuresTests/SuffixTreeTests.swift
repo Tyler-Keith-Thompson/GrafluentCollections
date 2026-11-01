@@ -159,21 +159,6 @@ struct SuffixTreeTests {
         }
     }
 
-    @Test("Reading a node outside the tree, or the root's edge, traps", .tags(.precondition))
-    func plainTraps() async {
-        await #expect(processExitsWith: .failure) {
-            let tree = SuffixTree("ab")
-            _ = tree.children(of: tree.nodeCount)
-        }
-        await #expect(processExitsWith: .failure) {
-            let tree = SuffixTree("ab")
-            _ = tree.edgeLabel(of: 0)
-        }
-        await #expect(processExitsWith: .failure) {
-            let tree = SuffixTree("ab")
-            _ = tree.stringDepth(of: -1)
-        }
-    }
 }
 
 @Suite("SuffixTree: properties")

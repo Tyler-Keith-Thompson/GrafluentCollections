@@ -112,17 +112,6 @@ struct SuffixAutomatonTests {
         #expect(firstSymbols == expected)
     }
 
-    @Test("Reading a transition or state outside the automaton traps", .tags(.precondition))
-    func plainTraps() async {
-        await #expect(processExitsWith: .failure) {
-            let automaton = SuffixAutomaton("ab")
-            _ = automaton.transitionsView.symbol(ofEdgeAt: automaton.transitionCount)
-        }
-        await #expect(processExitsWith: .failure) {
-            let automaton = SuffixAutomaton("ab")
-            _ = automaton.transitionsView.length(of: -1)
-        }
-    }
 }
 
 @Suite("SuffixAutomaton: properties")

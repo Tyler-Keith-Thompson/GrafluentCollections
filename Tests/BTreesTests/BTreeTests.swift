@@ -546,23 +546,4 @@ struct BTreeTests {
         #expect(Array(tree) == rest)
     }
 
-    @Test("The plain spellings trap outside the indices", .tags(.precondition))
-    func plainTraps() async {
-        await #expect(processExitsWith: .failure) {
-            let tree: BTree = [1, 2, 3]
-            _ = tree[3]
-        }
-        await #expect(processExitsWith: .failure) {
-            let tree: BTree = [1, 2, 3]
-            _ = tree[-1]
-        }
-        await #expect(processExitsWith: .failure) {
-            var tree: BTree = [1, 2, 3]
-            tree.remove(at: 3)
-        }
-        await #expect(processExitsWith: .failure) {
-            var tree = BTree<Int>()
-            tree.remove(at: 0)
-        }
-    }
 }

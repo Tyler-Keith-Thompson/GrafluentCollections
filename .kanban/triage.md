@@ -355,6 +355,13 @@ of a hand-written loop over arrays.
   conversion, not by a general tree layout, which has no left and right and would put a lone
   right child under its parent. Each structure becomes a page as its own item; the rest stay
   `soon` rows. Publishing beside the docs needs a CI job, which waits for the owner.
+- D31. Exit tests live in their own `<Type>ExitTests.swift` files (2026-11-01): the template's
+  wasm piece (`just wasi-test`) leaves out every test file holding an exit test, since WASI
+  cannot start a child process, so a hand-worked file with one trap test in it would drop all
+  its other tests from the 32-bit run. Each type's trap tests sit in a `"<Type>: traps"` suite
+  beside its hand-worked suite. The wasm piece was taken from a render of the template with
+  `--wasm`, because `template-update` carries changes to the pieces a project has, not new ones.
+  The 32-bit run is local only; a CI job for it waits for the owner.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

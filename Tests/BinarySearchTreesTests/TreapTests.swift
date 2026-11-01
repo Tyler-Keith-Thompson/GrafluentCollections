@@ -526,23 +526,4 @@ struct TreapTests {
         #expect(Array(treap) == rest)
     }
 
-    @Test("The plain spellings trap outside the indices", .tags(.precondition))
-    func plainTraps() async {
-        await #expect(processExitsWith: .failure) {
-            let treap: Treap = [1, 2, 3]
-            _ = treap[3]
-        }
-        await #expect(processExitsWith: .failure) {
-            let treap: Treap = [1, 2, 3]
-            _ = treap[-1]
-        }
-        await #expect(processExitsWith: .failure) {
-            var treap: Treap = [1, 2, 3]
-            treap.remove(at: 3)
-        }
-        await #expect(processExitsWith: .failure) {
-            var treap = Treap<Int>()
-            treap.remove(at: 0)
-        }
-    }
 }

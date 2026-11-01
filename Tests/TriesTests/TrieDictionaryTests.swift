@@ -115,13 +115,6 @@ struct TrieDictionaryTests {
         #expect(dictionary.count == 2)
     }
 
-    @Test("The plain spelling traps on a repeated key", .tags(.precondition))
-    func plainTraps() async {
-        await #expect(processExitsWith: .failure) {
-            _ = TrieDictionary(uniqueKeysWithValues: [("a", 1), ("a", 2)])
-        }
-    }
-
     @Test("Mutating a copy leaves the original alone", .tags(.copyOnWrite))
     func copyOnWrite() {
         let original = TrieDictionary(uniqueKeysWithValues: [("a", 1)])

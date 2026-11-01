@@ -125,12 +125,6 @@ struct LRUCacheTests {
         #expect(cache.capacity == zero)
     }
 
-    @Test("A negative capacity traps", .tags(.precondition))
-    func plainTraps() async {
-        await #expect(processExitsWith: .failure) {
-            _ = LRUCache<Int, Int>(capacity: -1)
-        }
-    }
 }
 
 @Suite("LRUCache: properties")

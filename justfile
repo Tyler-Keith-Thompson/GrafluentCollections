@@ -73,6 +73,10 @@ fuzz-regress *args="":
 fuzz-repro target input:
     python3 {{PROJECT_ROOT}}/scripts/fuzz.py repro {{target}} {{input}}
 
+[doc('SwiftPM tests on wasm32-wasi under wasmtime, a 32-bit Int, in groups of targets, e.g. just wasi-test, just wasi-test -c release, or just wasi-test --targets TriesTests')]
+wasi-test *args="":
+    python3 -u {{PROJECT_ROOT}}/scripts/wasi_test.py {{args}}
+
 [doc('Build the browser explorer (Explore/) as size-optimized release WebAssembly into Explore/dist, e.g. EXPLORE_XCODE=/Applications/Xcode-26.2.0.app just explore')]
 explore:
     {{PROJECT_ROOT}}/Explore/build.sh

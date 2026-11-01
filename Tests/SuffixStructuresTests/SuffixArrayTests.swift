@@ -127,17 +127,6 @@ struct SuffixArrayTests {
         #expect(Array(text.longestCommonPrefixes) == prefixes)
     }
 
-    @Test("Reading a position or prefix length outside the arrays traps", .tags(.precondition))
-    func plainTraps() async {
-        await #expect(processExitsWith: .failure) {
-            let text = SuffixArray("ab")
-            _ = text.positions[2]
-        }
-        await #expect(processExitsWith: .failure) {
-            let text = SuffixArray("ab")
-            _ = text.longestCommonPrefixes[-1]
-        }
-    }
 }
 
 @Suite("SuffixArray: properties")

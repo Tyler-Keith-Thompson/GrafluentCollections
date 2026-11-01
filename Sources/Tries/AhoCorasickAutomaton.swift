@@ -74,7 +74,7 @@ public struct AhoCorasickAutomaton<Symbol: Hashable> {
         // Map the symbols to dense indices and build the trie, numbering states as they are met.
         var alphabet = ContiguousArray<Symbol>()
         var alphabetIndices: [Symbol: Int32] = [:]
-        var children: [Int: Int32] = [:]
+        var children: [UInt64: Int32] = [:]
         var edges = ContiguousArray<(parent: Int32, symbol: Int32, child: Int32)>()
         var stateCount: Int32 = 1
         var ends = ContiguousArray<(state: Int32, pattern: Int32)>()
@@ -91,8 +91,9 @@ public struct AhoCorasickAutomaton<Symbol: Hashable> {
                     alphabet.append(symbol)
                     alphabetIndices[symbol] = index
                 }
-                // A key unique for (state, symbol): states and symbols are below 2³¹.
-                let key = Int(state) << 32 | Int(index)
+                // A key unique for (state, symbol): states and symbols are below 2³¹. 64 bits
+                // wide on every platform, since a 32-bit `Int` would shift the state out.
+                let key = UInt64(UInt32(bitPattern: state)) << 32 | UInt64(UInt32(bitPattern: index))
                 if let child = children[key] {
                     state = child
                 } else {

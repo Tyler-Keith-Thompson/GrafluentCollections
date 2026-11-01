@@ -38,6 +38,43 @@ struct TriePropertyTests {
         }
     }
 
+    @Test("A byte trie with wide fan-out answers like a Set of arrays through inserts, removes and reinserts", .tags(.randomized))
+    func bytesMatchSet() async {
+        // Twelve byte values, so vertices pass eight children and take a row of byte links, and
+        // removals drop them below eight and back.
+        let key = Gen.int(in: 0 ... 11).array(of: 0 ... 3)
+        let operations = zip(Gen.int(in: 0 ... 2), key).array(of: 0 ... 200)
+        await propertyCheck(count: 300, input: operations) { operations in
+            var trie = Trie<UInt8>()
+            var reference = Set<[UInt8]>()
+            for (kind, key) in operations {
+                let bytes = key.map { UInt8(truncatingIfNeeded: $0 * 20) }
+                if kind == 2 {
+                    #expect(trie.remove(bytes) == reference.remove(bytes))
+                } else {
+                    #expect(trie.insert(bytes).inserted == reference.insert(bytes).inserted)
+                }
+            }
+            let sorted = reference.sorted { $0.lexicographicallyPrecedes($1) }
+            #expect(Array(trie) == sorted)
+            #expect(trie.count == reference.count)
+            for first in 0 ..< 13 {
+                for second in 0 ..< 13 {
+                    let probe = [UInt8(truncatingIfNeeded: first * 20), UInt8(truncatingIfNeeded: second * 20)]
+                    #expect(trie.contains(probe) == reference.contains(probe))
+                    let withPrefix = sorted.filter { $0.starts(with: probe) }
+                    #expect(Array(trie.elements(withPrefix: probe)) == withPrefix)
+                    let longest = reference.filter { probe.starts(with: $0) }.max { $0.count < $1.count }
+                    #expect(trie.longestPrefix(of: probe) == longest)
+                }
+            }
+            for member in sorted {
+                #expect(trie.contains(member))
+            }
+            #expect(trie == Trie(sorted))
+        }
+    }
+
     @Test("A TrieDictionary stores and removes like a Dictionary keyed by arrays", .tags(.randomized))
     func dictionaryMatchesDictionary() async {
         let key = Gen.int(in: 0 ... 2).array(of: 0 ... 4)

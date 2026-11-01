@@ -10,6 +10,42 @@ import Trees
 
 @Suite("Trie: hand-worked cases")
 struct TrieTests {
+    @Test("A byte trie with many children per vertex finds every key after removals move vertices around")
+    func wideByteTrie() {
+        var trie = Trie<UInt8>()
+        // Ten children of the root, past the eight at which a vertex takes a row of byte links,
+        // then ten under the key [5].
+        for byte in 0 as UInt8 ..< 10 {
+            trie.insert([byte])
+        }
+        for byte in 0 as UInt8 ..< 10 {
+            trie.insert([5, byte])
+        }
+        // [3] is a leaf; removing it moves the last vertex, [5, 9], into its slot, and removing
+        // [9] moves [5, 8] into its slot, so the rows must follow both.
+        #expect(trie.remove([3]) == [3])
+        #expect(trie.remove([9]) == [9])
+        let present: [[UInt8]] = [[0], [1], [2], [4], [5], [6], [7], [8]] + (0 as UInt8 ..< 10).map { [5, $0] }
+        for key in present {
+            #expect(trie.contains(key))
+        }
+        let absent: [[UInt8]] = [[3], [9], [5, 10], [10], [4, 0]]
+        for key in absent {
+            #expect(!trie.contains(key))
+        }
+        let sorted = present.sorted { $0.lexicographicallyPrecedes($1) }
+        #expect(Array(trie) == sorted)
+        // Down to seven children of [5], then back up, so the row is refilled.
+        for byte in 0 as UInt8 ..< 3 {
+            #expect(trie.remove([5, byte]) == [5, byte])
+        }
+        trie.insert([5, 200])
+        let underFive: [[UInt8]] = (3 as UInt8 ..< 10).map { [5, $0] } + [[5, 200]]
+        #expect(Array(trie.elements(withPrefix: [5]).dropFirst()) == underFive)
+        #expect(trie.contains([5, 200]))
+        #expect(!trie.contains([5, 0]))
+    }
+
     @Test("Inserting words makes them members, and reports what was inserted")
     func insert() {
         var words = Trie<Character>()

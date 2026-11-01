@@ -5,6 +5,10 @@
 /// value of the key ending at `v`, nil when none does, and `counts[v]` the number of keys at or
 /// below `v`, so every vertex but an empty trie's root has a key at or below it.
 ///
+/// When the symbols are bytes, a vertex with at least ``denseThreshold`` children also gets a
+/// row of 256 child links, one per byte, so a lookup through it takes one step instead of a walk
+/// along the chain; the chain stays, for order. `denseRows[v]` is that row's number, −1 for none.
+///
 /// A removal prunes the vertices left with no key below them and fills each one's slot with the
 /// last vertex, redirecting the links to it.
 @frozen
@@ -16,6 +20,26 @@ package struct _TrieCore<Symbol: Hashable, Value> {
     @usableFromInline package var nextSiblings: ContiguousArray<Int32>
     @usableFromInline package var counts: ContiguousArray<Int32>
     @usableFromInline package var values: ContiguousArray<Value?>
+    /// Each vertex's row in `denseChildren`, or −1; empty unless the symbols are bytes.
+    @usableFromInline package var denseRows: ContiguousArray<Int32>
+    /// Rows of 256 child links, each the child along that byte or −1.
+    @usableFromInline package var denseChildren: ContiguousArray<Int32>
+    /// Rows no vertex uses, every link in them −1.
+    @usableFromInline package var freeRows: ContiguousArray<Int32>
+
+    /// Whether vertices with many children get a row of byte-indexed links.
+    @inlinable
+    static var usesDenseRows: Bool { Symbol.self == UInt8.self }
+
+    /// The number of children at which a vertex gets a row.
+    @inlinable
+    static var denseThreshold: Int { 8 }
+
+    /// The link in row `row` for `symbol`, a byte.
+    @inlinable @inline(__always)
+    static func denseSlot(_ row: Int32, _ symbol: Symbol) -> Int {
+        Int(row) &<< 8 | Int(unsafeBitCast(symbol, to: UInt8.self))
+    }
 
     /// The trie holding no keys: the root alone.
     @inlinable
@@ -26,6 +50,9 @@ package struct _TrieCore<Symbol: Hashable, Value> {
         nextSiblings = [-1]
         counts = [0]
         values = ContiguousArray(repeating: nil, count: 1)
+        denseRows = Self.usesDenseRows ? [-1] : []
+        denseChildren = []
+        freeRows = []
     }
 
     /// The number of keys.
@@ -41,6 +68,10 @@ package struct _TrieCore<Symbol: Hashable, Value> {
     /// The child of `vertex` along `symbol`, or −1. O(*σ*) for *σ* children.
     @inlinable
     func child(of vertex: Int32, _ symbol: Symbol) -> Int32 {
+        if Self.usesDenseRows {
+            let row = denseRows[Int(vertex)]
+            if row >= 0 { return denseChildren[Self.denseSlot(row, symbol)] }
+        }
         var child = firstChildren[Int(vertex)]
         while child >= 0 && symbols[Int(child) &- 1] != symbol {
             child = nextSiblings[Int(child)]
@@ -51,12 +82,44 @@ package struct _TrieCore<Symbol: Hashable, Value> {
     /// The vertex whose prefix is `key`, or −1 when no key starts with it.
     @inlinable
     package func vertex(for key: some Sequence<Symbol>) -> Int32 {
-        var vertex: Int32 = 0
-        for symbol in key {
-            vertex = child(of: vertex, symbol)
-            if vertex < 0 { return -1 }
+        symbols.withUnsafeBufferPointer { symbols in
+            firstChildren.withUnsafeBufferPointer { firstChildren in
+                nextSiblings.withUnsafeBufferPointer { nextSiblings in
+                    if Self.usesDenseRows {
+                        return denseRows.withUnsafeBufferPointer { denseRows in
+                            denseChildren.withUnsafeBufferPointer { denseChildren in
+                                var vertex: Int32 = 0
+                                for symbol in key {
+                                    let row = denseRows[Int(vertex)]
+                                    var child: Int32
+                                    if row >= 0 {
+                                        child = denseChildren[Self.denseSlot(row, symbol)]
+                                    } else {
+                                        child = firstChildren[Int(vertex)]
+                                        while child >= 0 && symbols[Int(child) &- 1] != symbol {
+                                            child = nextSiblings[Int(child)]
+                                        }
+                                    }
+                                    if child < 0 { return -1 }
+                                    vertex = child
+                                }
+                                return vertex
+                            }
+                        }
+                    }
+                    var vertex: Int32 = 0
+                    for symbol in key {
+                        var child = firstChildren[Int(vertex)]
+                        while child >= 0 && symbols[Int(child) &- 1] != symbol {
+                            child = nextSiblings[Int(child)]
+                        }
+                        if child < 0 { return -1 }
+                        vertex = child
+                    }
+                    return vertex
+                }
+            }
         }
-        return vertex
     }
 
     /// The value of `key`, or nil when the trie doesn't hold it.
@@ -144,10 +207,38 @@ package struct _TrieCore<Symbol: Hashable, Value> {
     mutating func _makeVertex(for key: some Sequence<Symbol>) -> Int32 {
         var vertex: Int32 = 0
         for symbol in key {
+            if Self.usesDenseRows {
+                let row = denseRows[Int(vertex)]
+                if row >= 0 {
+                    let slot = Self.denseSlot(row, symbol)
+                    let child = denseChildren[slot]
+                    if child >= 0 {
+                        vertex = child
+                        continue
+                    }
+                    // The chain is in byte order, so the new child follows the nearest smaller
+                    // byte present in the row.
+                    let rowStart = Int(row) &<< 8
+                    var previous: Int32 = -1
+                    var k = slot
+                    while k > rowStart {
+                        k &-= 1
+                        if denseChildren[k] >= 0 {
+                            previous = denseChildren[k]
+                            break
+                        }
+                    }
+                    let next = previous < 0 ? firstChildren[Int(vertex)] : nextSiblings[Int(previous)]
+                    vertex = _addVertex(parent: vertex, symbol: symbol, previous: previous, next: next, siblingCount: Self.denseThreshold)
+                    continue
+                }
+            }
             var previous: Int32 = -1
+            var siblingCount = 0
             var child = firstChildren[Int(vertex)]
             while child >= 0 && symbols[Int(child) &- 1] != symbol {
                 previous = child
+                siblingCount &+= 1
                 child = nextSiblings[Int(child)]
             }
             if child >= 0 {
@@ -158,7 +249,7 @@ package struct _TrieCore<Symbol: Hashable, Value> {
             if let order = Symbol.self as? any Comparable.Type {
                 (previous, next) = _insertionPoint(of: symbol, under: vertex, order)
             }
-            vertex = _addVertex(parent: vertex, symbol: symbol, previous: previous, next: next)
+            vertex = _addVertex(parent: vertex, symbol: symbol, previous: previous, next: next, siblingCount: siblingCount)
         }
         return vertex
     }
@@ -181,9 +272,10 @@ package struct _TrieCore<Symbol: Hashable, Value> {
         return (previous, child)
     }
 
-    /// A new childless vertex under `parent`, between `previous` and `next` in its chain.
+    /// A new childless vertex under `parent`, between `previous` and `next` in its chain, beside
+    /// `siblingCount` children already there.
     @inlinable
-    mutating func _addVertex(parent: Int32, symbol: Symbol, previous: Int32, next: Int32) -> Int32 {
+    mutating func _addVertex(parent: Int32, symbol: Symbol, previous: Int32, next: Int32, siblingCount: Int) -> Int32 {
         precondition(parents.count < Int(Int32.max), "A trie holds fewer than 2³¹ − 1 vertices")
         let vertex = Int32(truncatingIfNeeded: parents.count)
         symbols.append(symbol)
@@ -197,7 +289,34 @@ package struct _TrieCore<Symbol: Hashable, Value> {
         } else {
             nextSiblings[Int(previous)] = vertex
         }
+        if Self.usesDenseRows {
+            denseRows.append(-1)
+            let row = denseRows[Int(parent)]
+            if row >= 0 {
+                denseChildren[Self.denseSlot(row, symbol)] = vertex
+            } else if siblingCount &+ 1 >= Self.denseThreshold {
+                _addDenseRow(parent)
+            }
+        }
         return vertex
+    }
+
+    /// Gives `parent`, which has ``denseThreshold`` children, a row of byte-indexed links.
+    @inlinable
+    mutating func _addDenseRow(_ parent: Int32) {
+        let row: Int32
+        if let free = freeRows.popLast() {
+            row = free
+        } else {
+            row = Int32(truncatingIfNeeded: denseChildren.count &>> 8)
+            denseChildren.append(contentsOf: repeatElement(-1, count: 256))
+        }
+        denseRows[Int(parent)] = row
+        var child = firstChildren[Int(parent)]
+        while child >= 0 {
+            denseChildren[Self.denseSlot(row, symbols[Int(child) &- 1])] = child
+            child = nextSiblings[Int(child)]
+        }
     }
 
     /// Adds `delta` to the counts of `vertex` and every vertex above it.
@@ -213,6 +332,10 @@ package struct _TrieCore<Symbol: Hashable, Value> {
     /// Takes `vertex` out of its parent's chain of children.
     @inlinable
     mutating func _unlink(_ vertex: Int32, from parent: Int32) {
+        if Self.usesDenseRows {
+            let row = denseRows[Int(parent)]
+            if row >= 0 { denseChildren[Self.denseSlot(row, symbols[Int(vertex) &- 1])] = -1 }
+        }
         let next = nextSiblings[Int(vertex)]
         if firstChildren[Int(parent)] == vertex {
             firstChildren[Int(parent)] = next
@@ -233,6 +356,18 @@ package struct _TrieCore<Symbol: Hashable, Value> {
     mutating func _delete(_ vertex: Int32) -> Int32 {
         let last = Int32(truncatingIfNeeded: parents.count &- 1)
         let v = Int(vertex)
+        if Self.usesDenseRows {
+            // A childless vertex's row holds no links, so it is free for another.
+            let row = denseRows[v]
+            if row >= 0 { freeRows.append(row) }
+            if vertex != last {
+                let l = Int(last)
+                denseRows[v] = denseRows[l]
+                let parentRow = denseRows[Int(parents[l])]
+                if parentRow >= 0 { denseChildren[Self.denseSlot(parentRow, symbols[l &- 1])] = vertex }
+            }
+            denseRows.removeLast()
+        }
         if vertex != last {
             let l = Int(last)
             symbols.swapAt(v &- 1, l &- 1)

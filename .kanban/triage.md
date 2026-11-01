@@ -382,6 +382,14 @@ of a hand-written loop over arrays.
   `OverlappingPair`s, each pair once. A box outside `bounds` traps (`checked:` throws
   `OutOfBounds`). There is no `update` for a moving box: remove and insert it. Loose quadtrees
   (enlarged cells) were not built.
+- D34. A byte trie's busy vertices get a row of 256 child links (2026-11-01): when `Symbol` is
+  `UInt8`, a vertex that reaches 8 children gets a row in one flat `Int32` array, indexed by the
+  byte, so a lookup through it takes one load instead of a walk along the sibling chain; the
+  chain stays, so D9's order and one type hold. A new child under a row finds its place in the
+  sorted chain from the nearest smaller byte in the row. Rows are freed with their vertex and
+  reused; other symbol types keep the chain alone. Contiguous sorted rows with binary search
+  (D14's layout) were not built, since they make every insertion move a row; RadixTree remains
+  the pick for long shared prefixes.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

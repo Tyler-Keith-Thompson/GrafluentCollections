@@ -40,7 +40,7 @@ range trees are collections of their values.
 
 A plain spelling traps when its precondition fails, like an `Array` subscript out of range: it is
 the fast path, for callers who know the precondition holds. Beside it, a `checked:` spelling
-throws a typed error instead, one of those in <doc://CollectionErrors/documentation/CollectionErrors>; `try?` turns it into an
+throws a typed error instead, one of those in [`CollectionErrors`](https://tyler-keith-thompson.github.io/GrafluentCollections/documentation/collectionerrors); `try?` turns it into an
 optional.
 
 ```swift
@@ -66,14 +66,14 @@ through the conversion. <doc:SeeingACollectionAsAGraph> shows the round trip.
 
 | Group | Modules |
 |---|---|
-| Search trees | <doc://BinarySearchTrees/documentation/BinarySearchTrees> (AVL, red–black and splay trees, treaps), <doc://BTrees/documentation/BTrees> (B-trees), <doc://SkipLists/documentation/SkipLists> (skip lists) |
-| Tries | <doc://Tries/documentation/Tries> (tries over any sequence of symbols, radix and Patricia trees, Aho–Corasick automata) |
-| Suffix structures | <doc://SuffixStructures/documentation/SuffixStructures> (suffix arrays with LCP, suffix trees, suffix automata) |
-| Decision diagrams | <doc://DecisionDiagrams/documentation/DecisionDiagrams> (reduced ordered BDDs, zero-suppressed ZDDs) |
-| Range and spatial trees | <doc://RangeTrees/documentation/RangeTrees> (Fenwick trees, segment trees with lazy propagation, interval trees), <doc://SpatialTrees/documentation/SpatialTrees> (k-d trees, quadtrees, octrees) |
-| Sequences and persistence | <doc://Ropes/documentation/Ropes> (ropes: sequences as balanced trees of chunks), <doc://PersistentTrees/documentation/PersistentTrees> (path-copying weight-balanced trees that keep every version) |
-| Caches | <doc://Caches/documentation/Caches> (LRU caches) |
-| Shared | <doc://CollectionErrors/documentation/CollectionErrors>: the errors the `checked:` spellings throw, re-exported by every module that throws them |
+| Search trees | [`BinarySearchTrees`](https://tyler-keith-thompson.github.io/GrafluentCollections/documentation/binarysearchtrees) (AVL, red–black and splay trees, treaps), [`BTrees`](https://tyler-keith-thompson.github.io/GrafluentCollections/documentation/btrees) (B-trees), [`SkipLists`](https://tyler-keith-thompson.github.io/GrafluentCollections/documentation/skiplists) (skip lists) |
+| Tries | [`Tries`](https://tyler-keith-thompson.github.io/GrafluentCollections/documentation/tries) (tries over any sequence of symbols, radix and Patricia trees, Aho–Corasick automata) |
+| Suffix structures | [`SuffixStructures`](https://tyler-keith-thompson.github.io/GrafluentCollections/documentation/suffixstructures) (suffix arrays with LCP, suffix trees, suffix automata) |
+| Decision diagrams | [`DecisionDiagrams`](https://tyler-keith-thompson.github.io/GrafluentCollections/documentation/decisiondiagrams) (reduced ordered BDDs, zero-suppressed ZDDs) |
+| Range and spatial trees | [`RangeTrees`](https://tyler-keith-thompson.github.io/GrafluentCollections/documentation/rangetrees) (Fenwick trees, segment trees with lazy propagation, interval trees), [`SpatialTrees`](https://tyler-keith-thompson.github.io/GrafluentCollections/documentation/spatialtrees) (k-d trees, quadtrees, octrees) |
+| Sequences and persistence | [`Ropes`](https://tyler-keith-thompson.github.io/GrafluentCollections/documentation/ropes) (ropes: sequences as balanced trees of chunks), [`PersistentTrees`](https://tyler-keith-thompson.github.io/GrafluentCollections/documentation/persistenttrees) (path-copying weight-balanced trees that keep every version) |
+| Caches | [`Caches`](https://tyler-keith-thompson.github.io/GrafluentCollections/documentation/caches) (LRU caches) |
+| Shared | [`CollectionErrors`](https://tyler-keith-thompson.github.io/GrafluentCollections/documentation/collectionerrors): the errors the `checked:` spellings throw, re-exported by every module that throws them |
 
 ## Topics
 
@@ -84,18 +84,3 @@ through the conversion. <doc:SeeingACollectionAsAGraph> shows the round trip.
 - <doc:DecisionDiagrams>
 - <doc:RangeAndSpatialTrees>
 - <doc:SeeingACollectionAsAGraph>
-
-### Modules
-
-- <doc://BinarySearchTrees/documentation/BinarySearchTrees>
-- <doc://BTrees/documentation/BTrees>
-- <doc://SkipLists/documentation/SkipLists>
-- <doc://Tries/documentation/Tries>
-- <doc://SuffixStructures/documentation/SuffixStructures>
-- <doc://DecisionDiagrams/documentation/DecisionDiagrams>
-- <doc://RangeTrees/documentation/RangeTrees>
-- <doc://SpatialTrees/documentation/SpatialTrees>
-- <doc://Ropes/documentation/Ropes>
-- <doc://PersistentTrees/documentation/PersistentTrees>
-- <doc://Caches/documentation/Caches>
-- <doc://CollectionErrors/documentation/CollectionErrors>

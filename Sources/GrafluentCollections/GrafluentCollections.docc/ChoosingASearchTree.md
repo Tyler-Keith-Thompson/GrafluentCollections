@@ -26,7 +26,7 @@ which workloads they suit.
 
 ### Lookups and scans over a large set: BTree
 
-A B-tree node (<doc://BTrees/documentation/BTrees>) holds tens of elements side by side, so a lookup reads a few nodes and few
+A B-tree node ([`BTrees`](https://tyler-keith-thompson.github.io/GrafluentCollections/documentation/btrees)) holds tens of elements side by side, so a lookup reads a few nodes and few
 cache lines, and iteration walks contiguous arrays. For a large set that is read far more often
 than it is changed, and for range scans, a `BTree` is the default. Copying a B-tree shares its
 nodes, and a mutated copy copies only the nodes on the path it changes. `BTreeDictionary` is
@@ -74,14 +74,14 @@ semantics; use `access(_:)` where the splay is wanted.
 
 ### A sorted queue with a simple structure: SkipList
 
-A skip list (<doc://SkipLists/documentation/SkipLists>) stacks sorted linked levels, each holding about half the elements of
+A skip list ([`SkipLists`](https://tyler-keith-thompson.github.io/GrafluentCollections/documentation/skiplists)) stacks sorted linked levels, each holding about half the elements of
 the one below. Its insertions touch only the levels an element reaches, and its levels are a
 Grafluent graph through `layersView`.
 
 ### Keeping every version: PersistentTreeSet
 
 When old versions must stay readable, as in undo histories, snapshots handed to other tasks or
-backtracking searches, a persistent set (<doc://PersistentTrees/documentation/PersistentTrees>) shares all but the vertices an edit touched:
+backtracking searches, a persistent set ([`PersistentTrees`](https://tyler-keith-thompson.github.io/GrafluentCollections/documentation/persistenttrees)) shares all but the vertices an edit touched:
 
 ```swift
 let empty = PersistentTreeSet<Int>()

@@ -314,19 +314,18 @@ of a hand-written loop over arrays.
   with Python's own sort and scans. ZDDs, range-sum trees, octrees and ropes have no maintained
   Python reference and are covered by fuzzing alone. The differential executable builds with
   SwiftPM only (no Bazel target), since it is a local tool. No CI job runs either harness.
-- D26. The guides live in the umbrella catalog, and link modules across archives
+- D26. The guides live in the umbrella catalog, and link modules by URL
   (2026-11-01): the landing page and the five guides (choosing a search tree, tries and suffix
   structures, decision diagrams, range and spatial trees, seeing a collection as a graph) sit in
   `GrafluentCollections.docc`, so one page leads to each family. Their code samples are tests in
   `Tests/GrafluentCollectionsTests/ArticleExamplesTests.swift`, which depends on Grafluent's
-  `GraphFormats` and `GraphDrawing` for the graph article. Links to modules from the umbrella use
-  `<doc://Module/documentation/Module>`, which docc resolves through the `--dependency`
-  archives; ``Module`` symbol links don't resolve across archives. Swift 6.3's docc (the
-  DocC workflow's) resolves them; Xcode 27.1 beta's docc does not, so a local `just docs` on
-  that Xcode renders them as plain text. Type names in the guides stay code font rather than
-  links, so the guides read the same in either docc. The `docc convert` rule discards docc's
-  output, so its warnings are checked by running docc by hand; the guides and every module
-  catalog have none.
+  `GraphFormats` and `GraphDrawing` for the graph article. The umbrella links to the module
+  pages with absolute URLs on the published site: ``Module`` symbol links and
+  `<doc://Module/...>` links don't resolve across archives in Swift 6.3's docc, even with the
+  `--dependency` archives (it reports no external resolver), and a topic group takes only doc
+  links, so the module list is the overview's table rather than a Topics group. The
+  `docc convert` rule discards docc's output, so its warnings are checked by running docc by
+  hand in the `swift:6.3` image; the umbrella catalog has none.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

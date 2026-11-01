@@ -396,6 +396,11 @@ of a hand-written loop over arrays.
   without the `package` core; the balance fields stay internal and nothing can set them. Splay
   trees need no such read, since their shape alone is the state. AVL balance factors are not
   exposed: they follow from the shape.
+- D36. A rope's chunks are a public read (2026-11-01): `Rope.chunksView` is a sequence of the
+  chunks, as `ContiguousArray`s, in sequence order, the *i*th being vertex *i* of
+  `BinaryTree(rope)`; none is empty. It lets callers write a rope out a chunk at a time and draw
+  which chunks an edit touched. Chunk sizes and boundaries remain the rope's choice: nothing can
+  set them, and they may change between versions.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

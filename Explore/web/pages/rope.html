@@ -1,0 +1,28 @@
+<!-- title: Ropes · Explore GrafluentCollections -->
+<!-- description: Edit the middle of a long text held in a real Rope and see which of its chunks each insertion, removal, extraction and concatenation writes. -->
+<header class="sign">
+  <h1>Ropes</h1>
+  <p class="question">How do you edit the middle of a long text without copying the rest of it?</p>
+</header>
+<p class="example lead">Example: removing characters 200 to 419 of a 557-character text. The chunk lying wholly inside that range is unlinked from the tree without being read. Only the two chunks at the range’s ends are copied, trimmed, and the rest are not touched.</p>
+
+<div id="app"></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>Long sequences that change in the middle</h2>
+  <p>An array keeps its elements in one block, so inserting near the start moves everything after it. A rope keeps them in short chunks hung from a balanced tree, so an edit anywhere costs about the same: a walk down to the chunk, a rewrite of that chunk, and a rebalance. Text editors, collaborative editing and undo histories use ropes, since copies are cheap and share every chunk they have not changed.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>A tree that counts</h2>
+  <p>Every vertex holds one chunk and the number of elements in its subtree. To find offset 300, compare it with the count on the left: smaller goes left, larger subtracts the left count and this chunk’s length and goes right. Reading the chunks left to right gives the text. Chunks are copy-on-write, so an edit writes new storage only for the chunks it lands in, and extracting a range or joining two ropes links existing chunks rather than copying their characters.</p>
+  <p>GrafluentCollections keeps the tree balanced as an AVL tree, with chunks of about 2 KB. <code>chunksView</code> lists them in order, and <code>BinaryTree(rope)</code> gives the shape drawn here, numbered the same way.</p>
+
+  <h2><small>Where it breaks</small>Small or read-mostly text</h2>
+  <p>Each read costs a walk down the tree, and the chunks are scattered in memory, so a short text, or one that is read far more than it changes, is faster as a plain array or string. Many tiny edits leave many part-full chunks. A gap buffer, which keeps one hole at the cursor, suits a single cursor typing in one place.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The edits above, in GrafluentCollections</h2>
+  <pre id="code" aria-label="Swift code"></pre>
+</section>

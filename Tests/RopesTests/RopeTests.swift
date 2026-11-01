@@ -116,6 +116,25 @@ struct RopeTests {
         #expect(tree.inorder == sequence)
     }
 
+    @Test("chunksView lists the chunks in sequence order, one per BinaryTree vertex")
+    func chunksView() throws {
+        let perChunk = 2_048 / MemoryLayout<Int>.stride
+        var rope = Rope(0 ..< 3 * perChunk)
+        let counts = rope.chunksView.map(\.count)
+        let three = [perChunk, perChunk, perChunk]
+        #expect(counts == three)
+        rope.insert(-1, at: perChunk + 5)
+        let chunks = Array(rope.chunksView)
+        let tree = try #require(BinaryTree(rope))
+        #expect(chunks.count == tree.vertexCount)
+        let joined = Array(chunks.joined())
+        #expect(joined == Array(rope))
+        let noneEmpty = chunks.allSatisfy { !$0.isEmpty }
+        #expect(noneEmpty)
+        let empty = Array(Rope<Int>().chunksView)
+        #expect(empty.isEmpty)
+    }
+
     @Test("Collection laws: indices, counts, equality and hashing ignore chunking")
     func collectionLaws() {
         var built = Rope<Int>()
@@ -185,6 +204,12 @@ struct RopePropertyTests {
             }
             #expect(Array(rope) == reference)
             #expect(rope.count == reference.count)
+            let chunks = Array(rope.chunksView)
+            #expect(Array(chunks.joined()) == reference)
+            let noneEmpty = chunks.allSatisfy { !$0.isEmpty }
+            #expect(noneEmpty)
+            let vertices = BinaryTree(rope)?.vertexCount ?? 0
+            #expect(chunks.count == vertices)
             for k in Swift.stride(from: 0, to: reference.count, by: 37) {
                 #expect(rope[k] == reference[k])
             }

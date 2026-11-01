@@ -23,6 +23,7 @@ func mountPage(_ page: String) -> Bool {
     case "kdtree": KDTreePage.mount()
     case "suffix": SuffixPage.mount()
     case "decisiondiagrams": DecisionDiagramsPage.mount()
+    case "rope": RopePage.mount()
     default: return false
     }
     return true

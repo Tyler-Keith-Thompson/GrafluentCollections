@@ -572,3 +572,54 @@ extension Rope: CustomStringConvertible {
         Array(self).description
     }
 }
+
+extension Rope {
+    /// The rope's chunks in sequence order, each a run of consecutive elements stored together.
+    ///
+    /// The *i*th chunk is vertex *i* of `BinaryTree(rope)`. Concatenating the chunks gives the
+    /// rope's elements; no chunk is empty.
+    ///
+    /// - Complexity: O(log *m*) to start for *m* chunks, then O(1) amortized per chunk.
+    @inlinable
+    public var chunksView: ChunksView { ChunksView(self) }
+
+    /// A rope's chunks in sequence order.
+    @frozen
+    public struct ChunksView: Sequence {
+        @usableFromInline let _nodes: ContiguousArray<_RopeNode<Element>>
+        @usableFromInline let _root: Int32
+
+        @inlinable
+        init(_ rope: Rope) {
+            _nodes = rope._nodes
+            _root = rope._root
+        }
+
+        /// Walks the chunks in sequence order.
+        @frozen
+        public struct Iterator: IteratorProtocol {
+            @usableFromInline var _slots: _ChunkSlots
+
+            @inlinable
+            init(_ slots: _ChunkSlots) {
+                _slots = slots
+            }
+
+            /// The next chunk, or nil after the last.
+            @inlinable
+            public mutating func next() -> ContiguousArray<Element>? {
+                guard let slot = _slots.next() else { return nil }
+                return _slots.nodes[Int(slot)].chunk
+            }
+        }
+
+        /// An iterator over the chunks.
+        @inlinable
+        public func makeIterator() -> Iterator {
+            Iterator(_ChunkSlots(_nodes, root: _root))
+        }
+    }
+}
+
+extension Rope.ChunksView: Sendable where Element: Sendable {}
+extension Rope.ChunksView.Iterator: Sendable where Element: Sendable {}

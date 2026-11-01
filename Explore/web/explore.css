@@ -560,3 +560,8 @@ table.suffixes tr.found td { background: color-mix(in srgb, var(--danger) 22%, t
 
 /* Decision diagrams: low edges dashed, high edges solid. */
 .edge.low .stroke { stroke-dasharray: 6 5; }
+.chunks { font-family: var(--mono); font-size: 14px; line-height: 1.7; margin: 6px 0 0; white-space: pre-wrap; }
+.chunks .chunk { background: color-mix(in srgb, var(--sign) 10%, var(--sheet)); border-radius: 3px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.chunks .chunk.odd { background: color-mix(in srgb, var(--sign) 24%, var(--sheet)); }
+.chunks .chunk.written { background: color-mix(in srgb, var(--signal) 55%, var(--sheet)); }
+.chunks .chunk.shared { background: color-mix(in srgb, var(--sign) 45%, var(--sheet)); }

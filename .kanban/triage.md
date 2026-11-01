@@ -347,6 +347,14 @@ of a hand-written loop over arrays.
   splitting (as B*-trees do) cut allocations under random churn, but each move shifts up to
   2*t* − 1 elements in two nodes, and it raised the instructions of one-at-a-time insertion by
   far more than the allocations it saved, so it was measured and left out.
+- D30. The explorer is a separate package that follows Grafluent's, one page at a time
+  (2026-11-01): `Explore/` copies Grafluent's shared explorer layer (canvas, timeline, playback,
+  code panel, snippet plugin, build script, template, stylesheet), since that layer lives in
+  Grafluent's executable rather than in a library. Pages use only public API, as any user
+  would. Search trees are drawn with x as in-order rank and y as depth from the `BinaryTree`
+  conversion, not by a general tree layout, which has no left and right and would put a lone
+  right child under its parent. Each structure becomes a page as its own item; the rest stay
+  `soon` rows. Publishing beside the docs needs a CI job, which waits for the owner.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

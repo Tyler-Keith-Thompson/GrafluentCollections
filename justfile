@@ -73,6 +73,10 @@ fuzz-regress *args="":
 fuzz-repro target input:
     python3 {{PROJECT_ROOT}}/scripts/fuzz.py repro {{target}} {{input}}
 
+[doc('Build the browser explorer (Explore/) as size-optimized release WebAssembly into Explore/dist, e.g. EXPLORE_XCODE=/Applications/Xcode-26.2.0.app just explore')]
+explore:
+    {{PROJECT_ROOT}}/Explore/build.sh
+
 [doc('Differential testing against Python references, e.g. just diff, just diff --section tries, or just diff --cases 3000 --seed 7')]
 diff *args="":
     python3 {{PROJECT_ROOT}}/scripts/differential.py {{args}}

@@ -17,6 +17,7 @@ bazel-testlogs
 Benchmarks
 Fuzz
 Differential
+Explore
 
 # Overlays the bootstrap script copies over the template (server type); not built in place.
 templates

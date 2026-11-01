@@ -1,0 +1,199 @@
+#!/bin/sh
+# Builds the explorer as release WebAssembly, optimized for size, into Explore/dist/: the pages,
+# their stylesheet, the one .wasm they share, and the JavaScript that loads it, all as plain files
+# with relative URLs. Run through `just explore`; see README.md.
+set -eu
+
+HERE=$(cd "$(dirname "$0")" && pwd)
+VERSION=${EXPLORE_SWIFT:-6.3.3}
+SDK=${EXPLORE_SDK:-swift-$VERSION-RELEASE_wasm}
+SWIFTLY=$(command -v swiftly || echo "$HOME/.swiftly/bin/swiftly")
+# PackageToJS writes here by default; its plugin sandbox allows no other path in the package.
+OUT="$HERE/.build/plugins/PackageToJS/outputs/Package"
+DIST="$HERE/dist"
+
+# A swift.org toolchain can fail to compile package manifests against a newer Xcode's macOS SDK;
+# EXPLORE_XCODE names an older Xcode to take the SDK from.
+if [ -n "${EXPLORE_XCODE:-}" ]; then
+    export DEVELOPER_DIR="$EXPLORE_XCODE/Contents/Developer"
+    export SDKROOT="$DEVELOPER_DIR/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+fi
+
+if ! command -v wasm-opt >/dev/null; then
+    echo "wasm-opt (binaryen) is not on PATH; the .wasm will not be optimized." >&2
+fi
+
+# PackageToJS strips debug info and runs wasm-opt when it is on PATH. Without swiftly (as in CI,
+# where the toolchain is the container's), the `swift` on PATH must be $VERSION.
+cd "$HERE"
+if [ -x "$SWIFTLY" ]; then
+    "$SWIFTLY" run swift package --swift-sdk "$SDK" -Xswiftc -Osize \
+        js -c release --product Explore "+$VERSION"
+else
+    swift --version 2>&1 | grep -q "Swift version $VERSION " || { echo "swift on PATH is not $VERSION" >&2; exit 1; }
+    swift package --swift-sdk "$SDK" -Xswiftc -Osize js -c release --product Explore
+fi
+
+if command -v wasm-opt >/dev/null; then
+    wasm-opt -Oz --enable-bulk-memory --enable-sign-ext --enable-mutable-globals --enable-nontrapping-float-to-int \
+        --strip-debug --strip-producers "$OUT/Explore.wasm" -o "$OUT/Explore.wasm"
+fi
+
+rm -rf "$DIST"
+mkdir -p "$DIST/platforms" "$DIST/vendor"
+cp "$HERE/web/explore.css" "$DIST/"
+cp -R "$HERE/web/vendor/browser_wasi_shim" "$DIST/vendor/"
+cp "$OUT/Explore.wasm" "$OUT/index.js" "$OUT/instantiate.js" "$OUT/runtime.js" "$OUT/bridge-js.js" "$DIST/"
+# The WASI shim is imported by package name; point it at the vendored copy so no bundler or
+# import map is needed.
+sed "s#'@bjorn3/browser_wasi_shim'#'../vendor/browser_wasi_shim/index.js'#" \
+    "$OUT/platforms/browser.js" > "$DIST/platforms/browser.js"
+grep -q "../vendor/browser_wasi_shim/index.js" "$DIST/platforms/browser.js"
+
+# Each page is web/pages/<name>.html: a title and a description comment, then the body, poured
+# into web/template.html as <name>.html. web/contents.txt gives the reading order: the index's
+# contents list (its @CONTENTS@ line) and each page's previous and next links come from it. The
+# index loads no WebAssembly.
+CONTENTS="$HERE/web/contents.txt"
+for name in $(grep -v '^#' "$CONTENTS" | awk -F'|' '$5 == "page" { print $1 }'); do
+    [ -f "$HERE/web/pages/$name.html" ] || { echo "contents.txt lists $name, but web/pages/$name.html is missing" >&2; exit 1; }
+done
+for page in "$HERE"/web/pages/*.html; do
+    name=$(basename "$page" .html)
+    if [ "$name" != index ] && ! grep -q "^$name|.*|page\$" "$CONTENTS"; then
+        echo "web/pages/$name.html is not a page row in contents.txt" >&2
+        exit 1
+    fi
+    title=$(sed -n '1s/^<!-- title: \(.*\) -->$/\1/p' "$page")
+    description=$(sed -n '2s/^<!-- description: \(.*\) -->$/\1/p' "$page")
+    if [ -z "$title" ] || [ -z "$description" ]; then
+        echo "$page must start with a title and a description comment" >&2
+        exit 1
+    fi
+    tail -n +3 "$page" > "$DIST/.body"
+    awk -v title="$title" -v description="$description" -v name="$name" -v body="$DIST/.body" -v contents="$CONTENTS" '
+        function trim(s) { sub(/^[ \t]+/, "", s); sub(/[ \t]+$/, "", s); return s }
+        # The cells of a "| a | b |" row, trimmed, into `out`; returns how many.
+        function cells(line, out,   n, i) {
+            line = trim(line); sub(/^\|/, "", line); sub(/\|$/, "", line)
+            n = split(line, out, "|")
+            for (i = 1; i <= n; i++) out[i] = trim(out[i])
+            return n
+        }
+        # A compare block as a table. Its first row names the columns; in each later row the first
+        # cell is the method: a leading "[Name](page.html)" links to its page, "*Name" is this page, and
+        # anything else is plain text. Each cell keeps its column name, so a phone can show the
+        # rows as cards.
+        function compare_table(rows,   head, c, n, i, j, s, p, q, out) {
+            n = cells(row[1], head)
+            out = "<div class=\"compare\">\n<table>\n  <thead><tr>"
+            for (j = 1; j <= n; j++) out = out "<th scope=\"col\">" head[j] "</th>"
+            out = out "</tr></thead>\n  <tbody>"
+            for (i = 2; i <= rows; i++) {
+                if (cells(row[i], c) != n) { print name ".html: compare row " i " does not have " n " cells" > "/dev/stderr"; exit 1 }
+                s = c[1]
+                if (substr(s, 1, 1) == "*") {
+                    out = out "\n    <tr class=\"self\"><th scope=\"row\">" substr(s, 2) " <span class=\"this\">This page</span></th>"
+                } else {
+                    p = index(s, "](")
+                    q = p > 0 ? index(substr(s, p + 2), ")") : 0
+                    if (substr(s, 1, 1) == "[" && q > 0)
+                        s = "<a href=\"" substr(s, p + 2, q - 1) "\">" substr(s, 2, p - 2) "</a>" substr(s, p + 2 + q)
+                    out = out "\n    <tr><th scope=\"row\">" s "</th>"
+                }
+                for (j = 2; j <= n; j++) out = out "<td data-label=\"" head[j] "\">" c[j] "</td>"
+                out = out "</tr>"
+            }
+            return out "\n  </tbody>\n</table>\n</div>"
+        }
+        BEGIN {
+            FS = "|"
+            while ((getline line < contents) > 0) {
+                if (line ~ /^#/ || line == "") continue
+                split(line, f, "|")
+                n++; slug[n] = f[1]; heading[n] = f[2]; group[n] = f[3]; summary[n] = f[4]; status[n] = f[5]
+            }
+            # The contents list, a section per group.
+            list = "<nav class=\"contents\" id=\"contents\" aria-label=\"Contents\">\n  <h2>Contents</h2>"
+            for (i = 1; i <= n; i++) {
+                if (i == 1 || group[i] != group[i - 1]) {
+                    if (i > 1) list = list "\n    </ol>\n  </section>"
+                    list = list "\n  <section class=\"group\">\n    <h3>" group[i] "</h3>\n    <ol>"
+                }
+                if (status[i] == "page")
+                    list = list "\n      <li><a href=\"" slug[i] ".html\"><b>" heading[i] "</b><span>" summary[i] "</span></a></li>"
+                else
+                    list = list "\n      <li><div class=\"soon\"><b>" heading[i] "</b><span>" summary[i] "</span><i>Coming soon</i></div></li>"
+            }
+            list = list "\n    </ol>\n  </section>\n</nav>"
+            # The menu of every page, grouped, the current one marked.
+            menu = "    <details class=\"menu\"><summary><span class=\"burger\" aria-hidden=\"true\"></span><span class=\"mlabel\">All pages</span></summary>"
+            menu = menu "\n      <nav class=\"mpanel\" aria-label=\"All pages\"><a class=\"mhome\" href=\"./\"" (name == "index" ? " aria-current=\"page\"" : "") ">Contents</a>"
+            for (i = 1; i <= n; i++) {
+                if (i == 1 || group[i] != group[i - 1]) {
+                    if (i > 1) menu = menu "</div>"
+                    menu = menu "\n        <div class=\"mgroup\"><span>" group[i] "</span>"
+                }
+                if (status[i] == "page")
+                    menu = menu "<a href=\"" slug[i] ".html\"" (slug[i] == name ? " aria-current=\"page\"" : "") ">" heading[i] "</a>"
+                else
+                    menu = menu "<i>" heading[i] " (soon)</i>"
+            }
+            menu = menu "</div>\n      </nav>\n    </details>"
+            # Previous and next among the pages that exist.
+            pager = ""
+            if (name != "index") {
+                prev = ""; following = ""; found = 0
+                for (i = 1; i <= n; i++) {
+                    if (status[i] != "page") continue
+                    if (slug[i] == name) { found = 1; continue }
+                    if (!found) prev = i
+                    else if (following == "") following = i
+                }
+                pager = "<nav class=\"pager\" aria-label=\"Pages\">"
+                pager = pager (prev != "" ? "<a class=\"prev\" href=\"" slug[prev] ".html\"><span>Previous</span>" heading[prev] "</a>" : "<a class=\"prev\" href=\"./\"><span>Previous</span>Contents</a>")
+                pager = pager (following != "" ? "<a class=\"next\" href=\"" slug[following] ".html\"><span>Next</span>" heading[following] "</a>" : "<a class=\"next\" href=\"./#contents\"><span>Next</span>Contents</a>")
+                pager = pager "</nav>"
+            }
+        }
+        /<!-- wasm -->/ { if (name == "index") { skip = 1 }; next }
+        /<!-- end wasm -->/ { skip = 0; next }
+        skip { next }
+        /^@BODY@$/ {
+            rows = 0; table = 0
+            while ((getline line < body) > 0) {
+                if (line ~ /^ *@CONTENTS@$/) { print list; continue }
+                # A "Compared with" table: the rows between "<!-- compare" and "-->".
+                if (line ~ /^ *<!-- compare *$/) { table = 1; rows = 0; continue }
+                if (table && line ~ /^ *--> *$/) { print compare_table(rows); table = 0; continue }
+                if (table) { if (trim(line) != "") row[++rows] = line; continue }
+                print line
+            }
+            if (table) { print name ".html: a compare table is not closed with -->" > "/dev/stderr"; exit 1 }
+            next
+        }
+        /^@PAGER@$/ { print pager; next }
+        /^@MENU@$/ { print menu; next }
+        { gsub(/@TITLE@/, title); gsub(/@DESCRIPTION@/, description); gsub(/@PAGE@/, name); print }
+    ' "$HERE/web/template.html" > "$DIST/$name.html"
+done
+rm "$DIST/.body"
+
+# Each page's first frame goes into its HTML, so the page is drawn before the WebAssembly arrives:
+# the same views, built for this machine, render the initial state of every mount point as HTML.
+# The WebAssembly then mounts in their place. A debug build compiles fastest; it keeps no index or
+# debug info, which nothing here reads.
+HOST_FLAGS="--product Explore --disable-index-store -debug-info-format none"
+if [ -x "$SWIFTLY" ]; then
+    "$SWIFTLY" run swift build $HOST_FLAGS "+$VERSION"
+    HOST_BIN=$("$SWIFTLY" run swift build --show-bin-path "+$VERSION")
+else
+    swift build $HOST_FLAGS
+    HOST_BIN=$(swift build --show-bin-path)
+fi
+"$HOST_BIN/Explore" "$DIST" $(grep -v '^#' "$CONTENTS" | awk -F'|' '$5 == "page" { print $1 }')
+
+# Pages hosts limit each file to 15 MB.
+find "$DIST" -type f -size +15M -exec sh -c 'echo "$1 is over 15 MB" >&2; exit 1' _ {} \;
+echo "Explore/dist:"
+(cd "$DIST" && find . -type f | sort | while read -r f; do printf '%10s  %s\n' "$(wc -c < "$f" | tr -d ' ')" "${f#./}"; done)

@@ -1,0 +1,20 @@
+# The site's reading order: slug|title|group|summary|status. A `page` row is web/pages/<slug>.html,
+# listed in the contents with a link and joined to its neighbours by previous/next links; a
+# `soon` row is listed without a link until its page exists.
+avl|AVL trees|Search trees|A sorted set that keeps itself balanced by rotating.|page
+redblack|Red–black trees|Search trees|Balance kept by colours, with fewer rotations.|soon
+treap|Treaps|Search trees|A search tree shaped by random priorities, split and joined.|soon
+splay|Splay trees|Search trees|Recently used keys move to the top.|soon
+btree|B-trees|Search trees|Many keys per node, so the tree stays shallow.|soon
+skiplist|Skip lists|Search trees|Express lanes over a sorted list.|soon
+trie|Tries and radix trees|Strings|Keys spelled out one character at a time, shared prefixes once.|soon
+ahocorasick|Aho–Corasick|Strings|Every pattern found in one pass over the text.|soon
+suffix|Suffix arrays and trees|Strings|Every substring of a text, indexed.|soon
+decisiondiagrams|Decision diagrams|Logic|A Boolean function as a shared graph of choices.|soon
+fenwick|Fenwick trees|Ranges|Running totals that update in a few steps.|soon
+segmenttree|Segment trees|Ranges|Sums and minimums over any range, with range updates.|soon
+intervaltree|Interval trees|Ranges|Which intervals overlap a point or a range.|soon
+kdtree|k-d trees and quadtrees|Space|Nearest neighbours and boxes in two dimensions.|soon
+rope|Ropes|Text|Long text edited in the middle without copying it.|soon
+persistent|Persistent trees|History|Every version kept, sharing what did not change.|soon
+lru|LRU caches|History|A bounded dictionary that forgets the least recently used.|soon

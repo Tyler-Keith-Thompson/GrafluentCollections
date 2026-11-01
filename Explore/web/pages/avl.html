@@ -1,0 +1,29 @@
+<!-- title: AVL trees · Explore GrafluentCollections -->
+<!-- description: Insert and remove keys in a real AVLTree and watch it rotate to keep every subtree's two sides within one level of each other. -->
+<header class="sign">
+  <h1>AVL trees</h1>
+  <p class="question">How does a sorted set stay fast when the keys arrive in order?</p>
+</header>
+<p class="example lead">Example: insert 30, 20 and 10, in that order. A plain search tree would become a chain three levels deep. An AVL tree rotates as the 10 goes in, and ends with 20 on top.</p>
+
+<div id="app"></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>A sorted set with a guaranteed height</h2>
+  <p>An AVL tree keeps keys in order and finds, inserts or removes any one of them in a number of steps that grows with the logarithm of the count. Reach for it when you need a sorted set or dictionary that also answers by position: the tenth smallest key, or how many keys are below a value. Lookups are a little faster than in a red–black tree, because the tree is never more than about 1.44 times the height of a perfectly balanced one.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>Every subtree within one</h2>
+  <p>A binary search tree keeps smaller keys to the left of each vertex and larger ones to the right. Searching walks down one path, so the cost is the tree’s height. Keys inserted in order build a chain whose height is the count.</p>
+  <p>Adelson-Velsky and Landis fixed this in 1962 with one rule: at every vertex, the heights of the two subtrees differ by at most one. The number under each key above is that difference, right minus left. An insertion or removal changes heights only along the path it took. On the way back up, each vertex on that path checks the rule. Where a side has grown two taller, one rotation, or two in a zig-zag, lifts the taller side up and puts the subtree back within one. Once a subtree comes out as tall as it was before, nothing above it can change height, so the walk back up only updates counts from there.</p>
+  <p>Each vertex also records how many keys its subtree holds. That is what lets the tree find a key by its position in O(log n) steps.</p>
+
+  <h2><small>Where it breaks</small>Rotations on every write</h2>
+  <p>Keeping the rule this strictly means more rotations than looser schemes need. Under heavy inserts and removes, a red–black tree does less work per change. When most accesses go to a few hot keys, a splay tree keeps those near the top. When keys live on disk or are read in long runs, a B-tree’s wide nodes touch less memory.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The operations above, in GrafluentCollections</h2>
+  <pre id="code" aria-label="Swift code"></pre>
+</section>

@@ -28,10 +28,12 @@ Tests/GrafluentCollectionsTests/          The README examples, verbatim
 Tests/GrafluentCollectionsTestSupport/    Shared test fixtures (data only)
 scripts/modules.py               The module graph
 tools/                           Bazel rule wrappers (warnings as errors, Swift 6 mode), DocC rules
+Explore/                         The browser explorer: pages that run the library as WebAssembly
 ```
 
 `Benchmarks/` is a separate SwiftPM package (ordo-one/benchmark) that Bazel ignores; see
-`Benchmarks/README.md`.
+`Benchmarks/README.md`. `Explore/` is another, with an ElementaryUI interface compiled to
+WebAssembly; see `Explore/README.md`.
 
 ### Module graph
 
@@ -74,6 +76,7 @@ Every shell command gets a timeout. macOS has no `timeout`; use
 | `just fuzz [Target] [-t s]`, `just fuzz-regress` | libFuzzer targets in `Fuzz/` (swiftly's 6.3.3 toolchain); replay the local corpora |
 | `just diff [--section X]` | Differential tests against pinned Python references (`Differential/`, through `uv`) |
 | `just generate` | Xcode project from the Bazel graph |
+| `just explore` | The explorer into `Explore/dist` (`EXPLORE_XCODE=/Applications/Xcode-26.2.0.app` when the newest Xcode's SDK crashes the toolchain) |
 | `just template-update` | Merge the project template's changes since `.template.json`'s commit; resolve conflicts, then `just modules`, `just test` |
 | `bazel query 'rdeps(//Tests/..., //Sources/X)'` | Test targets affected by a change to X |
 
@@ -129,6 +132,8 @@ have.
    does. Allocation counts and absolute times still come from `just bench`, on a quiet machine.
    Re-record the `simulated` baseline for the targets a change touches
    (`just bench-simulated --target X`) and commit it with the change.
+5. **An explore page** (optional): a `soon` row of `Explore/web/contents.txt` turned into a page,
+   per "Adding a page" in `Explore/README.md`.
 
 Watch for these:
 
@@ -144,6 +149,7 @@ Watch for these:
 | Any library code | `bazel test` for every target in `bazel query 'rdeps(//Tests/..., //Sources/X)'`, then `just test-release` |
 | `scripts/modules.py` | `just modules`, `just test` (which runs `//:package_swift_test`), `just spm` |
 | `Benchmarks/`, or an API the benchmarks call | `cd Benchmarks && env -u TOOLCHAINS xcrun --toolchain default swift build -c release` |
+| `Explore/`, or an API a page calls | `just explore`, then check the pages in Chrome at 1280 and 400 px |
 | A change meant to be faster | `just bench-simulated-compare --target <Module>Benchmarks`, not `just bench-compare` |
 
 ### Before a push

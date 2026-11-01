@@ -62,6 +62,10 @@ docs:
 wasi-test *args="":
     python3 -u {{PROJECT_ROOT}}/scripts/wasi_test.py {{args}}
 
+[doc('Build the browser explorer (Explore/) as size-optimized release WebAssembly into Explore/dist; EXPLORE_XCODE=/Applications/Xcode-<older>.app if the toolchain crashes on a newer SDK')]
+explore:
+    {{PROJECT_ROOT}}/Explore/build.sh
+
 # The checkout of BenchmarkHarness whose benchmark-harness tool records simulated baselines.
 BENCHMARK_HARNESS := env("BENCHMARK_HARNESS", home_directory() / "workspace" / "BenchmarkHarness")
 
@@ -76,10 +80,6 @@ fuzz-regress *args="":
 [doc('Replay and minimize one crash, e.g. just fuzz-repro FuzzTries Fuzz/Crashes/FuzzTries/crash-…')]
 fuzz-repro target input:
     python3 {{PROJECT_ROOT}}/scripts/fuzz.py repro {{target}} {{input}}
-
-[doc('Build the browser explorer (Explore/) as size-optimized release WebAssembly into Explore/dist, e.g. EXPLORE_XCODE=/Applications/Xcode-26.2.0.app just explore')]
-explore:
-    {{PROJECT_ROOT}}/Explore/build.sh
 
 [doc('Differential testing against Python references, e.g. just diff, just diff --section tries, or just diff --cases 3000 --seed 7')]
 diff *args="":
@@ -155,6 +155,7 @@ clean:
     {{BAZEL_RELEASE}} clean || true
     rm -rf {{PROJECT_ROOT}}/.build
     rm -rf {{PROJECT_ROOT}}/Benchmarks/.build
+    rm -rf {{PROJECT_ROOT}}/Explore/.build {{PROJECT_ROOT}}/Explore/dist
 
 [doc('Print the dependency graph of a target')]
 deps target="//Sources/GrafluentCollections":

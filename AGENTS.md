@@ -27,9 +27,9 @@ Tests/<Module>Tests/             One test target per module; Performance/ holds 
 Tests/GrafluentCollectionsTests/          The README examples, verbatim
 Tests/GrafluentCollectionsTestSupport/    Shared test fixtures (data only)
 scripts/modules.py               The module graph
+Explore/                         The browser explorer: pages running the library as WebAssembly (`just explore`)
 tools/                           Bazel rule wrappers (warnings as errors, Swift 6 mode), DocC rules;
                                  tools/bazel turns BuildBuddy on when the Keychain holds its key
-Explore/                         The browser explorer: pages that run the library as WebAssembly
 ```
 
 `Benchmarks/` is a separate SwiftPM package (ordo-one/benchmark) that Bazel ignores; see
@@ -68,6 +68,7 @@ Every shell command gets a timeout. macOS has no `timeout`; use
 | `bazel test //Tests/XTests` | One test target (`just test-one //Tests/XTests`) |
 | `just filter <pattern>` | Tests whose name matches |
 | `just wasi-test [-c release] [--targets X,Y]` | SwiftPM tests on wasm32-wasi under wasmtime: a 32-bit `Int` |
+| `just explore` | Build the browser explorer into `Explore/dist` (serve it to try a page); the DocC workflow publishes it at `/GrafluentCollections/explore/`. `EXPLORE_XCODE=/Applications/Xcode-26.2.0.app` when the newest Xcode's SDK crashes the toolchain |
 | `just test-release` | `--config=release`: builds and runs only the `XPerformanceTests` targets |
 | `just spm-test`, `just verify` | SwiftPM tests; both build systems |
 | `just modules` | Regenerate build files from `scripts/modules.py` |
@@ -78,7 +79,6 @@ Every shell command gets a timeout. macOS has no `timeout`; use
 | `just fuzz [Target] [-t s]`, `just fuzz-regress` | libFuzzer targets in `Fuzz/` (swiftly's 6.3.3 toolchain); replay the local corpora |
 | `just diff [--section X]` | Differential tests against pinned Python references (`Differential/`, through `uv`) |
 | `just generate` | Xcode project from the Bazel graph |
-| `just explore` | The explorer into `Explore/dist` (`EXPLORE_XCODE=/Applications/Xcode-26.2.0.app` when the newest Xcode's SDK crashes the toolchain) |
 | `just buildbuddy-key`, `just ci-secrets` | Store the BuildBuddy key in the Keychain (once per Mac; builds then use the remote cache); set it as this repository's Actions secret with `gh` |
 | `just template-update` | Merge the project template's changes since `.template.json`'s commit; resolve conflicts, then `just modules`, `just test` |
 | `bazel query 'rdeps(//Tests/..., //Sources/X)'` | Test targets affected by a change to X |

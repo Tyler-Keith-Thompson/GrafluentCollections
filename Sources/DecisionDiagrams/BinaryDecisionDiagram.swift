@@ -268,6 +268,7 @@ public struct BinaryDecisionDiagram {
         /// The lookups that found their result.
         public var hits: Int
 
+        /// Statistics of `lookups` lookups, `hits` of which found their result.
         @inlinable
         public init(lookups: Int, hits: Int) {
             self.lookups = lookups

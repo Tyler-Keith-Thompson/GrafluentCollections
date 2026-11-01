@@ -2,6 +2,7 @@
 /// keys all lie below the other's.
 @frozen
 public struct OverlappingKeys: Error, Hashable, Sendable {
+    /// The error, which carries no payload.
     @inlinable
     public init() {}
 }

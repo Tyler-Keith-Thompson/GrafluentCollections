@@ -32,6 +32,8 @@ public struct IntervalTree<Bound: Comparable, Value> {
         /// The value stored with it.
         public var value: Value
 
+        /// An entry of `range` and `value`. ``IntervalTree/init(_:)`` traps on an entry whose range is
+        /// empty, and ``IntervalTree/init(checked:)`` throws ``EmptyRange``.
         @inlinable
         public init(range: Range<Bound>, value: Value) {
             self.range = range

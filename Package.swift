@@ -71,7 +71,7 @@ let targets: [Target] = [
     .testTarget(name: "RopesTests", dependencies: ["Ropes", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], exclude: ["BUILD.bazel", "Performance"]),
     .testTarget(name: "CachesTests", dependencies: ["Caches", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], exclude: ["BUILD.bazel", "Performance"]),
     .testTarget(name: "PersistentTreesTests", dependencies: ["PersistentTrees", "BinarySearchTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], exclude: ["BUILD.bazel", "Performance"]),
-    .testTarget(name: "GrafluentCollectionsTests", dependencies: ["GrafluentCollections", .product(name: "Trees", package: "grafluent")], exclude: bazelFiles),
+    .testTarget(name: "GrafluentCollectionsTests", dependencies: ["GrafluentCollections", .product(name: "Trees", package: "grafluent"), .product(name: "GraphFormats", package: "grafluent"), .product(name: "GraphDrawing", package: "grafluent")], exclude: bazelFiles),
 
     // Speed-reliant tests, split from the target of the same module (PERFORMANCE_TESTS in scripts/modules.py).
     .testTarget(name: "BinarySearchTreesPerformanceTests", dependencies: ["BinarySearchTrees", "GrafluentCollectionsTestSupport", .product(name: "PropertyBased", package: "swift-property-based"), .product(name: "Trees", package: "grafluent")], path: "Tests/BinarySearchTreesTests/Performance"),

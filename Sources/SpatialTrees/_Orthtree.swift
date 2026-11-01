@@ -10,6 +10,7 @@ public struct SpatialItem<Point: SIMD, Element> where Point.Scalar: FloatingPoin
     /// The element.
     public var element: Element
 
+    /// An item of `element` at `point`.
     @inlinable
     public init(point: Point, element: Element) {
         self.point = point

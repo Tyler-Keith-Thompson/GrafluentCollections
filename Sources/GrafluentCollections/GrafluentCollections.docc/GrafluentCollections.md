@@ -1,17 +1,13 @@
 # ``GrafluentCollections``
 
-Graph-shaped collections for Swift: search trees, tries, suffix structures and decision diagrams
-with value semantics, built on Grafluent.
+Graph-shaped collections for Swift: search trees, tries, suffix structures, decision diagrams,
+range and spatial trees, ropes, persistent trees and caches, with value semantics, built on
+Grafluent.
 
 ## Overview
 
-Every collection is a copy-on-write struct with the API shape of the standard library's
-collections and Swift Collections. Where a structure is a tree or a graph, it also converts to the
-Grafluent type of that shape (`BinaryTree`, `Arborescence`, `RootedTree`), so Grafluent's
-algorithms and drawings run over it.
-
-`import GrafluentCollections` imports every module. Each module also has its own documentation and
-can be imported on its own.
+`import GrafluentCollections` imports every module. Each module also has its own documentation
+and can be imported on its own.
 
 ```swift
 import GrafluentCollections
@@ -21,19 +17,85 @@ print(scores.prefixSum(through: 3))  // 9
 print(scores.sum(in: 2 ..< 6))       // 19
 ```
 
-## Topics
+### Values, not references
+
+Every collection is a copy-on-write struct. Assigning one copies nothing until one of the copies
+is mutated; then only that copy pays, once, and the other keeps its elements:
+
+```swift
+let original: BTree = [1, 2, 3]
+var copy = original
+copy.insert(4)
+Array(original)   // [1, 2, 3]
+Array(copy)       // [1, 2, 3, 4]
+```
+
+The vertices of a tree live in flat arrays linked by integer indices rather than in a class per
+vertex, so a copy is a few array copies and a traversal reads memory almost in order. The API
+follows the standard library and Swift Collections: the sorted sets are `SetAlgebra` and
+random-access collections indexed by rank, the dictionaries take `subscript(_:default:)`, and the
+range trees are collections of their values.
+
+### Traps and checked spellings
+
+A plain spelling traps when its precondition fails, like an `Array` subscript out of range: it is
+the fast path, for callers who know the precondition holds. Beside it, a `checked:` spelling
+throws a typed error instead, one of those in <doc://CollectionErrors/documentation/CollectionErrors>; `try?` turns it into an
+optional.
+
+```swift
+let primes: AVLTree = [2, 3, 5, 7]
+primes[2]                    // 5
+try primes[checked: 9]       // throws IndexOutOfRange
+```
+
+A mutation that would break a structure's invariant, such as joining two treaps whose elements
+interleave, throws on its plain spelling and changes nothing. Where the standard library's
+collections return an optional (`remove(_:)`, a dictionary's subscript, `min()`), these do too.
+
+### Grafluent conversions
+
+A collection whose shape is a tree converts to the Grafluent type of that shape: `BinaryTree`,
+`Arborescence`, `RootedTree` or `PrefixTree`, with an initializer on the Grafluent type that
+costs O(*n*) once. Structures whose shape is a general graph, such as decision diagrams and
+automata, offer a view that is a Grafluent graph without copying. Either way, Grafluent's
+algorithms, drawings and file formats run over the collection; its own operations never go
+through the conversion. <doc:SeeingACollectionAsAGraph> shows the round trip.
 
 ### Modules
 
-- ``BinarySearchTrees``
-- ``BTrees``
-- ``SkipLists``
-- ``Tries``
-- ``SuffixStructures``
-- ``DecisionDiagrams``
-- ``RangeTrees``
-- ``SpatialTrees``
-- ``Ropes``
-- ``PersistentTrees``
-- ``Caches``
-- ``CollectionErrors``
+| Group | Modules |
+|---|---|
+| Search trees | <doc://BinarySearchTrees/documentation/BinarySearchTrees> (AVL, red–black and splay trees, treaps), <doc://BTrees/documentation/BTrees> (B-trees), <doc://SkipLists/documentation/SkipLists> (skip lists) |
+| Tries | <doc://Tries/documentation/Tries> (tries over any sequence of symbols, radix and Patricia trees, Aho–Corasick automata) |
+| Suffix structures | <doc://SuffixStructures/documentation/SuffixStructures> (suffix arrays with LCP, suffix trees, suffix automata) |
+| Decision diagrams | <doc://DecisionDiagrams/documentation/DecisionDiagrams> (reduced ordered BDDs, zero-suppressed ZDDs) |
+| Range and spatial trees | <doc://RangeTrees/documentation/RangeTrees> (Fenwick trees, segment trees with lazy propagation, interval trees), <doc://SpatialTrees/documentation/SpatialTrees> (k-d trees, quadtrees, octrees) |
+| Sequences and persistence | <doc://Ropes/documentation/Ropes> (ropes: sequences as balanced trees of chunks), <doc://PersistentTrees/documentation/PersistentTrees> (path-copying weight-balanced trees that keep every version) |
+| Caches | <doc://Caches/documentation/Caches> (LRU caches) |
+| Shared | <doc://CollectionErrors/documentation/CollectionErrors>: the errors the `checked:` spellings throw, re-exported by every module that throws them |
+
+## Topics
+
+### Guides
+
+- <doc:ChoosingASearchTree>
+- <doc:TriesAndSuffixStructures>
+- <doc:DecisionDiagrams>
+- <doc:RangeAndSpatialTrees>
+- <doc:SeeingACollectionAsAGraph>
+
+### Modules
+
+- <doc://BinarySearchTrees/documentation/BinarySearchTrees>
+- <doc://BTrees/documentation/BTrees>
+- <doc://SkipLists/documentation/SkipLists>
+- <doc://Tries/documentation/Tries>
+- <doc://SuffixStructures/documentation/SuffixStructures>
+- <doc://DecisionDiagrams/documentation/DecisionDiagrams>
+- <doc://RangeTrees/documentation/RangeTrees>
+- <doc://SpatialTrees/documentation/SpatialTrees>
+- <doc://Ropes/documentation/Ropes>
+- <doc://PersistentTrees/documentation/PersistentTrees>
+- <doc://Caches/documentation/Caches>
+- <doc://CollectionErrors/documentation/CollectionErrors>

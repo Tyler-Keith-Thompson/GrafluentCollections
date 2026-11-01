@@ -30,6 +30,7 @@
 @frozen
 public struct LazySegmentTree<Action: MonoidAction> {
     public typealias Element = Action.Values.Element
+    /// The updates the tree applies to ranges of values, as its action names them.
     public typealias Update = Action.Update
 
     /// The cells; cell 0 is unused, and the leaves start at half the count.

@@ -20,6 +20,8 @@ swift_library(
     deps = [
         "//Sources/GrafluentCollections",
         "@swiftpkg_grafluent//:Trees",
+        "@swiftpkg_grafluent//:GraphFormats",
+        "@swiftpkg_grafluent//:GraphDrawing",
     ],
 )
 

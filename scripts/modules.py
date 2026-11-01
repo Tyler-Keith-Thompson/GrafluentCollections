@@ -80,7 +80,7 @@ TEST_TARGETS = [
     ("RopesTests", ["Ropes", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     ("CachesTests", ["Caches", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
     ("PersistentTreesTests", ["PersistentTrees", "BinarySearchTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/Trees"]),
-    (f"{PROJECT}Tests", [PROJECT, "grafluent/Trees"]),
+    (f"{PROJECT}Tests", [PROJECT, "grafluent/Trees", "grafluent/GraphFormats", "grafluent/GraphDrawing"]),
 ]
 
 # The modules the test-support target depends on (fixtures are usually written against the

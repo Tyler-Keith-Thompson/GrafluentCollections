@@ -14,10 +14,11 @@ package enum _BTreeExisting {
 /// *k* elements has *k* + 1 children, every leaf lies at the same depth, and each node records
 /// its subtree's element count, so ranks are found from the root.
 ///
-/// Insertion splits each full node on the way down (Cormen, Leiserson, Rivest and Stein,
-/// *Introduction to Algorithms*, chapter 18), and removal tops up each minimal node on the way
-/// down by borrowing from a sibling or merging with one, so neither walks back up. Recursion goes
-/// only as deep as the tree is high. Before changing a node, each walk copies it if another tree
+/// Insertion splits a node only when the new element would overflow it, passing the middle
+/// element up to its parent, and removal borrows from a sibling or merges with one only when a
+/// node falls below *t* − 1 elements, on the way back up. A merge leaves a node short of full, so
+/// alternating removals and insertions do not split and merge the same node in turn. Recursion
+/// goes only as deep as the tree is high. Before changing a node, each walk copies it if another tree
 /// shares it, so copies of a tree share every node neither has changed.
 @frozen
 @usableFromInline
@@ -254,44 +255,98 @@ package struct _BTreeCore<Key: Comparable, Value> {
     @inlinable
     mutating func insert(_ key: Key, _ value: Value, existing: _BTreeExisting) -> _BTreeElement<Key, Value>? {
         _makeRootUnique()
-        if root.elementCount == Self.maxElements {
-            let newRoot = _BTreeNode<Key, Value>.make(capacity: Self.maxElements, children: [root])
-            newRoot._header.pointee.subtreeCount = root._header.pointee.subtreeCount
+        switch Self._insert(_BTreeElement(key: key, value: value), existing: existing, into: root) {
+        case .found(let previous):
+            return previous
+        case .inserted:
+            return nil
+        case .split(let middle, let right):
+            let newRoot = _BTreeNode<Key, Value>.make(capacity: Self.maxElements, children: [root, right])
+            newRoot.insertElement(middle, at: 0)
+            newRoot._header.pointee.subtreeCount = root._header.pointee.subtreeCount &+ 1 &+ right._header.pointee.subtreeCount
             root = newRoot
-            Self._splitChild(newRoot, 0)
+            return nil
         }
-        return Self._insert(_BTreeElement(key: key, value: value), existing: existing, into: root)
     }
 
-    /// Inserts into the subtree of `node`, which is not full and held by this tree alone.
+    /// What inserting into a subtree did.
+    @frozen
+    @usableFromInline
+    enum _Insertion {
+        /// The subtree held an equal key; this is the element stored for it before.
+        case found(_BTreeElement<Key, Value>)
+        /// The element went in and the subtree's root had room.
+        case inserted
+        /// The element went in and the subtree's root split: `middle` goes up to the parent,
+        /// with `right` as the child after it.
+        case split(middle: _BTreeElement<Key, Value>, right: _BTreeNode<Key, Value>)
+    }
+
+    /// Inserts into the subtree of `node`, which is held by this tree alone, splitting `node`
+    /// when it has no room for what comes up.
     @inlinable
     static func _insert(
         _ element: _BTreeElement<Key, Value>,
         existing: _BTreeExisting,
         into node: _BTreeNode<Key, Value>
-    ) -> _BTreeElement<Key, Value>? {
-        var i = node.boundary(of: element.key, orEqual: false)
+    ) -> _Insertion {
+        let i = node.boundary(of: element.key, orEqual: false)
         if i < node.elementCount && !(element.key < node.key(at: i)) {
-            return _resolve(existing, node, i, element)
+            return .found(_resolve(existing, node, i, element))
         }
         if node.isLeaf {
-            node.insertElement(element, at: i)
             node._header.pointee.subtreeCount &+= 1
-            return nil
+            return _place(element, child: nil, at: i, in: node)
         }
         _makeChildUnique(node, i)
-        if node._header.pointee.children[i].elementCount == maxElements {
-            _splitChild(node, i)
-            let separator = node.key(at: i)
-            if separator < element.key {
-                i &+= 1
-            } else if !(element.key < separator) {
-                return _resolve(existing, node, i, element)
-            }
+        switch _insert(element, existing: existing, into: node._header.pointee.children[i]) {
+        case .found(let previous):
+            return .found(previous)
+        case .inserted:
+            node._header.pointee.subtreeCount &+= 1
+            return .inserted
+        case .split(let middle, let right):
+            node._header.pointee.subtreeCount &+= 1
+            return _place(middle, child: right, at: i, in: node)
         }
-        let previous = _insert(element, existing: existing, into: node._header.pointee.children[i])
-        if previous == nil { node._header.pointee.subtreeCount &+= 1 }
-        return previous
+    }
+
+    /// Puts `element` at `index` of `node`, and `child` (for an inner node) after it, splitting
+    /// `node` around its middle first when it is full. `node`'s subtree count already includes
+    /// what is placed.
+    @inlinable
+    static func _place(
+        _ element: _BTreeElement<Key, Value>,
+        child: _BTreeNode<Key, Value>?,
+        at index: Int,
+        in node: _BTreeNode<Key, Value>
+    ) -> _Insertion {
+        if node.elementCount < maxElements {
+            node.insertElement(element, at: index)
+            if let child { node._header.pointee.children.insert(child, at: index &+ 1) }
+            return .inserted
+        }
+        // Split the 2t − 1 elements into t − 1, the middle one and t − 1, then place the new
+        // element in the half it belongs to; either half has room.
+        let t = minimumDegree
+        let right = _BTreeNode<Key, Value>.make(capacity: maxElements)
+        node.moveElements(from: t, appendingTo: right)
+        let middle = node.removeElement(at: t &- 1)
+        if !node.isLeaf {
+            right._header.pointee.children = ContiguousArray(node._header.pointee.children[t...])
+            node._header.pointee.children.removeSubrange(t...)
+        }
+        let target = index < t ? node : right
+        let position = index < t ? index : index &- t
+        target.insertElement(element, at: position)
+        if let child { target._header.pointee.children.insert(child, at: position &+ 1) }
+        var rightCount = right.elementCount
+        for grandchild in right._header.pointee.children {
+            rightCount &+= grandchild._header.pointee.subtreeCount
+        }
+        right._header.pointee.subtreeCount = rightCount
+        node._header.pointee.subtreeCount &-= rightCount &+ 1
+        return .split(middle: middle, right: right)
     }
 
     /// Applies `existing` to the element at `index` of `node`, whose key equals `element`'s.
@@ -311,29 +366,6 @@ package struct _BTreeCore<Key: Comparable, Value> {
         case .replaceElement:
             return node.replaceElement(at: index, with: element)
         }
-    }
-
-    /// Splits `parent`'s full child `index`, held by this tree alone, around its middle element,
-    /// which moves up into `parent`, which is not full.
-    @inlinable
-    static func _splitChild(_ parent: _BTreeNode<Key, Value>, _ index: Int) {
-        let t = minimumDegree
-        let child = parent._header.pointee.children[index]
-        let right = _BTreeNode<Key, Value>.make(capacity: maxElements)
-        child.moveElements(from: t, appendingTo: right)
-        let middle = child.removeElement(at: t &- 1)
-        var rightCount = right.elementCount
-        if !child.isLeaf {
-            right._header.pointee.children = ContiguousArray(child._header.pointee.children[t...])
-            child._header.pointee.children.removeSubrange(t...)
-            for grandchild in right._header.pointee.children {
-                rightCount &+= grandchild._header.pointee.subtreeCount
-            }
-        }
-        right._header.pointee.subtreeCount = rightCount
-        child._header.pointee.subtreeCount &-= rightCount &+ 1
-        parent.insertElement(middle, at: index)
-        parent._header.pointee.children.insert(right, at: index &+ 1)
     }
 
     // MARK: Removal
@@ -361,55 +393,44 @@ package struct _BTreeCore<Key: Comparable, Value> {
     }
 
     /// Removes the element of rank `rank` from the subtree of `node`, which is held by this tree
-    /// alone and, unless it is the root, holds more than the fewest elements.
+    /// alone. `node` may be left with one element fewer than a node holds; its parent repairs
+    /// that.
     @inlinable
     static func _remove(atRank rank: Int, from node: _BTreeNode<Key, Value>) -> _BTreeElement<Key, Value> {
         node._header.pointee.subtreeCount &-= 1
         if node.isLeaf { return node.removeElement(at: rank) }
+        var j = 0
+        var rest = rank
+        var inChild = true
         while true {
-            var j = 0
-            var rest = rank
-            var inChild = true
-            while true {
-                let size = node._header.pointee.children[j].header.subtreeCount
-                if rest < size { break }
-                if rest == size {
-                    inChild = false
-                    break
-                }
-                rest &-= size &+ 1
-                j &+= 1
+            let size = node._header.pointee.children[j].header.subtreeCount
+            if rest < size { break }
+            if rest == size {
+                inChild = false
+                break
             }
-            if inChild {
-                if node._header.pointee.children[j].elementCount > minElements {
-                    _makeChildUnique(node, j)
-                    return _remove(atRank: rest, from: node._header.pointee.children[j])
-                }
-                _fill(node, j)
-                continue
-            }
-            // The element is `node`'s own: replace it with its predecessor or successor, taken
-            // from a child that can spare one, or merge the two children around it and go on.
-            _makeChildUnique(node, j)
-            _makeChildUnique(node, j &+ 1)
-            let left = node._header.pointee.children[j]
-            if left.elementCount > minElements {
-                let predecessor = _remove(atRank: left._header.pointee.subtreeCount &- 1, from: left)
-                return node.replaceElement(at: j, with: predecessor)
-            }
-            let right = node._header.pointee.children[j &+ 1]
-            if right.elementCount > minElements {
-                let successor = _remove(atRank: 0, from: right)
-                return node.replaceElement(at: j, with: successor)
-            }
-            let leftCount = left._header.pointee.subtreeCount
-            _merge(node, j)
-            return _remove(atRank: leftCount, from: node._header.pointee.children[j])
+            rest &-= size &+ 1
+            j &+= 1
         }
+        _makeChildUnique(node, j)
+        let child = node._header.pointee.children[j]
+        let removed: _BTreeElement<Key, Value>
+        if inChild {
+            removed = _remove(atRank: rest, from: child)
+        } else {
+            // The element is `node`'s own: its predecessor, the last of child `j`'s subtree,
+            // takes its place.
+            let predecessor = _remove(atRank: child._header.pointee.subtreeCount &- 1, from: child)
+            removed = node.replaceElement(at: j, with: predecessor)
+        }
+        if child.elementCount < minElements {
+            _fill(node, j)
+        }
+        return removed
     }
 
-    /// Gives `node`'s child `index`, which holds the fewest elements, one more: from a sibling
-    /// that can spare one, or by merging it with a sibling.
+    /// Gives `node`'s child `index`, which holds one element fewer than a node holds, one more:
+    /// from a sibling that can spare one, or by merging it with a sibling.
     @inlinable
     static func _fill(_ node: _BTreeNode<Key, Value>, _ index: Int) {
         if index > 0 && node._header.pointee.children[index &- 1].elementCount > minElements {
@@ -461,8 +482,9 @@ package struct _BTreeCore<Key: Comparable, Value> {
         child._header.pointee.subtreeCount &+= moved
     }
 
-    /// Merges `node`'s children `index` and `index + 1`, both holding the fewest elements, with
-    /// the element between them into child `index`.
+    /// Merges `node`'s children `index` and `index + 1`, one holding the fewest elements and the
+    /// other one fewer, with the element between them into child `index`, which ends one short of
+    /// full.
     @inlinable
     static func _merge(_ node: _BTreeNode<Key, Value>, _ index: Int) {
         _makeChildUnique(node, index)

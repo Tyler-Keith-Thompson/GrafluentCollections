@@ -340,6 +340,13 @@ of a hand-written loop over arrays.
   one and recomputes its augmentation summary. The summary is still recomputed on every
   vertex of the path, because a removal's successor swap changes a key on the path, which can
   change an interval tree's largest upper bound even where no height moves.
+- D29. B-trees split and merge bottom-up, and do not redistribute on overflow (2026-11-01):
+  insertion splits a node only when the new element overflows it, and never for a key already
+  present; removal borrows or merges only when a node falls below *t* − 1, so a merge leaves a
+  node one short of full rather than full. Moving an element into a sibling with room before
+  splitting (as B*-trees do) cut allocations under random churn, but each move shifts up to
+  2*t* − 1 elements in two nodes, and it raised the instructions of one-at-a-time insertion by
+  far more than the allocations it saved, so it was measured and left out.
 
 ## Open questions
 - Should the modules `@_exported import` the Grafluent modules whose types they return

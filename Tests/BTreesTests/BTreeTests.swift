@@ -369,6 +369,49 @@ struct BTreeTests {
         #expect(Array(copy) == Array(-1 ..< 10_000))
     }
 
+    @Test("Inserting an element already in a full root leaf splits nothing")
+    func insertExistingIntoFullNode() {
+        let maxElements = 2 * _BTreeCore<Int, Void>.minimumDegree - 1
+        var tree = BTree<Int>()
+        for element in 0 ..< maxElements {
+            tree.insert(element)
+        }
+        let root = ObjectIdentifier(tree._core.root)
+        let present = 0
+        let leafHeight = 1
+        #expect(tree._core.root.elementCount == maxElements)
+        #expect(!tree.insert(present).inserted)
+        #expect(tree.height == leafHeight)
+        #expect(ObjectIdentifier(tree._core.root) == root)
+    }
+
+    @Test("Removing and reinserting one element allocates no node after the first pair")
+    func removeInsertSteadyState() {
+        var tree = BTree<Int>()
+        for element in 0 ..< 200 {
+            tree.insert(element)
+        }
+        func nodes(_ tree: BTree<Int>) -> Set<ObjectIdentifier> {
+            var found = Set<ObjectIdentifier>()
+            var stack = [tree._core.root]
+            while let node = stack.popLast() {
+                found.insert(ObjectIdentifier(node))
+                stack.append(contentsOf: node.header.children)
+            }
+            return found
+        }
+        let element = 0
+        tree.remove(element)
+        tree.insert(element)
+        let settled = nodes(tree)
+        for _ in 0 ..< 50 {
+            tree.remove(element)
+            tree.insert(element)
+        }
+        #expect(nodes(tree) == settled)
+        #expect(Array(tree) == Array(0 ..< 200))
+    }
+
     @Test("Node sizes, key order, leaf depth and subtree counts hold after every seeded operation", .tags(.randomized))
     func invariantsUnderRandomOperations() {
         var rng = SeededRandomNumberGenerator(seed: 5)

@@ -7,7 +7,15 @@ collections and Swift Collections, and where a structure is a tree or a graph it
 [Grafluent](https://github.com/Tyler-Keith-Thompson/Grafluent) type of that shape, so Grafluent's
 algorithms and drawings run over it.
 
-[Documentation](https://tyler-keith-thompson.github.io/GrafluentCollections/documentation/)
+[Documentation](https://tyler-keith-thompson.github.io/GrafluentCollections/documentation/) ·
+[Explore](https://tyler-keith-thompson.github.io/GrafluentCollections/explore/)
+
+## Explore the collections
+
+[Explore GrafluentCollections](https://tyler-keith-thompson.github.io/GrafluentCollections/explore/)
+is a set of interactive pages that run the library in your browser, compiled to WebAssembly. Each
+page takes one structure, such as an AVL tree, and lets you step through its operations on a small
+example you can edit, beside the Swift code that runs it.
 
 ## Installation
 

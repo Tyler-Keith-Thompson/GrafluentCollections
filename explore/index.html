@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explore GrafluentCollections</title>
+<meta name="description" content="Watch data structures work. Every page runs the real GrafluentCollections library in your browser, one step at a time.">
+<script>
+  // The theme the reader picked last time, before anything is drawn.
+  try { const t = localStorage.getItem("explore-theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+  // A new page opens at its top, even where the host keeps the previous page's scroll position.
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%231d4f9c%22/%3E%3Cpath d=%22M9 22L16 9l7 13z%22 fill=%22none%22 stroke=%22white%22 stroke-width=%222.5%22/%3E%3Ccircle cx=%229%22 cy=%2222%22 r=%223.5%22 fill=%22white%22/%3E%3Ccircle cx=%2216%22 cy=%229%22 r=%223.5%22 fill=%22white%22/%3E%3Ccircle cx=%2223%22 cy=%2222%22 r=%223.5%22 fill=%22white%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="explore.css">
+</head>
+<body data-page="index">
+<div class="wrap">
+  <nav class="topbar" aria-label="Site">
+    <a class="home" href="./">Explore <b>GrafluentCollections</b></a>
+    <span class="spacer"></span>
+    <details class="menu"><summary><span class="burger" aria-hidden="true"></span><span class="mlabel">All pages</span></summary>
+      <nav class="mpanel" aria-label="All pages"><a class="mhome" href="./" aria-current="page">Contents</a>
+        <div class="mgroup"><span>Search trees</span><a href="avl.html">AVL trees</a><i>Red–black trees (soon)</i><i>Treaps (soon)</i><i>Splay trees (soon)</i><i>B-trees (soon)</i><i>Skip lists (soon)</i></div>
+        <div class="mgroup"><span>Strings</span><i>Tries and radix trees (soon)</i><i>Aho–Corasick (soon)</i><i>Suffix arrays and trees (soon)</i></div>
+        <div class="mgroup"><span>Logic</span><i>Decision diagrams (soon)</i></div>
+        <div class="mgroup"><span>Ranges</span><i>Fenwick trees (soon)</i><i>Segment trees (soon)</i><i>Interval trees (soon)</i></div>
+        <div class="mgroup"><span>Space</span><i>k-d trees and quadtrees (soon)</i></div>
+        <div class="mgroup"><span>Text</span><i>Ropes (soon)</i></div>
+        <div class="mgroup"><span>History</span><i>Persistent trees (soon)</i><i>LRU caches (soon)</i></div>
+      </nav>
+    </details>
+    <a href="../documentation/">Docs</a>
+    <button type="button" class="theme" id="theme" aria-label="Switch between light and dark">◐<span class="tlabel"> Theme</span></button>
+  </nav>
+<header class="sign">
+  <h1>Explore GrafluentCollections</h1>
+  <p class="question">Watch data structures work. Every page runs the real library in your browser, one step at a time.</p>
+</header>
+
+<section class="intro">
+  <p>Most fast collections are trees or graphs inside. A sorted set is a search tree that rotates to stay shallow. A spell checker’s dictionary is a tree of shared prefixes. A text index is every suffix of the text, sorted. The shape is what makes them fast, and it is usually hidden.</p>
+  <p>Each page takes one structure. It says what the structure is for and what else could do the job. Then it lets you run its operations, one step at a time, on a small example you can change, and draws the shape that results. Every page runs the real GrafluentCollections library in your browser, so what you see is what your code would do.</p>
+  <h3>How the pages work</h3>
+  <ul>
+    <li><em>What it’s for</em>, and when to choose something else.</li>
+    <li>A small example you can edit.</li>
+    <li>Step, play, go back, or drag the timeline. Each marble on the timeline is one operation.</li>
+    <li><em>The idea</em>: why it works.</li>
+    <li><em>Where it breaks</em>: the workload that hurts it, and what to use instead.</li>
+    <li><em>In Swift</em>: the exact code the page is running.</li>
+  </ul>
+  <p>Start with <a href="avl.html">AVL trees</a>.</p>
+</section>
+
+<nav class="contents" id="contents" aria-label="Contents">
+  <h2>Contents</h2>
+  <section class="group">
+    <h3>Search trees</h3>
+    <ol>
+      <li><a href="avl.html"><b>AVL trees</b><span>A sorted set that keeps itself balanced by rotating.</span></a></li>
+      <li><div class="soon"><b>Red–black trees</b><span>Balance kept by colours, with fewer rotations.</span><i>Coming soon</i></div></li>
+      <li><div class="soon"><b>Treaps</b><span>A search tree shaped by random priorities, split and joined.</span><i>Coming soon</i></div></li>
+      <li><div class="soon"><b>Splay trees</b><span>Recently used keys move to the top.</span><i>Coming soon</i></div></li>
+      <li><div class="soon"><b>B-trees</b><span>Many keys per node, so the tree stays shallow.</span><i>Coming soon</i></div></li>
+      <li><div class="soon"><b>Skip lists</b><span>Express lanes over a sorted list.</span><i>Coming soon</i></div></li>
+    </ol>
+  </section>
+  <section class="group">
+    <h3>Strings</h3>
+    <ol>
+      <li><div class="soon"><b>Tries and radix trees</b><span>Keys spelled out one character at a time, shared prefixes once.</span><i>Coming soon</i></div></li>
+      <li><div class="soon"><b>Aho–Corasick</b><span>Every pattern found in one pass over the text.</span><i>Coming soon</i></div></li>
+      <li><div class="soon"><b>Suffix arrays and trees</b><span>Every substring of a text, indexed.</span><i>Coming soon</i></div></li>
+    </ol>
+  </section>
+  <section class="group">
+    <h3>Logic</h3>
+    <ol>
+      <li><div class="soon"><b>Decision diagrams</b><span>A Boolean function as a shared graph of choices.</span><i>Coming soon</i></div></li>
+    </ol>
+  </section>
+  <section class="group">
+    <h3>Ranges</h3>
+    <ol>
+      <li><div class="soon"><b>Fenwick trees</b><span>Running totals that update in a few steps.</span><i>Coming soon</i></div></li>
+      <li><div class="soon"><b>Segment trees</b><span>Sums and minimums over any range, with range updates.</span><i>Coming soon</i></div></li>
+      <li><div class="soon"><b>Interval trees</b><span>Which intervals overlap a point or a range.</span><i>Coming soon</i></div></li>
+    </ol>
+  </section>
+  <section class="group">
+    <h3>Space</h3>
+    <ol>
+      <li><div class="soon"><b>k-d trees and quadtrees</b><span>Nearest neighbours and boxes in two dimensions.</span><i>Coming soon</i></div></li>
+    </ol>
+  </section>
+  <section class="group">
+    <h3>Text</h3>
+    <ol>
+      <li><div class="soon"><b>Ropes</b><span>Long text edited in the middle without copying it.</span><i>Coming soon</i></div></li>
+    </ol>
+  </section>
+  <section class="group">
+    <h3>History</h3>
+    <ol>
+      <li><div class="soon"><b>Persistent trees</b><span>Every version kept, sharing what did not change.</span><i>Coming soon</i></div></li>
+      <li><div class="soon"><b>LRU caches</b><span>A bounded dictionary that forgets the least recently used.</span><i>Coming soon</i></div></li>
+    </ol>
+  </section>
+</nav>
+
+</div>
+<script>
+  if (!location.hash) window.scrollTo(0, 0);
+  // Until the reader scrolls, keep the page at its top while the fonts and the interactive parts
+  // come in. `pinned` is read again once the interactive parts have mounted.
+  let pinned = !location.hash;
+  if (pinned) {
+    const release = () => { pinned = false; };
+    for (const kind of ["wheel", "touchstart", "keydown", "mousedown"]) addEventListener(kind, release, { once: true, passive: true });
+    const pin = new ResizeObserver(() => { if (pinned) window.scrollTo(0, 0); });
+    pin.observe(document.body);
+    setTimeout(() => { pinned = false; pin.disconnect(); }, 3000);
+  }
+  document.getElementById("theme").addEventListener("click", () => {
+    const root = document.documentElement;
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("explore-theme", root.dataset.theme); } catch {}
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AVL trees · Explore GrafluentCollections</title>
+<meta name="description" content="Insert and remove keys in a real AVLTree and watch it rotate to keep every subtree's two sides within one level of each other.">
+<script>
+  // The theme the reader picked last time, before anything is drawn.
+  try { const t = localStorage.getItem("explore-theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+  // A new page opens at its top, even where the host keeps the previous page's scroll position.
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%231d4f9c%22/%3E%3Cpath d=%22M9 22L16 9l7 13z%22 fill=%22none%22 stroke=%22white%22 stroke-width=%222.5%22/%3E%3Ccircle cx=%229%22 cy=%2222%22 r=%223.5%22 fill=%22white%22/%3E%3Ccircle cx=%2216%22 cy=%229%22 r=%223.5%22 fill=%22white%22/%3E%3Ccircle cx=%2223%22 cy=%2222%22 r=%223.5%22 fill=%22white%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="explore.css">
+<link rel="modulepreload" href="index.js">
+<link rel="preload" href="Explore.wasm" as="fetch" type="application/wasm" crossorigin>
+</head>
+<body data-page="avl">
+<div class="wrap">
+  <nav class="topbar" aria-label="Site">
+    <a class="home" href="./">Explore <b>GrafluentCollections</b></a>
+    <span class="spacer"></span>
+    <details class="menu"><summary><span class="burger" aria-hidden="true"></span><span class="mlabel">All pages</span></summary>
+      <nav class="mpanel" aria-label="All pages"><a class="mhome" href="./">Contents</a>
+        <div class="mgroup"><span>Search trees</span><a href="avl.html" aria-current="page">AVL trees</a><i>Red–black trees (soon)</i><i>Treaps (soon)</i><i>Splay trees (soon)</i><i>B-trees (soon)</i><i>Skip lists (soon)</i></div>
+        <div class="mgroup"><span>Strings</span><i>Tries and radix trees (soon)</i><i>Aho–Corasick (soon)</i><i>Suffix arrays and trees (soon)</i></div>
+        <div class="mgroup"><span>Logic</span><i>Decision diagrams (soon)</i></div>
+        <div class="mgroup"><span>Ranges</span><i>Fenwick trees (soon)</i><i>Segment trees (soon)</i><i>Interval trees (soon)</i></div>
+        <div class="mgroup"><span>Space</span><i>k-d trees and quadtrees (soon)</i></div>
+        <div class="mgroup"><span>Text</span><i>Ropes (soon)</i></div>
+        <div class="mgroup"><span>History</span><i>Persistent trees (soon)</i><i>LRU caches (soon)</i></div>
+      </nav>
+    </details>
+    <a href="../documentation/">Docs</a>
+    <button type="button" class="theme" id="theme" aria-label="Switch between light and dark">◐<span class="tlabel"> Theme</span></button>
+  </nav>
+<header class="sign">
+  <h1>AVL trees</h1>
+  <p class="question">How does a sorted set stay fast when the keys arrive in order?</p>
+</header>
+<p class="example lead">Example: insert 30, 20 and 10, in that order. A plain search tree would become a chain three levels deep. An AVL tree rotates as the 10 goes in, and ends with 20 on top.</p>
+
+<div id="app" data-loading aria-busy="true"><div><section class="panel controls" aria-label="Your operations"><label class="field" for="avl-text">Keys to insert, a minus sign to remove <input id="avl-text" type="text" value="30 20 10 40 50 25 27 5 -40 -50" maxlength="120" spellcheck="false" autocomplete="off"></label></section><section class="lab" aria-label="The AVL tree"><div class="panel stage"><p class="empty">The tree starts empty. Press Step to run the first operation.</p><div class="legend"><span><i class="dot current"></i>just inserted</span><span><i class="dot selected"></i>moved by this step</span><span>under each key: right height − left height</span></div></div><div class="side"><div class="panel" aria-live="polite"><span class="label">Operation 0 of 10</span><p class="narration">Each insert walks down to a leaf as in any search tree. On the way back up, each vertex checks that its two subtrees differ in height by at most one, and rotates when they differ by two.</p></div><div class="panel"><span class="label">The tree</span><div class="stat"><div><span class="num">0</span>keys</div><div class="good"><span class="num">0</span>levels</div></div></div><div class="panel"><span class="label">In order</span><p class="narration">—</p></div></div></section><section class="panel controls" aria-label="Playback"><div class="buttons"><button type="button" aria-label="Step back">◀ Back</button><button type="button" class="primary">▶ Play</button><button type="button">Step ▶</button><button type="button">Reset</button></div><div class="timeline-scroll"><svg class="timeline" width="300" viewBox="0 0 300 64" aria-label="Timeline of events"><line x1="8" y1="32" x2="292" y2="32" class="axis" /><g class="marble future" data-step="0"><circle cx="22" cy="32" r="10.0" class="m-blue" /><text x="22" y="36" text-anchor="middle">30</text><title>Insert 30 as a new leaf. Every subtree on the way back up still differs by at most one.</title></g><g class="marble future" data-step="1"><circle cx="48" cy="32" r="10.0" class="m-blue" /><text x="48" y="36" text-anchor="middle">20</text><title>Insert 20 as a new leaf. Every subtree on the way back up still differs by at most one.</title></g><g class="marble future" data-step="2"><circle cx="74" cy="32" r="10.0" class="m-violet" /><text x="74" y="36" text-anchor="middle">10</text><title>Insert 10 as a new leaf. A subtree above it now leans by two, so it rotates; 20 and 30 move.</title></g><g class="marble future" data-step="3"><circle cx="100" cy="32" r="10.0" class="m-blue" /><text x="100" y="36" text-anchor="middle">40</text><title>Insert 40 as a new leaf. Every subtree on the way back up still differs by at most one.</title></g><g class="marble future" data-step="4"><circle cx="126" cy="32" r="10.0" class="m-violet" /><text x="126" y="36" text-anchor="middle">50</text><title>Insert 50 as a new leaf. A subtree above it now leans by two, so it rotates; 30 and 40 move.</title></g><g class="marble future" data-step="5"><circle cx="152" cy="32" r="10.0" class="m-violet" /><text x="152" y="36" text-anchor="middle">25</text><title>Insert 25 as a new leaf. A subtree above it now leans by two, so it rotates; 20, 30 and 40 move.</title></g><g class="marble future" data-step="6"><circle cx="178" cy="32" r="10.0" class="m-blue" /><text x="178" y="36" text-anchor="middle">27</text><title>Insert 27 as a new leaf. Every subtree on the way back up still differs by at most one.</title></g><g class="marble future" data-step="7"><circle cx="204" cy="32" r="10.0" class="m-blue" /><text x="204" y="36" text-anchor="middle">5</text><title>Insert 5 as a new leaf. Every subtree on the way back up still differs by at most one.</title></g><g class="marble future" data-step="8"><circle cx="230" cy="32" r="10.0" class="m-red" /><text x="230" y="36" text-anchor="middle">40</text><title>Remove 40. On the way back up a subtree leans by two, so it rotates; 20, 25, 30 and 50 move.</title></g><g class="marble future" data-step="9"><circle cx="256" cy="32" r="10.0" class="m-red" /><text x="256" y="36" text-anchor="middle">50</text><title>Remove 50. On the way back up a subtree leans by two, so it rotates; 25, 27 and 30 move.</title></g><line x1="9" y1="8" x2="9" y2="56" class="playhead" /></svg></div><input id="scrub-avl" class="scrub" type="range" min="0" max="10" value="0" aria-label="Scrub through the steps"><div class="tl-legend"><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-blue" /></svg>insert</span><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-violet" /></svg>insert with a rotation</span><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-red" /></svg>remove</span></div></section></div></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>A sorted set with a guaranteed height</h2>
+  <p>An AVL tree keeps keys in order and finds, inserts or removes any one of them in a number of steps that grows with the logarithm of the count. Reach for it when you need a sorted set or dictionary that also answers by position: the tenth smallest key, or how many keys are below a value. Lookups are a little faster than in a red–black tree, because the tree is never more than about 1.44 times the height of a perfectly balanced one.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>Every subtree within one</h2>
+  <p>A binary search tree keeps smaller keys to the left of each vertex and larger ones to the right. Searching walks down one path, so the cost is the tree’s height. Keys inserted in order build a chain whose height is the count.</p>
+  <p>Adelson-Velsky and Landis fixed this in 1962 with one rule: at every vertex, the heights of the two subtrees differ by at most one. The number under each key above is that difference, right minus left. An insertion or removal changes heights only along the path it took. On the way back up, each vertex on that path checks the rule. Where a side has grown two taller, one rotation, or two in a zig-zag, lifts the taller side up and puts the subtree back within one. Once a subtree comes out as tall as it was before, nothing above it can change height, so the walk back up only updates counts from there.</p>
+  <p>Each vertex also records how many keys its subtree holds. That is what lets the tree find a key by its position in O(log n) steps.</p>
+
+  <h2><small>Where it breaks</small>Rotations on every write</h2>
+  <p>Keeping the rule this strictly means more rotations than looser schemes need. Under heavy inserts and removes, a red–black tree does less work per change. When most accesses go to a few hot keys, a splay tree keeps those near the top. When keys live on disk or are read in long runs, a B-tree’s wide nodes touch less memory.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The operations above, in GrafluentCollections</h2>
+  <pre id="code" data-loading aria-busy="true" aria-label="Swift code"><span><span class="k">import</span> <span class="t">BinarySearchTrees</span>
+<span class="k">import</span> <span class="t">Trees</span>
+
+<span class="k">let</span> operations = [<span class="n">30</span>, <span class="n">20</span>, <span class="n">10</span>, <span class="n">40</span>, <span class="n">50</span>, <span class="n">25</span>, <span class="n">27</span>, <span class="n">5</span>, -<span class="n">40</span>, -<span class="n">50</span>]  <span class="c">// negative: remove</span>
+
+<span class="k">var</span> tree = <span class="t">AVLTree</span>&lt;<span class="t">Int</span>&gt;()
+<span class="k">var</span> history = [tree]
+<span class="k">for</span> key <span class="k">in</span> operations {
+    <span class="k">if</span> key &lt; <span class="n">0</span> {
+        tree.remove(-key)
+    } <span class="k">else</span> {
+        tree.insert(key)
+    }
+    history.append(tree)
+}
+<span class="k">let</span> height = tree.height  <span class="c">// 3</span>
+
+<span class="k">let</span> shape = <span class="t">BinaryTree</span>(tree)
+<span class="k">let</span> order = shape?.inorder  <span class="c">// [5, 10, 20, 25, 27, 30]</span>
+</span></pre>
+</section>
+<nav class="pager" aria-label="Pages"><a class="prev" href="./"><span>Previous</span>Contents</a><a class="next" href="./#contents"><span>Next</span>Contents</a></nav>
+</div>
+<script>
+  if (!location.hash) window.scrollTo(0, 0);
+  // Until the reader scrolls, keep the page at its top while the fonts and the interactive parts
+  // come in. `pinned` is read again once the interactive parts have mounted.
+  let pinned = !location.hash;
+  if (pinned) {
+    const release = () => { pinned = false; };
+    for (const kind of ["wheel", "touchstart", "keydown", "mousedown"]) addEventListener(kind, release, { once: true, passive: true });
+    const pin = new ResizeObserver(() => { if (pinned) window.scrollTo(0, 0); });
+    pin.observe(document.body);
+    setTimeout(() => { pinned = false; pin.disconnect(); }, 3000);
+  }
+  document.getElementById("theme").addEventListener("click", () => {
+    const root = document.documentElement;
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("explore-theme", root.dataset.theme); } catch {}
+  });
+</script>
+<script type="module">
+  // GrafluentCollections and the interface run as WebAssembly; this loads them.
+  import { init } from "./index.js";
+  // The page's first frame is already drawn; these views mount in its place. Return to the top
+  // once they are drawn, unless the link named a section or the reader has scrolled.
+  const toTop = () => { if (pinned) window.scrollTo(0, 0); };
+  init().then(() => requestAnimationFrame(() => requestAnimationFrame(toTop))).catch((error) => {
+    console.error("The explorer failed to start:", error);
+    for (const part of document.querySelectorAll("[data-loading]")) { part.removeAttribute("data-loading"); part.removeAttribute("aria-busy"); }
+    const app = document.getElementById("app");
+    if (app) app.textContent = "The interactive part of this page could not start in this browser.";
+  });
+</script>
+</body>
+</html>

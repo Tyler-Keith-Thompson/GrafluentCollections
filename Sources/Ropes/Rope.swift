@@ -106,7 +106,9 @@ public struct Rope<Element> {
 
     /// Inserts `newElement` at `offset`.
     ///
-    /// - Parameter offset: Traps unless it is in `0 ... count`.
+    /// - Parameters:
+    ///   - newElement: The element to insert.
+    ///   - offset: Traps unless it is in `0 ... count`.
     /// - Complexity: O(log *n* + *c*) for chunks of *c* elements.
     @inlinable
     public mutating func insert(_ newElement: Element, at offset: Int) {
@@ -185,7 +187,7 @@ public struct Rope<Element> {
 
     /// The element at `offset`, throwing instead of trapping on an invalid offset.
     ///
-    /// - Throws: ``IndexOutOfRange`` unless `offset` is in `0 ..< count`.
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless `offset` is in `0 ..< count`.
     /// - Complexity: O(log *n*).
     @inlinable
     public subscript(checked offset: Int) -> Element {

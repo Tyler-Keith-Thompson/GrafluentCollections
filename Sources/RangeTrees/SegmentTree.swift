@@ -85,7 +85,7 @@ public struct SegmentTree<Operation: Monoid> {
     ///
     /// - Parameter range: The indices combined.
     /// - Returns: The combination, or the identity for an empty range.
-    /// - Throws: ``IndexOutOfRange`` unless every index in `range` is valid (an empty range may
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless every index in `range` is valid (an empty range may
     ///   sit at `endIndex`).
     /// - Complexity: O(log *n*).
     @inlinable
@@ -113,7 +113,7 @@ public struct SegmentTree<Operation: Monoid> {
     /// - Parameters:
     ///   - index: The index of the value replaced.
     ///   - value: The new value.
-    /// - Throws: ``IndexOutOfRange`` unless `index` is a valid index; the tree is unchanged.
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless `index` is a valid index; the tree is unchanged.
     /// - Complexity: O(log *n*), plus O(*n*) when the storage is shared with another copy.
     @inlinable
     public mutating func update(checkedAt index: Int, to value: Element) throws(IndexOutOfRange) {
@@ -141,7 +141,7 @@ public struct SegmentTree<Operation: Monoid> {
     /// The largest `end` for which `predicate` holds for the values in `start ..< end` combined,
     /// throwing instead of trapping on a start out of range.
     ///
-    /// - Throws: ``IndexOutOfRange`` unless `start` is in `0 ... count`.
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless `start` is in `0 ... count`.
     /// - Complexity: O(log *n*) calls to `predicate` and to the operation.
     @inlinable
     public func maxRight(checkedFrom start: Int, where predicate: (Element) -> Bool) throws(IndexOutOfRange) -> Int {
@@ -170,7 +170,7 @@ public struct SegmentTree<Operation: Monoid> {
     /// The smallest `start` for which `predicate` holds for the values in `start ..< end`
     /// combined, throwing instead of trapping on an end out of range.
     ///
-    /// - Throws: ``IndexOutOfRange`` unless `end` is in `0 ... count`.
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless `end` is in `0 ... count`.
     /// - Complexity: O(log *n*) calls to `predicate` and to the operation.
     @inlinable
     public func minLeft(checkedUpTo end: Int, where predicate: (Element) -> Bool) throws(IndexOutOfRange) -> Int {
@@ -181,7 +181,7 @@ public struct SegmentTree<Operation: Monoid> {
     /// The value at `position`, throwing instead of trapping on an invalid index.
     ///
     /// - Parameter position: The index of the value.
-    /// - Throws: ``IndexOutOfRange`` unless `position` is a valid index.
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless `position` is a valid index.
     /// - Complexity: O(1).
     @inlinable
     public subscript(checked position: Int) -> Element {

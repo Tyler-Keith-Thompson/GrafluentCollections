@@ -73,7 +73,7 @@ public struct FenwickTree<Element: AdditiveArithmetic> {
     ///
     /// - Parameter index: The last index summed.
     /// - Returns: The sum of the first `index + 1` values.
-    /// - Throws: ``IndexOutOfRange`` unless `index` is a valid index.
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless `index` is a valid index.
     /// - Complexity: O(log *n*).
     @inlinable
     public func prefixSum(checkedThrough index: Int) throws(IndexOutOfRange) -> Element {
@@ -98,7 +98,7 @@ public struct FenwickTree<Element: AdditiveArithmetic> {
     ///
     /// - Parameter range: The indices summed.
     /// - Returns: The sum, or zero for an empty range.
-    /// - Throws: ``IndexOutOfRange`` unless every index in `range` is valid (an empty range may
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless every index in `range` is valid (an empty range may
     ///   sit at `endIndex`).
     /// - Complexity: O(log *n*).
     @inlinable
@@ -125,7 +125,7 @@ public struct FenwickTree<Element: AdditiveArithmetic> {
     /// - Parameters:
     ///   - value: The amount added.
     ///   - index: The index of the value changed.
-    /// - Throws: ``IndexOutOfRange`` unless `index` is a valid index; the tree is unchanged.
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless `index` is a valid index; the tree is unchanged.
     /// - Complexity: O(log *n*), plus O(*n*) when the storage is shared with another copy.
     @inlinable
     public mutating func add(_ value: Element, checkedAt index: Int) throws(IndexOutOfRange) {
@@ -136,7 +136,7 @@ public struct FenwickTree<Element: AdditiveArithmetic> {
     /// The value at `position`, throwing instead of trapping on an invalid index.
     ///
     /// - Parameter position: The index of the value.
-    /// - Throws: ``IndexOutOfRange`` unless `position` is a valid index.
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless `position` is a valid index.
     /// - Complexity: O(log *n*).
     @inlinable
     public subscript(checked position: Int) -> Element {

@@ -67,7 +67,7 @@ public struct LRUCache<Key: Hashable, Value> {
     /// An empty cache holding at most `capacity` entries, throwing instead of trapping on a
     /// negative capacity.
     ///
-    /// - Throws: ``NegativeCapacity`` when `capacity` is negative.
+    /// - Throws: ``/CollectionErrors/NegativeCapacity`` when `capacity` is negative.
     @inlinable
     public init(checkedCapacity capacity: Int) throws(NegativeCapacity) {
         guard capacity >= 0 else { throw NegativeCapacity() }

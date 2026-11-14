@@ -73,7 +73,7 @@ public struct ZeroSuppressedDecisionDiagram {
     /// range.
     ///
     /// - Parameter element: The element.
-    /// - Throws: ``IndexOutOfRange`` unless `element` is in `0 ..< elementCount`.
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless `element` is in `0 ..< elementCount`.
     /// - Complexity: O(1) expected.
     public mutating func single(checked element: Int) throws(IndexOutOfRange) -> Family {
         guard element >= 0 && element < elementCount else { throw IndexOutOfRange() }

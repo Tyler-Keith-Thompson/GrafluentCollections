@@ -59,7 +59,7 @@ public struct KDTree<Point: SIMD> where Point.Scalar: FloatingPoint {
     /// The tree over `points`, throwing instead of trapping on a NaN coordinate.
     ///
     /// - Parameter points: The points.
-    /// - Throws: ``NotANumber`` if a coordinate is NaN.
+    /// - Throws: ``/CollectionErrors/NotANumber`` if a coordinate is NaN.
     /// - Complexity: O(*n* log *n*) expected.
     @inlinable
     public init(checked points: some Sequence<Point>) throws(NotANumber) {
@@ -225,7 +225,7 @@ public struct KDTree<Point: SIMD> where Point.Scalar: FloatingPoint {
     /// The point at `position`, the index it was given at, throwing instead of trapping on an
     /// invalid index.
     ///
-    /// - Throws: ``IndexOutOfRange`` unless `position` is a valid index.
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless `position` is a valid index.
     /// - Complexity: O(1).
     @inlinable
     public subscript(checked position: Int) -> Point {
@@ -498,7 +498,7 @@ public struct BoundingBox<Point: SIMD>: Hashable where Point.Scalar: FloatingPoi
 
     /// The box between `lower` and `upper`, throwing instead of trapping on corners out of order.
     ///
-    /// - Throws: ``EmptyRange`` unless each of `upper`'s coordinates is at least `lower`'s.
+    /// - Throws: ``/CollectionErrors/EmptyRange`` unless each of `upper`'s coordinates is at least `lower`'s.
     @inlinable
     public init(checkedLower lower: Point, upper: Point) throws(EmptyRange) {
         guard all(lower .<= upper) else { throw EmptyRange() }

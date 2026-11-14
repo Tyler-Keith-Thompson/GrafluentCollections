@@ -68,7 +68,7 @@ public struct Quadtree<Element> {
 
     /// Inserts `element` at `point`, throwing instead of trapping on a point outside the bounds.
     ///
-    /// - Throws: ``OutOfBounds`` unless `point` lies in ``bounds``; the quadtree is unchanged.
+    /// - Throws: ``/CollectionErrors/OutOfBounds`` unless `point` lies in ``bounds``; the quadtree is unchanged.
     /// - Complexity: O(depth) amortized, plus O(*n*) when the storage is shared with another copy.
     @inlinable
     public mutating func insert(_ element: Element, checkedAt point: SIMD2<Double>) throws(OutOfBounds) {

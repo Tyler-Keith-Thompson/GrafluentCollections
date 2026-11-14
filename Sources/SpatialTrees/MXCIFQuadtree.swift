@@ -61,7 +61,7 @@ public struct MXCIFQuadtree<Element> {
 
     /// Inserts `element` over `box`, throwing instead of trapping on a box outside the bounds.
     ///
-    /// - Throws: ``OutOfBounds`` unless `box` lies inside ``bounds``; the quadtree is unchanged.
+    /// - Throws: ``/CollectionErrors/OutOfBounds`` unless `box` lies inside ``bounds``; the quadtree is unchanged.
     /// - Complexity: O(depth), plus O(*n*) when the storage is shared with another copy.
     @inlinable
     public mutating func insert(_ element: Element, checkedIn box: BoundingBox<SIMD2<Double>>) throws(OutOfBounds) {

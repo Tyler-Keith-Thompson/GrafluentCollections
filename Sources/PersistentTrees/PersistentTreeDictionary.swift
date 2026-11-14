@@ -222,7 +222,7 @@ public struct PersistentTreeDictionary<Key: Comparable, Value> {
 
     /// Removes and returns the pair at `index`, throwing instead of trapping on an invalid index.
     ///
-    /// - Throws: ``IndexOutOfRange`` unless `index` is a valid index; the dictionary is unchanged.
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless `index` is a valid index; the dictionary is unchanged.
     /// - Complexity: O(log *n*).
     @inlinable
     @discardableResult
@@ -233,7 +233,7 @@ public struct PersistentTreeDictionary<Key: Comparable, Value> {
 
     /// The pair at `position`, throwing instead of trapping on an invalid index.
     ///
-    /// - Throws: ``IndexOutOfRange`` unless `position` is a valid index.
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless `position` is a valid index.
     /// - Complexity: O(log *n*).
     @inlinable
     public subscript(checked position: Index) -> Element {

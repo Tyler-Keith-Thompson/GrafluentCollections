@@ -101,7 +101,7 @@ public struct LazySegmentTree<Action: MonoidAction> {
     ///
     /// - Parameter range: The indices combined.
     /// - Returns: The combination, or the identity for an empty range.
-    /// - Throws: ``IndexOutOfRange`` unless every index in `range` is valid (an empty range may
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless every index in `range` is valid (an empty range may
     ///   sit at `endIndex`).
     /// - Complexity: O(log *n*).
     @inlinable
@@ -127,7 +127,7 @@ public struct LazySegmentTree<Action: MonoidAction> {
     /// Applies `update` to every value whose index lies in `range`, throwing instead of trapping
     /// on an invalid range.
     ///
-    /// - Throws: ``IndexOutOfRange`` unless every index in `range` is valid (an empty range may
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless every index in `range` is valid (an empty range may
     ///   sit at `endIndex`); the tree is unchanged.
     /// - Complexity: O(log *n*), plus O(*n*) when the storage is shared with another copy.
     @inlinable
@@ -152,7 +152,7 @@ public struct LazySegmentTree<Action: MonoidAction> {
     /// Replaces the value at `index` with `value`, throwing instead of trapping on an invalid
     /// index.
     ///
-    /// - Throws: ``IndexOutOfRange`` unless `index` is a valid index; the tree is unchanged.
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless `index` is a valid index; the tree is unchanged.
     /// - Complexity: O(log *n*), plus O(*n*) when the storage is shared with another copy.
     @inlinable
     public mutating func update(checkedAt index: Int, to value: Element) throws(IndexOutOfRange) {
@@ -164,7 +164,7 @@ public struct LazySegmentTree<Action: MonoidAction> {
     /// invalid index.
     ///
     /// - Parameter position: The index of the value.
-    /// - Throws: ``IndexOutOfRange`` unless `position` is a valid index.
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless `position` is a valid index.
     /// - Complexity: O(log *n*).
     @inlinable
     public subscript(checked position: Int) -> Element {

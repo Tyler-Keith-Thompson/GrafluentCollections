@@ -151,7 +151,7 @@ public struct PersistentTreeSet<Element: Comparable> {
     /// Removes and returns the element at `index`, throwing instead of trapping on an invalid
     /// index.
     ///
-    /// - Throws: ``IndexOutOfRange`` unless `index` is in `0 ..< count`; the set is unchanged.
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless `index` is in `0 ..< count`; the set is unchanged.
     /// - Complexity: O(log *n*).
     @inlinable
     @discardableResult
@@ -162,7 +162,7 @@ public struct PersistentTreeSet<Element: Comparable> {
 
     /// The element at `position`, throwing instead of trapping on an invalid index.
     ///
-    /// - Throws: ``IndexOutOfRange`` unless `position` is in `0 ..< count`.
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless `position` is in `0 ..< count`.
     /// - Complexity: O(log *n*).
     @inlinable
     public subscript(checked position: Int) -> Element {

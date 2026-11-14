@@ -33,7 +33,7 @@ public struct IntervalTree<Bound: Comparable, Value> {
         public var value: Value
 
         /// An entry of `range` and `value`. ``IntervalTree/init(_:)`` traps on an entry whose range is
-        /// empty, and ``IntervalTree/init(checked:)`` throws ``EmptyRange``.
+        /// empty, and ``IntervalTree/init(checked:)`` throws ``/CollectionErrors/EmptyRange``.
         @inlinable
         public init(range: Range<Bound>, value: Value) {
             self.range = range
@@ -73,7 +73,7 @@ public struct IntervalTree<Bound: Comparable, Value> {
     /// The tree holding `entries`, throwing instead of trapping on an empty interval.
     ///
     /// - Parameter entries: The entries.
-    /// - Throws: ``EmptyRange`` if any interval is empty.
+    /// - Throws: ``/CollectionErrors/EmptyRange`` if any interval is empty.
     /// - Complexity: O(*n* log *n*).
     @inlinable
     public init(checked entries: some Sequence<Entry>) throws(EmptyRange) {
@@ -129,7 +129,7 @@ public struct IntervalTree<Bound: Comparable, Value> {
 
     /// Inserts `range` with `value`, throwing instead of trapping on an empty interval.
     ///
-    /// - Throws: ``EmptyRange`` if `range` is empty; the tree is unchanged.
+    /// - Throws: ``/CollectionErrors/EmptyRange`` if `range` is empty; the tree is unchanged.
     /// - Complexity: O(log *n*), plus O(*n*) when the storage is shared with another copy.
     @inlinable
     public mutating func insert(checked range: Range<Bound>, value: Value) throws(EmptyRange) {
@@ -206,7 +206,7 @@ public struct IntervalTree<Bound: Comparable, Value> {
     /// The entry at in-order position `position`, throwing instead of trapping on an invalid
     /// position.
     ///
-    /// - Throws: ``IndexOutOfRange`` unless `position` is a valid index.
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless `position` is a valid index.
     /// - Complexity: O(log *n*).
     @inlinable
     public subscript(checked position: Int) -> Entry {

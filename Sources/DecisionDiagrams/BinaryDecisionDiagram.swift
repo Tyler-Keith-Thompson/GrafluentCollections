@@ -74,7 +74,7 @@ public struct BinaryDecisionDiagram {
     /// of range.
     ///
     /// - Parameter index: The variable's index.
-    /// - Throws: ``IndexOutOfRange`` unless `index` is in `0 ..< variableCount`.
+    /// - Throws: ``/CollectionErrors/IndexOutOfRange`` unless `index` is in `0 ..< variableCount`.
     /// - Complexity: O(1) expected.
     public mutating func variable(checked index: Int) throws(IndexOutOfRange) -> Function {
         guard index >= 0 && index < variableCount else { throw IndexOutOfRange() }

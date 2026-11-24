@@ -2,6 +2,7 @@
 // answer or a linear filter over an array of entries, so it can be copied into another file and
 // still run. Nothing here is shared but the imports.
 
+import Generators
 import GrafluentCollectionsTestSupport
 import PropertyBased
 import RangeTrees
@@ -175,7 +176,7 @@ struct IntervalTreePropertyTests {
 
     @Test("Building from entries gives the same tree as inserting them one at a time", .tags(.randomized))
     func buildMatchesInserts() {
-        var rng = SeededRandomNumberGenerator(seed: 17)
+        var rng = Xoroshiro128Plus(seed: 17)
         var entries: [IntervalTree<Int, Int>.Entry] = []
         for k in 0 ..< 300 {
             let lower = Int.random(in: 0 ..< 100, using: &rng)

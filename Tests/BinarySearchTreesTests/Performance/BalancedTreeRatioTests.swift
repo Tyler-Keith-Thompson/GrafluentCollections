@@ -7,6 +7,7 @@
 // elements that both sides agree.
 
 import BinarySearchTrees
+import Generators
 import GrafluentCollectionsTestSupport
 import Testing
 
@@ -20,7 +21,7 @@ struct BalancedTreeRatioTests {
             #else
             let n = 1_000_000
             #endif
-            var rng = SeededRandomNumberGenerator(seed: 1)
+            var rng = Xoroshiro128Plus(seed: 1)
             let sorted = (0 ..< n).map { $0 * 2 }
             let tree = AVLTree(sorted.shuffled(using: &rng))
             let probes = (0 ..< 100_000).map { _ in Int.random(in: 0 ..< 2 * n, using: &rng) }
@@ -78,7 +79,7 @@ struct BalancedTreeRatioTests {
             #else
             let n = 1_000_000
             #endif
-            var rng = SeededRandomNumberGenerator(seed: 1)
+            var rng = Xoroshiro128Plus(seed: 1)
             let sorted = (0 ..< n).map { $0 * 2 }
             let tree = RedBlackTree(sorted.shuffled(using: &rng))
             let probes = (0 ..< 100_000).map { _ in Int.random(in: 0 ..< 2 * n, using: &rng) }

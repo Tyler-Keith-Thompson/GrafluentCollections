@@ -5,6 +5,7 @@
 // sides are timed in alternating rounds, each keeping its fastest of seven. The timing runs only
 // in an optimized build; a debug build checks on 10³ words that both sides agree.
 
+import Generators
 import GrafluentCollectionsTestSupport
 import Testing
 import Tries
@@ -19,7 +20,7 @@ struct TrieRatioTests {
             #else
             let n = 100_000
             #endif
-            var rng = SeededRandomNumberGenerator(seed: 24)
+            var rng = Xoroshiro128Plus(seed: 24)
             func word() -> String {
                 let length = Int.random(in: 3 ... 10, using: &rng)
                 return String((0 ..< length).map { _ in Character(Unicode.Scalar(UInt8.random(in: 97 ... 122, using: &rng))) })

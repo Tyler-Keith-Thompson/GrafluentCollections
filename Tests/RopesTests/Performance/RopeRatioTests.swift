@@ -5,6 +5,7 @@
 // sides are timed in alternating rounds, each keeping its fastest of five. The timing runs only
 // in an optimized build; a debug build checks on 10⁴ elements that both sides agree.
 
+import Generators
 import GrafluentCollectionsTestSupport
 import Ropes
 import Testing
@@ -21,7 +22,7 @@ struct RopeRatioTests {
             let n = 1_000_000
             let insertions = 10_000
             #endif
-            var rng = SeededRandomNumberGenerator(seed: 21)
+            var rng = Xoroshiro128Plus(seed: 21)
             let offsets = (0 ..< insertions).map { k in Int.random(in: 0 ... n + k, using: &rng) }
             let initialRope = Rope(0 ..< n)
             let initialArray = Array(0 ..< n)

@@ -21,6 +21,7 @@ swift_library(
         "//Sources/SkipLists",
         "//Tests/GrafluentCollectionsTestSupport",
         "@swiftpkg_swift_property_based//:PropertyBased",
+        "@swiftpkg_swiftprng//:Generators",
         "@swiftpkg_grafluent//:GraphProtocols",
     ],
 )
@@ -63,6 +64,7 @@ swift_library(
         "//Sources/SkipLists",
         "//Tests/GrafluentCollectionsTestSupport",
         "@swiftpkg_swift_property_based//:PropertyBased",
+        "@swiftpkg_swiftprng//:Generators",
         "@swiftpkg_grafluent//:GraphProtocols",
     ],
 )

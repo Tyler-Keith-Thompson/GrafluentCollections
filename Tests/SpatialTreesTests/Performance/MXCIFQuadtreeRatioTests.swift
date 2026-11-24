@@ -6,6 +6,7 @@
 // rounds, each keeping its fastest of seven. The timing runs only in an optimized build; a debug
 // build checks on 300 boxes that both sides agree.
 
+import Generators
 import GrafluentCollectionsTestSupport
 import SpatialTrees
 import Testing
@@ -20,7 +21,7 @@ struct MXCIFQuadtreeRatioTests {
             #else
             let n = 10_000
             #endif
-            var rng = SeededRandomNumberGenerator(seed: 36)
+            var rng = Xoroshiro128Plus(seed: 36)
             let boxes = (0 ..< n).map { _ -> BoundingBox<SIMD2<Double>> in
                 let corner = SIMD2<Double>(Double.random(in: 0 ..< 0.99, using: &rng), Double.random(in: 0 ..< 0.99, using: &rng))
                 let size = SIMD2<Double>(Double.random(in: 0 ... 0.01, using: &rng), Double.random(in: 0 ... 0.01, using: &rng))

@@ -5,6 +5,7 @@
 // alternating rounds, each keeping its fastest of seven. The timing runs only in an optimized
 // build; a debug build checks on 10³ elements that both sides agree.
 
+import Generators
 import GrafluentCollectionsTestSupport
 import RangeTrees
 import Testing
@@ -19,7 +20,7 @@ struct FenwickTreeRatioTests {
             #else
             let n = 1_000_000
             #endif
-            var rng = SeededRandomNumberGenerator(seed: 15)
+            var rng = Xoroshiro128Plus(seed: 15)
             let values = (0 ..< n).map { _ in Int.random(in: -1_000 ... 1_000, using: &rng) }
             let queries = (0 ..< 2_000).map { _ in Int.random(in: 0 ..< n, using: &rng) }
             let tree = FenwickTree(values)

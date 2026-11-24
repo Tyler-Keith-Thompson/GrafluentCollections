@@ -3,6 +3,7 @@
 // invariant tests read the vertices from `package` storage.
 
 import Foundation
+import Generators
 import GrafluentCollectionsTestSupport
 import Testing
 import Tries
@@ -279,7 +280,7 @@ struct RadixTreeTests {
 
     @Test("Compression, counts, chains, parents and labels hold after every seeded operation", .tags(.randomized))
     func invariantsUnderRandomOperations() {
-        var rng = SeededRandomNumberGenerator(seed: 8)
+        var rng = Xoroshiro128Plus(seed: 8)
         var tree = RadixTree<UInt8>()
         var reference = Set<[UInt8]>()
         for step in 0 ..< 2_000 {

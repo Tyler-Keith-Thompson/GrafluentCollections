@@ -6,6 +6,7 @@
 // timing runs only in an optimized build; a debug build checks on 10³ points that both sides
 // agree.
 
+import Generators
 import GrafluentCollectionsTestSupport
 import SpatialTrees
 import Testing
@@ -20,7 +21,7 @@ struct KDTreeRatioTests {
             #else
             let n = 100_000
             #endif
-            var rng = SeededRandomNumberGenerator(seed: 19)
+            var rng = Xoroshiro128Plus(seed: 19)
             let points: [SIMD2<Double>] = (0 ..< n).map { _ in [Double.random(in: 0 ..< 1, using: &rng), Double.random(in: 0 ..< 1, using: &rng)] }
             let queries: [SIMD2<Double>] = (0 ..< 1_000).map { _ in [Double.random(in: 0 ..< 1, using: &rng), Double.random(in: 0 ..< 1, using: &rng)] }
             let tree = KDTree(points)

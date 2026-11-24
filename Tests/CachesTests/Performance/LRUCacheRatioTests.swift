@@ -6,6 +6,7 @@
 // five. The timing runs only in an optimized build; a debug build runs 10⁴ operations.
 
 import Caches
+import Generators
 import GrafluentCollectionsTestSupport
 import Testing
 
@@ -19,7 +20,7 @@ struct LRUCacheRatioTests {
             #else
             let n = 1_000_000
             #endif
-            var rng = SeededRandomNumberGenerator(seed: 23)
+            var rng = Xoroshiro128Plus(seed: 23)
             let keys = (0 ..< n).map { _ in Int.random(in: 0 ..< 12_500, using: &rng) }
             let isRead = (0 ..< n).map { _ in Int.random(in: 0 ..< 10, using: &rng) != 0 }
 

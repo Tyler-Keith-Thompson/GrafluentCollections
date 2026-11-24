@@ -3,6 +3,7 @@
 
 import BinarySearchTrees
 import Foundation
+import Generators
 import GrafluentCollectionsTestSupport
 import Testing
 import Trees
@@ -408,7 +409,7 @@ struct AVLTreeTests {
 
     @Test("Every vertex stays balanced and the height within Knuth's bound under seeded inserts and removes", .tags(.randomized))
     func balancedUnderRandomOperations() throws {
-        var rng = SeededRandomNumberGenerator(seed: 1)
+        var rng = Xoroshiro128Plus(seed: 1)
         var tree = AVLTree<Int>()
         var reference = Set<Int>()
         for step in 0 ..< 4_000 {
@@ -438,7 +439,7 @@ struct AVLTreeTests {
 
     @Test("Every vertex's recorded height and size match its subtree's after every seeded insert and remove", .tags(.randomized))
     func recordsMatchSubtrees() {
-        var rng = SeededRandomNumberGenerator(seed: 3)
+        var rng = Xoroshiro128Plus(seed: 3)
         var tree = AVLTree<Int>()
         var reference = Set<Int>()
         for step in 0 ..< 3_000 {

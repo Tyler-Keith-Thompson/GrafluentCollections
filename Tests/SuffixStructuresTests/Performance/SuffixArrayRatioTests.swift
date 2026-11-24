@@ -5,6 +5,7 @@
 // machine. The two sides are timed in alternating rounds, each keeping its fastest of five. The
 // timing runs only in an optimized build; a debug build checks on 10³ bytes that both sides agree.
 
+import Generators
 import GrafluentCollectionsTestSupport
 import SuffixStructures
 import Testing
@@ -19,7 +20,7 @@ struct SuffixArrayRatioTests {
             #else
             let n = 1_000_000
             #endif
-            var rng = SeededRandomNumberGenerator(seed: 10)
+            var rng = Xoroshiro128Plus(seed: 10)
             let letters: [UInt8] = Array("ACGT".utf8)
             let text = (0 ..< n).map { _ in letters[Int.random(in: 0 ..< 4, using: &rng)] }
 

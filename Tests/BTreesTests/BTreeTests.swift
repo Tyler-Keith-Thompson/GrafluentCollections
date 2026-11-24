@@ -5,6 +5,7 @@
 
 import BTrees
 import Foundation
+import Generators
 import GrafluentCollectionsTestSupport
 import Testing
 import Trees
@@ -414,7 +415,7 @@ struct BTreeTests {
 
     @Test("Node sizes, key order, leaf depth and subtree counts hold after every seeded operation", .tags(.randomized))
     func invariantsUnderRandomOperations() {
-        var rng = SeededRandomNumberGenerator(seed: 5)
+        var rng = Xoroshiro128Plus(seed: 5)
         var tree = BTree<Int>()
         var reference = Set<Int>()
         let maxElements = 2 * _BTreeCore<Int, Void>.minimumDegree - 1

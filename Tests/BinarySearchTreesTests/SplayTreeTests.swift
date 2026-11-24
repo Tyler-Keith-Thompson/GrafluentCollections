@@ -5,6 +5,7 @@
 
 import BinarySearchTrees
 import Foundation
+import Generators
 import GrafluentCollectionsTestSupport
 import Testing
 import Trees
@@ -466,7 +467,7 @@ struct SplayTreeTests {
 
     @Test("BST order and subtree sizes hold, and the element splayed is the root, after every seeded operation", .tags(.randomized))
     func invariantsUnderRandomOperations() throws {
-        var rng = SeededRandomNumberGenerator(seed: 5)
+        var rng = Xoroshiro128Plus(seed: 5)
         var tree = SplayTree<Int>()
         var reference = Set<Int>()
         for step in 0 ..< 3_000 {

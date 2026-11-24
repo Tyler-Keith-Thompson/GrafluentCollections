@@ -7,6 +7,7 @@
 // that both passes find every element.
 
 import BinarySearchTrees
+import Generators
 import GrafluentCollectionsTestSupport
 import Testing
 
@@ -20,7 +21,7 @@ struct SplayTreeSequentialAccessTests {
             #else
             let n = 1_000_000
             #endif
-            var rng = SeededRandomNumberGenerator(seed: 8)
+            var rng = Xoroshiro128Plus(seed: 8)
             var tree = SplayTree<Int>()
             for element in (0 ..< n).shuffled(using: &rng) {
                 tree.insert(element)

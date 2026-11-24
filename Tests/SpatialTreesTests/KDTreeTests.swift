@@ -2,6 +2,7 @@
 // brute-force scan over the same points, so it can be copied into another file and still run.
 // Nothing here is shared but the imports.
 
+import Generators
 import GrafluentCollectionsTestSupport
 import PropertyBased
 import SpatialTrees
@@ -138,7 +139,7 @@ struct KDTreePropertyTests {
 
     @Test("Nearest and radius searches match brute force in 3D with Float coordinates", .tags(.randomized))
     func matchesBruteForce3D() {
-        var rng = SeededRandomNumberGenerator(seed: 18)
+        var rng = Xoroshiro128Plus(seed: 18)
         for _ in 0 ..< 20 {
             let points: [SIMD3<Float>] = (0 ..< Int.random(in: 0 ..< 300, using: &rng)).map { _ in
                 [Float.random(in: -1 ... 1, using: &rng), Float.random(in: -1 ... 1, using: &rng), Float.random(in: -1 ... 1, using: &rng)]

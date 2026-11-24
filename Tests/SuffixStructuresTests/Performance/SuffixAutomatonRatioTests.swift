@@ -5,6 +5,7 @@
 // sides are timed in alternating rounds, each keeping its fastest of five. The timing runs only in
 // an optimized build; a debug build checks on 60 bytes that both count the same substrings.
 
+import Generators
 import GrafluentCollectionsTestSupport
 import SuffixStructures
 import Testing
@@ -19,7 +20,7 @@ struct SuffixAutomatonRatioTests {
             #else
             let n = 500
             #endif
-            var rng = SeededRandomNumberGenerator(seed: 12)
+            var rng = Xoroshiro128Plus(seed: 12)
             let letters: [UInt8] = Array("ACGT".utf8)
             let text = (0 ..< n).map { _ in letters[Int.random(in: 0 ..< 4, using: &rng)] }
 

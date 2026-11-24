@@ -5,6 +5,7 @@
 // rounds, each keeping its fastest of seven. The timing runs only in an optimized build; a debug
 // build checks on 200 bytes that the trie and the tree count the same distinct substrings.
 
+import Generators
 import GrafluentCollectionsTestSupport
 import SuffixStructures
 import Testing
@@ -19,7 +20,7 @@ struct SuffixTreeRatioTests {
             #else
             let n = 2_000
             #endif
-            var rng = SeededRandomNumberGenerator(seed: 11)
+            var rng = Xoroshiro128Plus(seed: 11)
             let letters: [UInt8] = Array("ACGT".utf8)
             let text = (0 ..< n).map { _ in letters[Int.random(in: 0 ..< 4, using: &rng)] }
 

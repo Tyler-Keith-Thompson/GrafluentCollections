@@ -5,6 +5,7 @@
 // The two sides are timed in alternating rounds, each keeping its fastest of seven. The timing
 // runs only in an optimized build; a debug build checks on 10³ points that both sides agree.
 
+import Generators
 import GrafluentCollectionsTestSupport
 import SpatialTrees
 import Testing
@@ -19,7 +20,7 @@ struct QuadtreeRatioTests {
             #else
             let n = 100_000
             #endif
-            var rng = SeededRandomNumberGenerator(seed: 20)
+            var rng = Xoroshiro128Plus(seed: 20)
             let points: [SIMD2<Double>] = (0 ..< n).map { _ in [Double.random(in: 0 ..< 1, using: &rng), Double.random(in: 0 ..< 1, using: &rng)] }
             let boxes = (0 ..< 1_000).map { _ -> BoundingBox<SIMD2<Double>> in
                 let corner = SIMD2<Double>(Double.random(in: 0 ..< 1, using: &rng), Double.random(in: 0 ..< 1, using: &rng))

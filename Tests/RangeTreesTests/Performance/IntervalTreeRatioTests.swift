@@ -7,6 +7,7 @@
 // alternating rounds, each keeping its fastest of seven. The timing runs only in an optimized
 // build; a debug build checks on 10³ intervals that both sides agree.
 
+import Generators
 import GrafluentCollectionsTestSupport
 import RangeTrees
 import Testing
@@ -21,7 +22,7 @@ struct IntervalTreeRatioTests {
             #else
             let n = 100_000
             #endif
-            var rng = SeededRandomNumberGenerator(seed: 18)
+            var rng = Xoroshiro128Plus(seed: 18)
             let entries = (0 ..< n).map { k -> IntervalTree<Int, Int>.Entry in
                 let lower = Int.random(in: 0 ..< 1_000_000, using: &rng)
                 return .init(range: lower ..< lower + Int.random(in: 1 ... 100, using: &rng), value: k)

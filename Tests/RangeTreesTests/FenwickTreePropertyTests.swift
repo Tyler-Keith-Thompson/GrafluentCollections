@@ -1,6 +1,7 @@
 // Property tests against a naive reference: a plain array, summed with `reduce`. Each test is
 // self-contained; see FenwickTreeTests.swift.
 
+import Generators
 import GrafluentCollectionsTestSupport
 import PropertyBased
 import RangeTrees
@@ -57,7 +58,7 @@ struct FenwickTreePropertyTests {
 
     @Test("The linear build gives the same tree as adding each value to zeros", .tags(.randomized))
     func buildMatchesAdds() {
-        var rng = SeededRandomNumberGenerator(seed: 15)
+        var rng = Xoroshiro128Plus(seed: 15)
         for count in 0 ... 70 {
             let values = (0 ..< count).map { _ in Int.random(in: -100 ... 100, using: &rng) }
             var added = FenwickTree([Int](repeating: 0, count: count))

@@ -5,6 +5,7 @@
 
 import BinarySearchTrees
 import Foundation
+import Generators
 import GrafluentCollectionsTestSupport
 import Testing
 import Trees
@@ -13,7 +14,7 @@ import Trees
 struct TreapTests {
     @Test("priority(of:) reads each vertex's priority: no vertex outranks its parent, the root ranks highest, and a seeded treap repeats them")
     func priorities() {
-        var rng = SeededRandomNumberGenerator(seed: 41)
+        var rng = Xoroshiro128Plus(seed: 41)
         var treap = Treap<Int>(using: &rng)
         for key in [50, 20, 80, 10, 30, 70, 90, 60, 40] {
             treap.insert(key)
@@ -28,7 +29,7 @@ struct TreapTests {
         let highest = treap.map { treap.priority(of: $0)! }.max()
         #expect(treap.priority(of: shape.root) == highest)
         #expect(treap.priority(of: 30) == nil)
-        var again = SeededRandomNumberGenerator(seed: 41)
+        var again = Xoroshiro128Plus(seed: 41)
         var copy = Treap<Int>(using: &again)
         for key in [50, 20, 80, 10, 30, 70, 90, 60, 40] {
             copy.insert(key)
@@ -40,7 +41,7 @@ struct TreapTests {
 
     @Test("Inserting keeps the elements in ascending order and reports what was inserted")
     func insert() {
-        var rng = SeededRandomNumberGenerator(seed: 1)
+        var rng = Xoroshiro128Plus(seed: 1)
         var treap = Treap<Int>(using: &rng)
         for element in [5, 2, 8, 1, 9, 3] {
             #expect(treap.insert(element).inserted)
@@ -52,7 +53,7 @@ struct TreapTests {
 
     @Test("Removing a leaf, a vertex with one child and the root each leaves the rest in order")
     func remove() {
-        var rng = SeededRandomNumberGenerator(seed: 2)
+        var rng = Xoroshiro128Plus(seed: 2)
         var treap = Treap(1 ... 7, using: &rng)
         for element in [7, 1, 4, 2, 6, 3, 5] {
             let removed: Int? = element
@@ -333,7 +334,7 @@ struct TreapTests {
 
     @Test("Splitting and joining the parts gives back the treap, at every split point", .tags(.exhaustive))
     func splitJoinRoundTrip() throws {
-        var rng = SeededRandomNumberGenerator(seed: 3)
+        var rng = Xoroshiro128Plus(seed: 3)
         let treap = Treap((0 ..< 40).map { $0 * 2 }, using: &rng)
         for point in -1 ... 80 {
             let parts = treap.split(at: point)
@@ -425,7 +426,7 @@ struct TreapTests {
     @Test("The same seed gives the same shape, through inserts, removes, splits and joins", .tags(.randomized))
     func seededRunsReproduce() throws {
         func run() throws -> [Int] {
-            var rng = SeededRandomNumberGenerator(seed: 4)
+            var rng = Xoroshiro128Plus(seed: 4)
             var treap = Treap((0 ..< 50).map { $0 * 3 }, using: &rng)
             for element in 0 ..< 40 {
                 treap.insert(element * 5)
@@ -442,7 +443,7 @@ struct TreapTests {
 
     @Test("BST order, heap order and subtree sizes hold after every seeded operation", .tags(.randomized))
     func invariantsUnderRandomOperations() throws {
-        var rng = SeededRandomNumberGenerator(seed: 5)
+        var rng = Xoroshiro128Plus(seed: 5)
         var treap = Treap<Int>(using: &rng)
         var reference = Set<Int>()
         for step in 0 ..< 3_000 {
@@ -501,7 +502,7 @@ struct TreapTests {
 
     @Test("A treap built from a sequence has heap-ordered priorities and right sizes for every count", .tags(.exhaustive))
     func builtTreapsAreTreaps() {
-        var rng = SeededRandomNumberGenerator(seed: 6)
+        var rng = Xoroshiro128Plus(seed: 6)
         for count in 0 ... 70 {
             let treap = Treap(0 ..< count, using: &rng)
             let nodes = treap._core.nodes

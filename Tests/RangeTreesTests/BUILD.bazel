@@ -21,6 +21,7 @@ swift_library(
         "//Sources/RangeTrees",
         "//Tests/GrafluentCollectionsTestSupport",
         "@swiftpkg_swift_property_based//:PropertyBased",
+        "@swiftpkg_swiftprng//:Generators",
         "@swiftpkg_grafluent//:Trees",
     ],
 )
@@ -63,6 +64,7 @@ swift_library(
         "//Sources/RangeTrees",
         "//Tests/GrafluentCollectionsTestSupport",
         "@swiftpkg_swift_property_based//:PropertyBased",
+        "@swiftpkg_swiftprng//:Generators",
         "@swiftpkg_grafluent//:Trees",
     ],
 )

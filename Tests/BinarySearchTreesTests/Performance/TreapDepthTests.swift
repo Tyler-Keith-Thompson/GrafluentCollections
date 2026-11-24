@@ -6,6 +6,7 @@
 
 import BinarySearchTrees
 import Foundation
+import Generators
 import GrafluentCollectionsTestSupport
 import Testing
 
@@ -20,7 +21,7 @@ struct TreapDepthTests {
             let n = 100_000
             #endif
             let bound = 3 * log2(Double(n))
-            var rng = SeededRandomNumberGenerator(seed: 7)
+            var rng = Xoroshiro128Plus(seed: 7)
 
             let built = Treap(0 ..< n, using: &rng)
             #expect(Double(built.height) < bound, "built: height \(built.height), bound \(bound)")

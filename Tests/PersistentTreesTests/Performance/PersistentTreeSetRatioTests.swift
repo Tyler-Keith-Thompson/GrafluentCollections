@@ -7,6 +7,7 @@
 // only in an optimized build; a debug build checks on 500 insertions that both sides agree.
 
 import BinarySearchTrees
+import Generators
 import GrafluentCollectionsTestSupport
 import PersistentTrees
 import Testing
@@ -21,7 +22,7 @@ struct PersistentTreeSetRatioTests {
             #else
             let n = 10_000
             #endif
-            var rng = SeededRandomNumberGenerator(seed: 22)
+            var rng = Xoroshiro128Plus(seed: 22)
             let values = (0 ..< n).map { _ in Int.random(in: 0 ..< 1_000_000_000, using: &rng) }
 
             func library() -> [PersistentTreeSet<Int>] {

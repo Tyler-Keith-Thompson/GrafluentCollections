@@ -3,6 +3,7 @@
 // invariant tests read the vertices from `package` storage.
 
 import Foundation
+import Generators
 import GrafluentCollectionsTestSupport
 import Testing
 import Tries
@@ -301,7 +302,7 @@ struct TrieTests {
 
     @Test("Counts, chains, parents and sorted children hold after every seeded operation", .tags(.randomized))
     func invariantsUnderRandomOperations() {
-        var rng = SeededRandomNumberGenerator(seed: 7)
+        var rng = Xoroshiro128Plus(seed: 7)
         var trie = Trie<UInt8>()
         var reference = Set<[UInt8]>()
         for step in 0 ..< 2_000 {

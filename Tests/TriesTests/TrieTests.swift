@@ -5,6 +5,7 @@
 import Foundation
 import Generators
 import GrafluentCollectionsTestSupport
+import Sampling
 import Testing
 import Tries
 import Trees
@@ -302,13 +303,13 @@ struct TrieTests {
 
     @Test("Counts, chains, parents and sorted children hold after every seeded operation", .tags(.randomized))
     func invariantsUnderRandomOperations() {
-        var rng = Xoroshiro128Plus(seed: 7)
+        var rng = Xoshiro256StarStar(seed: 7)
         var trie = Trie<UInt8>()
         var reference = Set<[UInt8]>()
         for step in 0 ..< 2_000 {
-            let length = Int.random(in: 0 ... 5, using: &rng)
-            let key = (0 ..< length).map { _ in UInt8.random(in: 0 ..< 4, using: &rng) }
-            if step >= 300 && Bool.random(using: &rng) {
+            let length = rng.integer(in: 0 ... 5)
+            let key = (0 ..< length).map { _ in UInt8(rng.integer(in: 0 ..< 4)) }
+            if step >= 300 && rng.bernoulli(0.5) {
                 #expect(trie.remove(key) == reference.remove(key))
             } else {
                 #expect(trie.insert(key).inserted == reference.insert(key).inserted)

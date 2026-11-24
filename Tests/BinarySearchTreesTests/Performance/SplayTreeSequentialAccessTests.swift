@@ -9,6 +9,7 @@
 import BinarySearchTrees
 import Generators
 import GrafluentCollectionsTestSupport
+import Sampling
 import Testing
 
 @Suite("Splay tree sequential access")
@@ -21,12 +22,16 @@ struct SplayTreeSequentialAccessTests {
             #else
             let n = 1_000_000
             #endif
-            var rng = Xoroshiro128Plus(seed: 8)
+            var rng = Xoshiro256StarStar(seed: 8)
             var tree = SplayTree<Int>()
-            for element in (0 ..< n).shuffled(using: &rng) {
+            var order = Array(0 ..< n)
+            // Fisher–Yates over integer(in:): SwiftPRNG has no shuffle, and the standard library's
+            // shuffle may change its order between Swift releases.
+            for i in stride(from: order.count - 1, to: 0, by: -1) { order.swapAt(i, rng.integer(in: 0 ... i)) }
+            for element in order {
                 tree.insert(element)
             }
-            let randomKeys = (0 ..< n).map { _ in Int.random(in: 0 ..< n, using: &rng) }
+            let randomKeys = (0 ..< n).map { _ in rng.integer(in: 0 ..< n) }
 
             func ascending(_ tree: SplayTree<Int>) -> Int {
                 var tree = tree

@@ -7,6 +7,7 @@ import Foundation
 import Generators
 import GrafluentCollectionsTestSupport
 import GraphProtocols
+import Sampling
 import SkipLists
 import Testing
 
@@ -273,7 +274,7 @@ struct SkipListTests {
 
     @Test("The layers view has a vertex per tower level, edges along each level and down each tower", .tags(.fixture))
     func layersView() {
-        var rng = Xoroshiro128Plus(seed: 2)
+        var rng = Xoshiro256StarStar(seed: 2)
         let list = SkipList(0 ..< 200, using: &rng)
         let layers = list.layersView
         typealias Vertex = SkipList<Int>.LayersView.Vertex
@@ -323,7 +324,7 @@ struct SkipListTests {
     @Test("The same seed gives the same towers, through inserts and removes", .tags(.randomized))
     func seededRunsReproduce() {
         func run() -> [Int] {
-            var rng = Xoroshiro128Plus(seed: 4)
+            var rng = Xoshiro256StarStar(seed: 4)
             var list = SkipList((0 ..< 50).map { $0 * 3 }, using: &rng)
             for element in 0 ..< 40 {
                 list.insert(element * 5)
@@ -337,14 +338,14 @@ struct SkipListTests {
 
     @Test("Order, nesting, spans and reachability hold after every seeded operation", .tags(.randomized))
     func invariantsUnderRandomOperations() {
-        var rng = Xoroshiro128Plus(seed: 5)
+        var rng = Xoshiro256StarStar(seed: 5)
         var list = SkipList<Int>(using: &rng)
         var reference = Set<Int>()
         for step in 0 ..< 3_000 {
-            let element = Int.random(in: 0 ..< 400, using: &rng)
-            switch Int.random(in: 0 ..< 20, using: &rng) {
+            let element = rng.integer(in: 0 ..< 400)
+            switch rng.integer(in: 0 ..< 20) {
             case 0 where !list.isEmpty:
-                let rank = Int.random(in: 0 ..< list.count, using: &rng)
+                let rank = rng.integer(in: 0 ..< list.count)
                 let removed = list.remove(at: rank)
                 #expect(reference.remove(removed) != nil)
             case 1 ... 10 where step >= 300:
@@ -408,7 +409,7 @@ struct SkipListTests {
 
     @Test("A list built from a sequence reads back by rank and holds its levels for every count", .tags(.exhaustive))
     func builtListsAreSkipLists() {
-        var rng = Xoroshiro128Plus(seed: 6)
+        var rng = Xoshiro256StarStar(seed: 6)
         for count in 0 ... 70 {
             let list = SkipList(0 ..< count, using: &rng)
             #expect(Array(list) == Array(0 ..< count), "count \(count)")

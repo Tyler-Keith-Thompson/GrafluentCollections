@@ -7,6 +7,7 @@
 
 import Generators
 import GrafluentCollectionsTestSupport
+import Sampling
 import SpatialTrees
 import Testing
 
@@ -20,10 +21,10 @@ struct QuadtreeRatioTests {
             #else
             let n = 100_000
             #endif
-            var rng = Xoroshiro128Plus(seed: 20)
-            let points: [SIMD2<Double>] = (0 ..< n).map { _ in [Double.random(in: 0 ..< 1, using: &rng), Double.random(in: 0 ..< 1, using: &rng)] }
+            var rng = Xoshiro256StarStar(seed: 20)
+            let points: [SIMD2<Double>] = (0 ..< n).map { _ in [rng.uniform(in: 0 ..< 1), rng.uniform(in: 0 ..< 1)] }
             let boxes = (0 ..< 1_000).map { _ -> BoundingBox<SIMD2<Double>> in
-                let corner = SIMD2<Double>(Double.random(in: 0 ..< 1, using: &rng), Double.random(in: 0 ..< 1, using: &rng))
+                let corner = SIMD2<Double>(rng.uniform(in: 0 ..< 1), rng.uniform(in: 0 ..< 1))
                 return BoundingBox(lower: corner, upper: corner + [0.01, 0.01])
             }
             var tree = Quadtree<Int>(bounds: BoundingBox(lower: [0, 0], upper: [1, 1]))

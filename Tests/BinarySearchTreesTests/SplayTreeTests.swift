@@ -7,6 +7,7 @@ import BinarySearchTrees
 import Foundation
 import Generators
 import GrafluentCollectionsTestSupport
+import Sampling
 import Testing
 import Trees
 
@@ -467,17 +468,17 @@ struct SplayTreeTests {
 
     @Test("BST order and subtree sizes hold, and the element splayed is the root, after every seeded operation", .tags(.randomized))
     func invariantsUnderRandomOperations() throws {
-        var rng = Xoroshiro128Plus(seed: 5)
+        var rng = Xoshiro256StarStar(seed: 5)
         var tree = SplayTree<Int>()
         var reference = Set<Int>()
         for step in 0 ..< 3_000 {
-            let element = Int.random(in: 0 ..< 400, using: &rng)
+            let element = rng.integer(in: 0 ..< 400)
             var expectedRoot: Int?
-            switch Int.random(in: 0 ..< 20, using: &rng) {
+            switch rng.integer(in: 0 ..< 20) {
             case 0:
                 // Split and join back, in either order.
                 let parts = tree.split(at: element)
-                if Bool.random(using: &rng) {
+                if rng.bernoulli(0.5) {
                     tree = parts.lower
                     try tree.join(parts.upper)
                 } else {

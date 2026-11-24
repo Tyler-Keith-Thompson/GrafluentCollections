@@ -7,6 +7,7 @@
 
 import Generators
 import GrafluentCollectionsTestSupport
+import Sampling
 import Testing
 import Tries
 
@@ -20,13 +21,13 @@ struct TrieRatioTests {
             #else
             let n = 100_000
             #endif
-            var rng = Xoroshiro128Plus(seed: 24)
+            var rng = Xoshiro256StarStar(seed: 24)
             func word() -> String {
-                let length = Int.random(in: 3 ... 10, using: &rng)
-                return String((0 ..< length).map { _ in Character(Unicode.Scalar(UInt8.random(in: 97 ... 122, using: &rng))) })
+                let length = rng.integer(in: 3 ... 10)
+                return String((0 ..< length).map { _ in Character(Unicode.Scalar(UInt8(rng.integer(in: 97 ... 122)))) })
             }
             let words = (0 ..< n).map { _ in word() }
-            let probes = (0 ..< n).map { k in k % 2 == 0 ? words[Int.random(in: 0 ..< n, using: &rng)] : word() }
+            let probes = (0 ..< n).map { k in k % 2 == 0 ? words[rng.integer(in: 0 ..< n)] : word() }
             let trie = Trie(words.map(\.utf8))
             let set = Set(words)
 

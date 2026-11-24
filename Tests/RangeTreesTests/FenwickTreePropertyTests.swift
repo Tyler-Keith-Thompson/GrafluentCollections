@@ -5,6 +5,7 @@ import Generators
 import GrafluentCollectionsTestSupport
 import PropertyBased
 import RangeTrees
+import Sampling
 import Testing
 
 @Suite("FenwickTree: properties")
@@ -58,9 +59,9 @@ struct FenwickTreePropertyTests {
 
     @Test("The linear build gives the same tree as adding each value to zeros", .tags(.randomized))
     func buildMatchesAdds() {
-        var rng = Xoroshiro128Plus(seed: 15)
+        var rng = Xoshiro256StarStar(seed: 15)
         for count in 0 ... 70 {
-            let values = (0 ..< count).map { _ in Int.random(in: -100 ... 100, using: &rng) }
+            let values = (0 ..< count).map { _ in rng.integer(in: -100 ... 100) }
             var added = FenwickTree([Int](repeating: 0, count: count))
             for (index, value) in values.enumerated() {
                 added.add(value, at: index)

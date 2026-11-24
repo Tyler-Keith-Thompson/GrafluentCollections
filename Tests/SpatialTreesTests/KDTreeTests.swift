@@ -5,6 +5,7 @@
 import Generators
 import GrafluentCollectionsTestSupport
 import PropertyBased
+import Sampling
 import SpatialTrees
 import Testing
 import Trees
@@ -97,7 +98,8 @@ struct KDTreeTests {
         let one: SIMD2<Double> = [1, 1]
         #expect(try tree[checked: 1] == one)
         #expect(throws: IndexOutOfRange()) { try tree[checked: 2] }
-        #expect(throws: EmptyRange()) { try BoundingBox<SIMD2<Double>>(checkedLower: [1, 0], upper: [0, 1]) }
+        // Qualified because Sampling, imported for the seeded draws, declares an EmptyRange too.
+        #expect(throws: CollectionErrors.EmptyRange()) { try BoundingBox<SIMD2<Double>>(checkedLower: [1, 0], upper: [0, 1]) }
         let box = try BoundingBox<SIMD2<Double>>(checkedLower: [0, 0], upper: [0, 1])
         #expect(box.contains([0, 1]))
     }
@@ -139,10 +141,10 @@ struct KDTreePropertyTests {
 
     @Test("Nearest and radius searches match brute force in 3D with Float coordinates", .tags(.randomized))
     func matchesBruteForce3D() {
-        var rng = Xoroshiro128Plus(seed: 18)
+        var rng = Xoshiro256StarStar(seed: 18)
         for _ in 0 ..< 20 {
-            let points: [SIMD3<Float>] = (0 ..< Int.random(in: 0 ..< 300, using: &rng)).map { _ in
-                [Float.random(in: -1 ... 1, using: &rng), Float.random(in: -1 ... 1, using: &rng), Float.random(in: -1 ... 1, using: &rng)]
+            let points: [SIMD3<Float>] = (0 ..< rng.integer(in: 0 ..< 300)).map { _ in
+                [Float(rng.uniform(in: -1 ..< 1)), Float(rng.uniform(in: -1 ..< 1)), Float(rng.uniform(in: -1 ..< 1))]
             }
             let tree = KDTree(points)
             func distance(_ a: SIMD3<Float>, _ b: SIMD3<Float>) -> Float {
@@ -150,13 +152,13 @@ struct KDTreePropertyTests {
                 return (d * d).sum()
             }
             for _ in 0 ..< 20 {
-                let query: SIMD3<Float> = [Float.random(in: -1.2 ... 1.2, using: &rng), Float.random(in: -1.2 ... 1.2, using: &rng), Float.random(in: -1.2 ... 1.2, using: &rng)]
+                let query: SIMD3<Float> = [Float(rng.uniform(in: -1.2 ..< 1.2)), Float(rng.uniform(in: -1.2 ..< 1.2)), Float(rng.uniform(in: -1.2 ..< 1.2))]
                 let ranked = points.indices.sorted {
                     (distance(points[$0], query), $0) < (distance(points[$1], query), $1)
                 }
                 #expect(tree.nearestIndex(to: query) == ranked.first)
                 #expect(tree.nearestIndices(to: query, count: 5) == Array(ranked.prefix(5)))
-                let radius = Float.random(in: 0 ... 0.6, using: &rng)
+                let radius = Float(rng.uniform(in: 0 ..< 0.6))
                 #expect(tree.indices(within: radius, of: query) == points.indices.filter { distance(points[$0], query) <= radius * radius })
             }
         }

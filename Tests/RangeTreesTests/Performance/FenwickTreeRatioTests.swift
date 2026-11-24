@@ -8,6 +8,7 @@
 import Generators
 import GrafluentCollectionsTestSupport
 import RangeTrees
+import Sampling
 import Testing
 
 @Suite("FenwickTree prefix sums against a linear scan")
@@ -20,9 +21,9 @@ struct FenwickTreeRatioTests {
             #else
             let n = 1_000_000
             #endif
-            var rng = Xoroshiro128Plus(seed: 15)
-            let values = (0 ..< n).map { _ in Int.random(in: -1_000 ... 1_000, using: &rng) }
-            let queries = (0 ..< 2_000).map { _ in Int.random(in: 0 ..< n, using: &rng) }
+            var rng = Xoshiro256StarStar(seed: 15)
+            let values = (0 ..< n).map { _ in rng.integer(in: -1_000 ... 1_000) }
+            let queries = (0 ..< 2_000).map { _ in rng.integer(in: 0 ..< n) }
             let tree = FenwickTree(values)
 
             func fenwick() -> Int {

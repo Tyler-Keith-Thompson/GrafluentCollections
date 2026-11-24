@@ -8,6 +8,7 @@
 import Caches
 import Generators
 import GrafluentCollectionsTestSupport
+import Sampling
 import Testing
 
 @Suite("LRUCache against Dictionary")
@@ -20,9 +21,9 @@ struct LRUCacheRatioTests {
             #else
             let n = 1_000_000
             #endif
-            var rng = Xoroshiro128Plus(seed: 23)
-            let keys = (0 ..< n).map { _ in Int.random(in: 0 ..< 12_500, using: &rng) }
-            let isRead = (0 ..< n).map { _ in Int.random(in: 0 ..< 10, using: &rng) != 0 }
+            var rng = Xoshiro256StarStar(seed: 23)
+            let keys = (0 ..< n).map { _ in rng.integer(in: 0 ..< 12_500) }
+            let isRead = (0 ..< n).map { _ in rng.integer(in: 0 ..< 10) != 0 }
 
             func library() -> Int {
                 var cache = LRUCache<Int, Int>(capacity: 10_000)

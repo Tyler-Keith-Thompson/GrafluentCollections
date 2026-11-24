@@ -190,17 +190,17 @@ EXECUTABLES = [
 # Test targets. SwiftPM rejects a target with no sources, so list a target only once its directory
 # holds tests. (name, dependencies)
 TEST_TARGETS = [
-    ("BinarySearchTreesTests", ["BinarySearchTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "swiftprng/Generators", "grafluent/Trees"]),
-    ("BTreesTests", ["BTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "swiftprng/Generators", "grafluent/Trees"]),
-    ("SkipListsTests", ["SkipLists", TEST_SUPPORT, "swift-property-based/PropertyBased", "swiftprng/Generators", "grafluent/GraphProtocols"]),
-    ("TriesTests", ["Tries", TEST_SUPPORT, "swift-property-based/PropertyBased", "swiftprng/Generators", "grafluent/GraphProtocols", "grafluent/Trees"]),
-    ("SuffixStructuresTests", ["SuffixStructures", TEST_SUPPORT, "swift-property-based/PropertyBased", "swiftprng/Generators", "grafluent/GraphProtocols", "grafluent/Trees"]),
+    ("BinarySearchTreesTests", ["BinarySearchTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "swiftprng/Generators", "swiftprng/Sampling", "grafluent/Trees"]),
+    ("BTreesTests", ["BTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "swiftprng/Generators", "swiftprng/Sampling", "grafluent/Trees"]),
+    ("SkipListsTests", ["SkipLists", TEST_SUPPORT, "swift-property-based/PropertyBased", "swiftprng/Generators", "swiftprng/Sampling", "grafluent/GraphProtocols"]),
+    ("TriesTests", ["Tries", TEST_SUPPORT, "swift-property-based/PropertyBased", "swiftprng/Generators", "swiftprng/Sampling", "grafluent/GraphProtocols", "grafluent/Trees"]),
+    ("SuffixStructuresTests", ["SuffixStructures", TEST_SUPPORT, "swift-property-based/PropertyBased", "swiftprng/Generators", "swiftprng/Sampling", "grafluent/GraphProtocols", "grafluent/Trees"]),
     ("DecisionDiagramsTests", ["DecisionDiagrams", TEST_SUPPORT, "swift-property-based/PropertyBased", "grafluent/GraphProtocols"]),
-    ("RangeTreesTests", ["RangeTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "swiftprng/Generators", "grafluent/Trees"]),
-    ("SpatialTreesTests", ["SpatialTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "swiftprng/Generators", "grafluent/Trees"]),
-    ("RopesTests", ["Ropes", TEST_SUPPORT, "swift-property-based/PropertyBased", "swiftprng/Generators", "grafluent/Trees"]),
-    ("CachesTests", ["Caches", TEST_SUPPORT, "swift-property-based/PropertyBased", "swiftprng/Generators", "grafluent/Trees"]),
-    ("PersistentTreesTests", ["PersistentTrees", "BinarySearchTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "swiftprng/Generators", "grafluent/Trees"]),
+    ("RangeTreesTests", ["RangeTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "swiftprng/Generators", "swiftprng/Sampling", "grafluent/Trees"]),
+    ("SpatialTreesTests", ["SpatialTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "swiftprng/Generators", "swiftprng/Sampling", "grafluent/Trees"]),
+    ("RopesTests", ["Ropes", TEST_SUPPORT, "swift-property-based/PropertyBased", "swiftprng/Generators", "swiftprng/Sampling", "grafluent/Trees"]),
+    ("CachesTests", ["Caches", TEST_SUPPORT, "swift-property-based/PropertyBased", "swiftprng/Generators", "swiftprng/Sampling", "grafluent/Trees"]),
+    ("PersistentTreesTests", ["PersistentTrees", "BinarySearchTrees", TEST_SUPPORT, "swift-property-based/PropertyBased", "swiftprng/Generators", "swiftprng/Sampling", "grafluent/Trees"]),
     (f"{PROJECT}Tests", [PROJECT, "grafluent/Trees", "grafluent/GraphFormats", "grafluent/GraphDrawing"]),
 ]
 

@@ -5,6 +5,7 @@ import BinarySearchTrees
 import Foundation
 import Generators
 import GrafluentCollectionsTestSupport
+import Sampling
 import Testing
 import Trees
 
@@ -12,10 +13,10 @@ import Trees
 struct RedBlackTreeTests {
     @Test("After seeded inserts and removes, color(of:) shows a black root, no red vertex with a red child, and one black count on every path")
     func colorInvariants() {
-        var rng = Xoroshiro128Plus(seed: 40)
+        var rng = Xoshiro256StarStar(seed: 40)
         var tree = RedBlackTree<Int>()
         for step in 0 ..< 600 {
-            let key = Int.random(in: 0 ..< 200, using: &rng)
+            let key = rng.integer(in: 0 ..< 200)
             if step % 3 == 2 {
                 tree.remove(key)
             } else {
@@ -455,12 +456,12 @@ struct RedBlackTreeTests {
 
     @Test("Both red–black invariants and the height bound hold after every seeded insert and remove", .tags(.randomized))
     func invariantsUnderRandomOperations() {
-        var rng = Xoroshiro128Plus(seed: 2)
+        var rng = Xoshiro256StarStar(seed: 2)
         var tree = RedBlackTree<Int>()
         var reference = Set<Int>()
         for step in 0 ..< 3_000 {
-            let element = Int.random(in: 0 ..< 400, using: &rng)
-            if Bool.random(using: &rng) || step < 300 {
+            let element = rng.integer(in: 0 ..< 400)
+            if rng.bernoulli(0.5) || step < 300 {
                 tree.insert(element)
                 reference.insert(element)
             } else {

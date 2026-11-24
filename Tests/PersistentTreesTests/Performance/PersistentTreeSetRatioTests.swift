@@ -10,6 +10,7 @@ import BinarySearchTrees
 import Generators
 import GrafluentCollectionsTestSupport
 import PersistentTrees
+import Sampling
 import Testing
 
 @Suite("Persistent versions against copied AVL trees")
@@ -22,8 +23,8 @@ struct PersistentTreeSetRatioTests {
             #else
             let n = 10_000
             #endif
-            var rng = Xoroshiro128Plus(seed: 22)
-            let values = (0 ..< n).map { _ in Int.random(in: 0 ..< 1_000_000_000, using: &rng) }
+            var rng = Xoshiro256StarStar(seed: 22)
+            let values = (0 ..< n).map { _ in rng.integer(in: 0 ..< 1_000_000_000) }
 
             func library() -> [PersistentTreeSet<Int>] {
                 var versions: [PersistentTreeSet<Int>] = [PersistentTreeSet()]

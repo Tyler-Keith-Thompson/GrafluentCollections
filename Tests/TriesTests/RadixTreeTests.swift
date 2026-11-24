@@ -5,6 +5,7 @@
 import Foundation
 import Generators
 import GrafluentCollectionsTestSupport
+import Sampling
 import Testing
 import Tries
 import Trees
@@ -280,13 +281,13 @@ struct RadixTreeTests {
 
     @Test("Compression, counts, chains, parents and labels hold after every seeded operation", .tags(.randomized))
     func invariantsUnderRandomOperations() {
-        var rng = Xoroshiro128Plus(seed: 8)
+        var rng = Xoshiro256StarStar(seed: 8)
         var tree = RadixTree<UInt8>()
         var reference = Set<[UInt8]>()
         for step in 0 ..< 2_000 {
-            let length = Int.random(in: 0 ... 6, using: &rng)
-            let key = (0 ..< length).map { _ in UInt8.random(in: 0 ..< 3, using: &rng) }
-            if step >= 300 && Bool.random(using: &rng) {
+            let length = rng.integer(in: 0 ... 6)
+            let key = (0 ..< length).map { _ in UInt8(rng.integer(in: 0 ..< 3)) }
+            if step >= 300 && rng.bernoulli(0.5) {
                 #expect(tree.remove(key) == reference.remove(key))
             } else {
                 #expect(tree.insert(key).inserted == reference.insert(key).inserted)

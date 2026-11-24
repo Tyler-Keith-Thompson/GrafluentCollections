@@ -9,6 +9,7 @@
 import BTrees
 import Generators
 import GrafluentCollectionsTestSupport
+import Sampling
 import Testing
 
 @Suite("B-tree lookups against binary search in a sorted array")
@@ -21,10 +22,14 @@ struct BTreeRatioTests {
             #else
             let n = 1_000_000
             #endif
-            var rng = Xoroshiro128Plus(seed: 1)
+            var rng = Xoshiro256StarStar(seed: 1)
             let sorted = (0 ..< n).map { $0 * 2 }
-            let tree = BTree(sorted.shuffled(using: &rng))
-            let probes = (0 ..< 100_000).map { _ in Int.random(in: 0 ..< 2 * n, using: &rng) }
+            var shuffled = sorted
+            // Fisher–Yates over integer(in:): SwiftPRNG has no shuffle, and the standard library's
+            // shuffle may change its order between Swift releases.
+            for i in stride(from: shuffled.count - 1, to: 0, by: -1) { shuffled.swapAt(i, rng.integer(in: 0 ... i)) }
+            let tree = BTree(shuffled)
+            let probes = (0 ..< 100_000).map { _ in rng.integer(in: 0 ..< 2 * n) }
 
             func lookups() -> Int {
                 var found = 0

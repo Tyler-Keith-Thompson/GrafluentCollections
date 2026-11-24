@@ -8,6 +8,7 @@
 import Generators
 import GrafluentCollectionsTestSupport
 import Ropes
+import Sampling
 import Testing
 
 @Suite("Rope insertions against Array.insert")
@@ -22,8 +23,8 @@ struct RopeRatioTests {
             let n = 1_000_000
             let insertions = 10_000
             #endif
-            var rng = Xoroshiro128Plus(seed: 21)
-            let offsets = (0 ..< insertions).map { k in Int.random(in: 0 ... n + k, using: &rng) }
+            var rng = Xoshiro256StarStar(seed: 21)
+            let offsets = (0 ..< insertions).map { k in rng.integer(in: 0 ... n + k) }
             let initialRope = Rope(0 ..< n)
             let initialArray = Array(0 ..< n)
 

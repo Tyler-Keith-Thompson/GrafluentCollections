@@ -7,6 +7,7 @@
 
 import Generators
 import GrafluentCollectionsTestSupport
+import Sampling
 import SuffixStructures
 import Testing
 
@@ -20,9 +21,9 @@ struct SuffixAutomatonRatioTests {
             #else
             let n = 500
             #endif
-            var rng = Xoroshiro128Plus(seed: 12)
+            var rng = Xoshiro256StarStar(seed: 12)
             let letters: [UInt8] = Array("ACGT".utf8)
-            let text = (0 ..< n).map { _ in letters[Int.random(in: 0 ..< 4, using: &rng)] }
+            let text = (0 ..< n).map { _ in letters[rng.integer(in: 0 ..< 4)] }
 
             func library() -> Int64 {
                 SuffixAutomaton(text).distinctSubstringCount

@@ -6,6 +6,7 @@ import Generators
 import GrafluentCollectionsTestSupport
 import PropertyBased
 import RangeTrees
+import Sampling
 import Testing
 import Trees
 
@@ -117,13 +118,14 @@ struct IntervalTreeTests {
     @Test("The checked spellings throw EmptyRange and IndexOutOfRange and change nothing")
     func checkedSpellings() throws {
         var tree = IntervalTree<Int, Int>()
-        #expect(throws: EmptyRange()) { try tree.insert(checked: 3 ..< 3, value: 0) }
+        // Qualified because Sampling, imported for the seeded draws, declares an EmptyRange too.
+        #expect(throws: CollectionErrors.EmptyRange()) { try tree.insert(checked: 3 ..< 3, value: 0) }
         #expect(tree.isEmpty)
         try tree.insert(checked: 3 ..< 4, value: 1)
         let one = 1
         #expect(try tree[checked: 0].value == one)
         #expect(throws: IndexOutOfRange()) { try tree[checked: 1] }
-        #expect(throws: EmptyRange()) {
+        #expect(throws: CollectionErrors.EmptyRange()) {
             try IntervalTree<Int, Int>(checked: [.init(range: 0 ..< 1, value: 0), .init(range: 2 ..< 2, value: 1)])
         }
         let built = try IntervalTree<Int, Int>(checked: [.init(range: 0 ..< 1, value: 0)])
@@ -176,11 +178,11 @@ struct IntervalTreePropertyTests {
 
     @Test("Building from entries gives the same tree as inserting them one at a time", .tags(.randomized))
     func buildMatchesInserts() {
-        var rng = Xoroshiro128Plus(seed: 17)
+        var rng = Xoshiro256StarStar(seed: 17)
         var entries: [IntervalTree<Int, Int>.Entry] = []
         for k in 0 ..< 300 {
-            let lower = Int.random(in: 0 ..< 100, using: &rng)
-            entries.append(.init(range: lower ..< lower + Int.random(in: 1 ... 10, using: &rng), value: k))
+            let lower = rng.integer(in: 0 ..< 100)
+            entries.append(.init(range: lower ..< lower + rng.integer(in: 1 ... 10), value: k))
         }
         var inserted = IntervalTree<Int, Int>()
         for entry in entries {

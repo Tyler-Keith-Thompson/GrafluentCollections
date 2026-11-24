@@ -7,6 +7,7 @@
 
 import Generators
 import GrafluentCollectionsTestSupport
+import Sampling
 import SuffixStructures
 import Testing
 
@@ -20,9 +21,9 @@ struct SuffixTreeRatioTests {
             #else
             let n = 2_000
             #endif
-            var rng = Xoroshiro128Plus(seed: 11)
+            var rng = Xoshiro256StarStar(seed: 11)
             let letters: [UInt8] = Array("ACGT".utf8)
-            let text = (0 ..< n).map { _ in letters[Int.random(in: 0 ..< 4, using: &rng)] }
+            let text = (0 ..< n).map { _ in letters[rng.integer(in: 0 ..< 4)] }
 
             // Both sides return the number of distinct non-empty substrings: the trie's nodes but
             // the root, and the sum of the tree's edge lengths.

@@ -9,6 +9,7 @@
 import Generators
 import GrafluentCollectionsTestSupport
 import RangeTrees
+import Sampling
 import Testing
 
 @Suite("SegmentTree and LazySegmentTree against loops")
@@ -21,10 +22,10 @@ struct SegmentTreeRatioTests {
             #else
             let n = 1_000_000
             #endif
-            var rng = Xoroshiro128Plus(seed: 16)
-            let values = (0 ..< n).map { _ in Int.random(in: -1_000 ... 1_000, using: &rng) }
+            var rng = Xoshiro256StarStar(seed: 16)
+            let values = (0 ..< n).map { _ in rng.integer(in: -1_000 ... 1_000) }
             let ranges = (0 ..< 2_000).map { _ in
-                let x = Int.random(in: 0 ... n, using: &rng), y = Int.random(in: 0 ... n, using: &rng)
+                let x = rng.integer(in: 0 ... n), y = rng.integer(in: 0 ... n)
                 return min(x, y) ..< max(x, y)
             }
             let tree = SegmentTree<Minimum<Int>>(values)
@@ -80,11 +81,11 @@ struct SegmentTreeRatioTests {
             #else
             let n = 1_000_000
             #endif
-            var rng = Xoroshiro128Plus(seed: 17)
-            let values = (0 ..< n).map { _ in Int.random(in: -1_000 ... 1_000, using: &rng) }
+            var rng = Xoshiro256StarStar(seed: 17)
+            let values = (0 ..< n).map { _ in rng.integer(in: -1_000 ... 1_000) }
             let updates = (0 ..< 2_000).map { _ in
-                let x = Int.random(in: 0 ... n, using: &rng), y = Int.random(in: 0 ... n, using: &rng)
-                return (range: min(x, y) ..< max(x, y), amount: Int.random(in: -9 ... 9, using: &rng))
+                let x = rng.integer(in: 0 ... n), y = rng.integer(in: 0 ... n)
+                return (range: min(x, y) ..< max(x, y), amount: rng.integer(in: -9 ... 9))
             }
 
             var tree = LazySegmentTree<AddToSum>(values)

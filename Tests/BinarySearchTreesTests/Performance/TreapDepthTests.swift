@@ -8,6 +8,7 @@ import BinarySearchTrees
 import Foundation
 import Generators
 import GrafluentCollectionsTestSupport
+import Sampling
 import Testing
 
 @Suite("Treap depth")
@@ -21,13 +22,17 @@ struct TreapDepthTests {
             let n = 100_000
             #endif
             let bound = 3 * log2(Double(n))
-            var rng = Xoroshiro128Plus(seed: 7)
+            var rng = Xoshiro256StarStar(seed: 7)
 
             let built = Treap(0 ..< n, using: &rng)
             #expect(Double(built.height) < bound, "built: height \(built.height), bound \(bound)")
 
             var inserted = Treap<Int>(using: &rng)
-            for element in (0 ..< n).shuffled(using: &rng) {
+            var order = Array(0 ..< n)
+            // Fisher–Yates over integer(in:): SwiftPRNG has no shuffle, and the standard library's
+            // shuffle may change its order between Swift releases.
+            for i in stride(from: order.count - 1, to: 0, by: -1) { order.swapAt(i, rng.integer(in: 0 ... i)) }
+            for element in order {
                 inserted.insert(element)
             }
             #expect(Double(inserted.height) < bound, "inserted: height \(inserted.height), bound \(bound)")

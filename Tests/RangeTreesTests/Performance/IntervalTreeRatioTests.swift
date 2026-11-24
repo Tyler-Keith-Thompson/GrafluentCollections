@@ -10,6 +10,7 @@
 import Generators
 import GrafluentCollectionsTestSupport
 import RangeTrees
+import Sampling
 import Testing
 
 @Suite("IntervalTree stabbing queries against a linear filter")
@@ -22,12 +23,12 @@ struct IntervalTreeRatioTests {
             #else
             let n = 100_000
             #endif
-            var rng = Xoroshiro128Plus(seed: 18)
+            var rng = Xoshiro256StarStar(seed: 18)
             let entries = (0 ..< n).map { k -> IntervalTree<Int, Int>.Entry in
-                let lower = Int.random(in: 0 ..< 1_000_000, using: &rng)
-                return .init(range: lower ..< lower + Int.random(in: 1 ... 100, using: &rng), value: k)
+                let lower = rng.integer(in: 0 ..< 1_000_000)
+                return .init(range: lower ..< lower + rng.integer(in: 1 ... 100), value: k)
             }
-            let points = (0 ..< 1_000).map { _ in Int.random(in: 0 ..< 1_000_000, using: &rng) }
+            let points = (0 ..< 1_000).map { _ in rng.integer(in: 0 ..< 1_000_000) }
             let tree = IntervalTree(entries)
             let ranges = entries.map(\.range)
 

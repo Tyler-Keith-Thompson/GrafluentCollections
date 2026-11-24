@@ -17,6 +17,10 @@ module, in their own package so the library never links the fuzzer runtime.
 | `FuzzRopes` | An `Array`: inserts and replacements crossing chunks, removals, writes, extractions and concatenations, a snapshot |
 | `FuzzCaches` | A list from most to least recent: `LRUCache` reads, peeks, writes, removals and evictions at capacities 0 to 5, a snapshot |
 
+Each target reads its input as a sequence of small choices (`FuzzInput`): an operation and its
+arguments. Every byte string decodes, and a mutation of one byte changes one choice, so libFuzzer
+explores operation sequences rather than parse errors.
+
 ## Running
 
 | Command | Does |
@@ -35,7 +39,7 @@ deleted.
 
 Xcode's toolchain does not include the libFuzzer runtime; the swift.org toolchains do. The
 scripts build with `swiftly run swift build +6.3.3` (override with
-`GRAFLUENT_COLLECTIONS_FUZZ_SWIFT`), so install it once with `swiftly install 6.3.3`. Targets are
+`GRAFLUENTCOLLECTIONS_FUZZ_SWIFT`), so install it once with `swiftly install 6.3.3`. Targets are
 built in release mode with AddressSanitizer: preconditions stay on, and unsafe buffer code is
 checked for out-of-bounds access.
 

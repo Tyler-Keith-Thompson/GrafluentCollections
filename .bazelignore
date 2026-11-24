@@ -16,9 +16,11 @@ swift/.swiftpm
 Benchmarks/.build
 Benchmarks/.swiftpm
 
-# The fuzz and differential packages are SwiftPM-only.
-Fuzz
-Differential
+# The fuzz package builds with SwiftPM.
+Fuzz/.build
+
+# The differential package's SwiftPM build (`just diff`).
+Differential/.build
 
 # The browser explorer is a SwiftPM package; its build directory can contain BUILD files.
 Explore

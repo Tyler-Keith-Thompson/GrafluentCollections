@@ -1,13 +1,13 @@
 {
-  "originHash" : "cb204f8576cf3b101103149b15b1b20306c99d9c16ff2ca67ad47f93ea599e53",
+  "originHash" : "0445c7168aee142349c4159643b14b085bbc756ef467c4307c0359b24590f5a1",
   "pins" : [
     {
       "identity" : "grafluent",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Tyler-Keith-Thompson/Grafluent",
       "state" : {
-        "revision" : "3d64729290ca6105acd5a01df0626b383284aca2",
-        "version" : "0.0.63"
+        "revision" : "e4285bf969b76f8c380381b2828650ffbc979a26",
+        "version" : "0.0.71"
       }
     },
     {
@@ -44,6 +44,15 @@
       "state" : {
         "revision" : "0c0290ff6b24942dadb83a929ffaaa1481df04a2",
         "version" : "1.1.1"
+      }
+    },
+    {
+      "identity" : "swiftprng",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Tyler-Keith-Thompson/SwiftPRNG",
+      "state" : {
+        "revision" : "39f8c8194fb5cbb91fc5f4e7908df0ac27d43523",
+        "version" : "0.0.11"
       }
     }
   ],

@@ -5,9 +5,12 @@ random cases.
     python3 scripts/differential.py                       # 300 cases per section, every section
     python3 scripts/differential.py --cases 3000 --seed 7
     python3 scripts/differential.py --section tries --section lru
+    python3 scripts/differential.py --swiftpm              # build the library side with SwiftPM
 
 The library side is Differential/, an executable that reads a section's cases as JSON and
-answers them; it is built with SwiftPM in release. The references run under `uv` with pinned
+answers them; it is built optimized through Bazel (//Differential:GrafluentCollectionsDifferential,
+in the justfile's release output base, so a run only compiles what changed), or with SwiftPM
+under --swiftpm. The references run under `uv` with pinned
 versions (the script re-executes itself through `uv run` when they are not importable), so
 nothing is installed globally. Only answers are compared, never shapes: a tree's balance or a
 cache's internal order are the library's own business. A failing case is written to
@@ -43,22 +46,41 @@ except ImportError:
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PACKAGE = os.path.join(ROOT, "Differential")
 FAILURES = os.path.join(PACKAGE, "Failures")
-BINARY = os.path.join(PACKAGE, ".build", "release", "GrafluentCollectionsDifferential")
+EXECUTABLE = "GrafluentCollectionsDifferential"
+BAZEL_TARGET = f"//Differential:{EXECUTABLE}"
 
 SETS = ["AVLTree", "RedBlackTree", "Treap", "SplayTree", "BTree", "SkipList", "PersistentTreeSet"]
 DICTIONARIES = ["AVLDictionary", "BTreeDictionary", "PersistentTreeDictionary"]
 
 
-def build():
-    command = ["env", "-u", "TOOLCHAINS", "xcrun", "--toolchain", "default", "swift", "build", "-c", "release"] \
-        if sys.platform == "darwin" else ["swift", "build", "-c", "release"]
-    result = subprocess.run(command, cwd=PACKAGE, capture_output=True, text=True)
+def build(swiftpm):
+    """Builds the library side optimized and returns the executable's path."""
+    if swiftpm:
+        command = ["env", "-u", "TOOLCHAINS", "xcrun", "--toolchain", "default", "swift", "build", "-c", "release"] \
+            if sys.platform == "darwin" else ["swift", "build", "-c", "release"]
+        result = subprocess.run(command, cwd=PACKAGE, capture_output=True, text=True)
+        if result.returncode != 0:
+            sys.exit("The differential build failed:\n" + (result.stdout + result.stderr)[-4000:])
+        return os.path.join(PACKAGE, ".build", "release", EXECUTABLE)
+    # The justfile's release output base, asked of the justfile so the two can't differ: another
+    # base would start a second release server that tools/sweep-output-bases never finds.
+    output_base = subprocess.run(["just", "--evaluate", "BAZEL_RELEASE_OUTPUT_BASE"], cwd=ROOT,
+                                 capture_output=True, text=True, check=True).stdout.strip()
+    bazel = ["bazel", f"--output_base={output_base}"]
+    # The workspace's bazel-bin and bazel-out links stay on the debug output base.
+    flags = ["--config=release", "--experimental_convenience_symlinks=ignore"]
+    result = subprocess.run(bazel + ["build", *flags, BAZEL_TARGET], cwd=ROOT, capture_output=True, text=True)
     if result.returncode != 0:
-        sys.exit("The differential build failed:\n" + (result.stdout + result.stderr)[-4000:])
+        sys.exit("The differential build failed:\n" + result.stderr[-6000:])
+    where = subprocess.run(bazel + ["cquery", *flags, "--output=files", BAZEL_TARGET], cwd=ROOT, capture_output=True, text=True)
+    root = subprocess.run(bazel + ["info", *flags, "execution_root"], cwd=ROOT, capture_output=True, text=True)
+    if where.returncode != 0 or root.returncode != 0 or not where.stdout.strip():
+        sys.exit("Could not find the differential executable:\n" + where.stderr[-3000:] + root.stderr[-3000:])
+    return os.path.join(root.stdout.strip(), where.stdout.split()[0])
 
 
-def library(section, cases):
-    result = subprocess.run([BINARY], input=json.dumps({"section": section, "cases": cases}),
+def library(binary, section, cases):
+    result = subprocess.run([binary], input=json.dumps({"section": section, "cases": cases}),
                             capture_output=True, text=True)
     if result.returncode != 0:
         sys.exit(f"The library side crashed on section {section}:\n{result.stderr[-4000:]}")
@@ -325,16 +347,17 @@ def main():
     parser.add_argument("--cases", type=int, default=300, help="cases per section")
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--section", action="append", choices=sorted(SECTIONS), help="repeatable; default every section")
+    parser.add_argument("--swiftpm", action="store_true", help="build the library side with SwiftPM instead of Bazel")
     args = parser.parse_args()
     seed = args.seed if args.seed is not None else random.randrange(1 << 30)
     print(f"Seed {seed}, {args.cases} cases per section", flush=True)
-    build()
+    binary = build(args.swiftpm)
     failed = False
     for name in args.section or list(SECTIONS):
         generate, reference = SECTIONS[name]
         rng = random.Random(f"{seed}-{name}")
         cases = [generate(rng) for _ in range(args.cases)]
-        answers = library(name, cases)
+        answers = library(binary, name, cases)
         failures = [(case, got, reference(case)) for case, got in zip(cases, answers)]
         failures = [f for f in failures if not close(f[1], f[2])]
         print(f"{name:<12} {len(cases):>5} cases  " + ("ok" if not failures else f"{len(failures)} FAILED"), flush=True)

@@ -24,11 +24,6 @@ xcuserdata/
 # macOS
 .DS_Store
 
-# Fuzzing (see Fuzz/README.md): the corpus is a local cache; a crash becomes a test, then goes.
-/Fuzz/Corpus/
-/Fuzz/Crashes/
-/Differential/Failures/
-
 # Python
 __pycache__/
 
@@ -40,7 +35,13 @@ Benchmarks/.benchmarkBaselines/*/*
 # The harness copy, toolchain stamp and lock scripts/bench_simulated.py writes for Bazel, per machine.
 Benchmarks/.harness/
 
-*.swp
+# Fuzzing (see Fuzz/README.md): the corpus is a local cache; a crash becomes a test, then goes.
+/Fuzz/Corpus/
+/Fuzz/Crashes/
+
+# Differential failures (see Differential/README.md): each becomes a test, then goes.
+/Differential/Failures/
 
 # The explorer's build output (just explore).
 /Explore/dist/
+*.swp

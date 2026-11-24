@@ -8,11 +8,17 @@ the answers. The references are pinned and run through `uv`, so nothing is insta
 | `just diff` | 300 random cases per section with a random seed, every section (seconds) |
 | `just diff --cases 3000 --seed 7` | More cases, reproducibly |
 | `just diff --section tries` | One section; repeat the flag for several |
+| `just diff --swiftpm` | Build the library side with SwiftPM instead of Bazel |
 
-`GrafluentCollectionsDifferential` (this package, built with SwiftPM in release) reads a section's
-cases as JSON on standard input and answers them with the library; `scripts/differential.py`
-generates the cases, asks the references the same questions, and compares. A failing case is
-written to `Differential/Failures/` (not committed) for a regression test.
+`GrafluentCollectionsDifferential` (this package) reads a section's cases as JSON on standard
+input and answers them with the library; `scripts/differential.py` generates the cases, asks the
+references the same questions, and compares. A failing case is written to
+`Differential/Failures/` (not committed) for a regression test.
+
+The executable is built through Bazel, `//Differential:GrafluentCollectionsDifferential` (a
+`manual` `swift_binary`), with `--config=release` in the output base `just test-release` uses, so
+a run only compiles what changed. `scripts/modules.py` writes its BUILD.bazel and Package.swift
+from one list, `DIFFERENTIAL_DEPENDENCIES`. The SwiftPM package serves `--swiftpm`.
 
 ## What is compared
 

@@ -28,6 +28,8 @@ Tests/<Module>Tests/             One test target per module; Performance/ holds 
 Tests/GrafluentCollectionsTests/          The README examples, verbatim
 Tests/GrafluentCollectionsTestSupport/    Shared test fixtures (data only)
 scripts/modules.py               The module graph
+Fuzz/Sources/Fuzz<Module>/       A libFuzzer target per module, in the separate Fuzz/ package
+Differential/                    The library side of `just diff`; scripts/differential.py the pinned Python references
 Explore/                         The browser explorer: pages running the library as WebAssembly (`just explore`)
 tools/                           Bazel rule wrappers (warnings as errors, Swift 6 mode), DocC rules;
                                  tools/bazel turns BuildBuddy on when the Keychain holds its key, and
@@ -40,6 +42,8 @@ tools/                           Bazel rule wrappers (warnings as errors, Swift 
 simulated counts (`tools/benchmarks.bzl`). See `Benchmarks/README.md`.
 `Explore/` is another, with an ElementaryUI interface compiled to WebAssembly; see
 `Explore/README.md`.
+`Fuzz/` is a separate SwiftPM package of libFuzzer targets that Bazel ignores, built with a
+swift.org toolchain through swiftly (`swiftly install 6.3.3`); see `Fuzz/README.md`.
 
 ### Module graph
 
@@ -153,6 +157,7 @@ in beside the project's own: keep one definition, holding the project's rows, an
   replaces the previous ones in every other file that names them (`SWIFT_SITES`), from the record
   in `tools/swift_version.bzl`. Never edit a version in those files by hand. `just template-update`
   keeps the project's versions, and says when the template's have passed them.
+  The fuzz targets build with `SWIFT_TOOLCHAIN`.
   `just wasi-test` builds with `SWIFT_TOOLCHAIN` and its WebAssembly SDK.
   The explorer builds with `SWIFT_TOOLCHAIN` and its WebAssembly SDK.
   CI needs a `swift-bazel` image of the new version, published from the project template's
@@ -170,6 +175,8 @@ Every shell command gets a timeout. macOS has no `timeout`; use
 | `just build` / `just test` | Build / test everything (debug) |
 | `bazel test //Tests/XTests` | One test target (`just test-one //Tests/XTests`) |
 | `just filter <pattern>` | Tests whose name matches |
+| `just fuzz [Fuzz<Module>] [-t secs]` | libFuzzer, time-boxed (60 s per target); `just fuzz-regress` replays the corpus, `just fuzz-repro <target> <file>` a crash |
+| `just diff [--section X] [--cases N] [--seed S]` | Differential tests against pinned Python references (`Differential/`, through `uv`) |
 | `just wasi-test [-c release] [--targets X,Y]` | SwiftPM tests on wasm32-wasi under wasmtime: a 32-bit `Int` |
 | `just explore` | Build the browser explorer into `Explore/dist` (serve it to try a page); the DocC workflow publishes it at `/GrafluentCollections/explore/`. `EXPLORE_XCODE=/Applications/Xcode-26.2.0.app` when the newest Xcode's SDK crashes the toolchain |
 | `just test-release` | `--config=release`: builds and runs only the `XPerformanceTests` targets |
@@ -179,8 +186,6 @@ Every shell command gets a timeout. macOS has no `timeout`; use
 | `just bench [--target X]` | Benchmarks; `just bench-compare` against the `main` baseline |
 | `just bench-simulated-compare [--target X]` | Simulated counts (Callgrind in a Linux VM, from `~/workspace/BenchmarkHarness`) against the committed `simulated` baseline; `just bench-simulated [--target X]` re-records it. Both measure only targets whose code changed |
 | `just docs` | Combined DocC site into `.build/docs` |
-| `just fuzz [Target] [-t s]`, `just fuzz-regress` | libFuzzer targets in `Fuzz/` (swiftly's 6.3.3 toolchain); replay the local corpora |
-| `just diff [--section X]` | Differential tests against pinned Python references (`Differential/`, through `uv`) |
 | `just generate` | Xcode project from the Bazel graph, in `xcode/` (out of the root, where `xcodebuild` would pick it over `Package.swift`) |
 | `just buildbuddy-key`, `just ci-secrets` | Store the BuildBuddy key in the Keychain (once per Mac; builds then use the remote cache); set it as this repository's Actions secret with `gh` |
 | `just template-update` | Merge the project template's changes since `.template.json`'s commit; resolve conflicts, then `just modules`, `just test` |
@@ -274,6 +279,12 @@ have.
    - `checked:` spellings and their errors;
    - exit tests for every trap;
    - a property test against a naive reference (`swift-property-based`).
+   - a fuzz target in `Fuzz/Sources/Fuzz<Module>` checking the new code against a model after
+     every operation (see `Fuzz/README.md`), then `just fuzz Fuzz<Module>`. A crash becomes a
+     test in the module's suite, then its file is deleted.
+   - a differential section where an independent Python implementation answers the same
+     question (`Differential/README.md`), then `just diff --section <section>`. A failure becomes
+     a test, then its file is deleted.
 3. **A README example**, if the feature changes how the package is introduced, copied verbatim
    into `Tests/GrafluentCollectionsTests`.
 4. **A benchmark** in `Benchmarks/Benchmarks/<Module>Benchmarks` (a row in `BENCHMARKS`, then
@@ -309,6 +320,8 @@ Watch for these:
 |---|---|
 | Any library code | `bazel test` for every target in `bazel query 'rdeps(//Tests/..., //Sources/X)'`, then `just test-release` |
 | `scripts/modules.py` | `just modules`, `just test` (which runs `//:package_swift_test`), `just spm` |
+| A fuzzed module | `just fuzz-regress` |
+| A module in `DIFFERENTIAL_DEPENDENCIES` | `just diff --section <section>` for its sections |
 | Integer arithmetic that could overflow, or anything platform-conditional | `just wasi-test -c release --targets XTests` (a 32-bit `Int`) |
 | `Benchmarks/`, or an API the benchmarks call | `cd Benchmarks && env -u TOOLCHAINS xcrun --toolchain default swift build -c release` |
 | `Explore/`, or an API a page calls | `just explore`, then check the pages in Chrome at 1280 and 400 px |

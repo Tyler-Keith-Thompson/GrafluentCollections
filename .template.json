@@ -6,5 +6,7 @@
   "fly": false,
   "database": false,
   "wasm": true,
-  "explore": true
+  "explore": true,
+  "fuzz": true,
+  "differential": true
 }

@@ -67,11 +67,13 @@ in beside the project's own: keep one definition, holding the project's rows, an
   Apple's alone goes in `APPLE_ONLY_TESTS` too. A target that depends on an iOS module or a Bazel
   label runs in the simulator alone already, so it isn't listed.
   It needs the test host and the simulator settings in `.bazelrc`, which the app type and the
-  `--ios` option ship (`just modules` refuses the table without them).
-- Add an iOS app, iOS modules and simulator tests to this project: from the project template's
-  checkout, `./template.py add <project> --ios` (after `just template-update`, if the stamp
-  predates the option). It brings `Apps/GrafluentCollections`, the test host, the simulator settings and
-  `tools/ios.bzl`; until then `just modules` refuses `IOS_MODULES` and simulator tests.
+  `--simulator` and `--ios` options ship (`just modules` refuses the table without them).
+  From the project template's checkout, `./template.py add <project> --simulator` brings them
+  without an app.
+- Add an iOS app to this project: from the project template's checkout,
+  `./template.py add <project> --ios` (after `just template-update`, if the stamp predates the
+  option). It brings `Apps/GrafluentCollections`, the test host, the simulator settings and `tools/ios.bzl`;
+  until then `just modules` refuses `IOS_MODULES` and simulator tests.
 - Give a test target an environment variable under `bazel test` (an integration test that runs
   only when `TEST_DATABASE_URL` is set, say): its name and the variables in `TEST_ENVIRONMENT`
   (`{"<Target>Tests": ["TEST_DATABASE_URL"]}`), then `just modules`. Bazel strips the test
@@ -117,6 +119,16 @@ in beside the project's own: keep one definition, holding the project's rows, an
   `Bundle.module`. Not under `Performance/`, which the target leaves out: the speed-reliant tests
   of a `PERFORMANCE_TESTS` target list theirs under `<X>PerformanceTests`, paths relative to
   `Tests/<X>/Performance`, and read them through `Bundle.module` in debug and release alike.
+- Generate a Swift source at build time (overloads for each arity, tables from a data file): the
+  generator is a Bazel executable that writes the source to standard output, or, given output
+  names, gets their paths before a `--`. List it in `GENERATED_SOURCES` under the module or test
+  target (`{"<Module>": [("<Name>", "//tools/<generator>", [<input labels>], [])]}`), create an
+  empty `Generated/<Name>.swift` in the target's directory, then `just modules` and `just sources`.
+  Bazel compiles the generator's output; SwiftPM compiles the copy under `Generated/`, which
+  `just sources` rewrites and `<Name>_test` fails on while it differs from what the generator
+  writes. Commit the copy, and run `just sources` after a change to the generator or its inputs.
+  `check()` refuses a copy that doesn't exist, and a speed-reliant, iOS or firmware target.
+  Simulated benchmarks measure the generator's output, at the copy's path.
 - Add a macro: its compiler plugin is a row in `MACROS` (name, group, description, and only
   package products as dependencies: swift-syntax's, with `swift-syntax` in `PACKAGES`), its sources
   in `Sources/<Plugin>/` (an `@main` `CompilerPlugin` listing the macro types), then `just modules`
@@ -182,6 +194,7 @@ Every shell command gets a timeout. macOS has no `timeout`; use
 | `just test-release` | `--config=release`: builds and runs only the `XPerformanceTests` targets |
 | `just spm-test`, `just verify` | SwiftPM tests; both build systems |
 | `just modules` | Regenerate build files from `scripts/modules.py` |
+| `just sources` | Rewrite the checked-in copies of generated sources (`GENERATED_SOURCES`) that SwiftPM compiles |
 | `just resolve` | Re-resolve Bazel's SwiftPM dependencies after editing `PACKAGES` |
 | `just bench [--target X]` | Benchmarks; `just bench-compare` against the `main` baseline |
 | `just bench-simulated-compare [--target X]` | Simulated counts (Callgrind in a Linux VM, from `~/workspace/BenchmarkHarness`) against the committed `simulated` baseline; `just bench-simulated [--target X]` re-records it. Both measure only targets whose code changed |
@@ -212,12 +225,14 @@ Every shell command gets a timeout. macOS has no `timeout`; use
 watchOS's arm64_32 and wasm32 have a 32-bit `Int`. `just wasi-test` (`scripts/wasi_test.py`)
 builds the SwiftPM test targets with `swift build --build-tests --swift-sdk
 swift-6.3.3-RELEASE_wasm` through swiftly into `.build/wasm`, then runs each test binary (one
-`<Target>-test-runner.wasm` per target from Swift 6.4, one `<Project>PackageTests.xctest` before)
+`<Target>-test-runner.wasm` per target, or an older toolchain's one `<Project>PackageTests.xctest`)
 with `wasmtime run --dir . --dir <checkout>::<checkout> --argv0 <binary's path> <binary>
 --testing-library swift-testing`, logs in `.build/wasm/logs`. The checkout at its own path and the
 binary's path as `argv[0]` are where SwiftPM's `Bundle.module` looks for a module's resource bundle
-(an absolute build path in 6.3, beside `Bundle.main` from 6.4, which WASI's Foundation takes from
-`argv[0]`).
+(an absolute build path with the `.xctest`, beside `Bundle.main` with the per-target runners, which
+WASI's Foundation takes from `argv[0]`). `-c release` builds with `-enable-testing`, so suites that
+`@testable import` build in release too. A `--targets` name that isn't a test target is refused
+before anything builds, and a group fails when its build wrote no runner for one of its targets.
 Needs swiftly's 6.3.3 toolchain, its WebAssembly SDK (`swift sdk list`; swift.org's "Getting
 Started with Swift SDKs for WebAssembly" has the install command) and `brew install wasmtime`. If
 the toolchain crashes on the manifest against a newer Xcode's SDK, pass `--xcode
@@ -251,14 +266,16 @@ the toolchain crashes on the manifest against a newer Xcode's SDK, pass `--xcode
 
 The owner's own libraries, first in line under "Don't reinvent the wheel" (House rules). Reach
 for them before writing a graph, a container or an operator chain by hand, and before adding a
-third-party package for the same job. Add one as a row in `PACKAGES` (`scripts/modules.py`).
+third-party package for the same job. Add one as a row in `PACKAGES` (`scripts/modules.py`) under its
+identity, the repository's name in lowercase (`swiftprng`), and list a product among a module's
+dependencies as `"<identity>/<Product>"` (`"swiftprng/Generators"`), as the rows below spell them.
 
 | Library | What it is | Use it for |
 |---|---|---|
-| [Grafluent](https://github.com/Tyler-Keith-Thompson/Grafluent) | A generic, high-performance graph library: copy-on-write representations (`AdjacencyList`, `CompressedSparseRow`, `AdjacencyMatrix`, pseudographs, stable graphs), graph classes with invariants (`DirectedAcyclicGraph`, `BipartiteGraph`, `Tree`) and algorithms (traversal, shortest paths, flows, matching, connectivity, isomorphism, layout) | Anything shaped like a graph or DAG: dependency orderings, scheduling, routing, state machines, reachability. Products are per module (`.product(name: "ShortestPaths", package: "Grafluent")`); the umbrella is `Grafluent`. |
-| [SwiftPRNG](https://github.com/Tyler-Keith-Thompson/SwiftPRNG) | Seeded random numbers that reproduce bit for bit on every platform and Swift release: generators as values (`Xoshiro256StarStar`, `Xoroshiro128Plus`, `SplitMix64`, with `jump()` for streams that never overlap), platform-stable draws (`uniform(in:)`, `integer(in:)`, `bernoulli(_:)`, with `checked` spellings), `SeedTree` (a seed per named decision, so adding a draw shifts nothing elsewhere, with overrides and `fitting` to search one subtree for a seed that meets a predicate) and `SeedSearch` (the smallest matching seed, concurrently) | Every seeded test, and any program whose randomness must replay: simulations, procedural generation, games, sampling. Never hand-write a generator. `Xoroshiro128Plus(seed:)` gives the same numbers as a hand-written `SeededRandomNumberGenerator` (xoroshiro128+ seeded by SplitMix64), so replacing one changes no pinned value. Products are per module (`.product(name: "Generators", package: "SwiftPRNG")`: `Generators`, `Sampling`, `SeedTrees`, `SeedDiscovery`); the umbrella is `SwiftPRNG`. |
-| [DependencyInjection](https://github.com/Tyler-Keith-Thompson/DependencyInjection) | Swift 6 dependency injection: `Factory` values on `Container`, `@Injected` / `@LazyInjected` / `@ConstructorInjected`, unique, cached and shared scopes, hierarchical containers, and `withTestContainer` so concurrent tests never share state | Any seam a test needs to replace (clocks, network, storage). Tests wrap their body in `withTestContainer { }` and register doubles there. Product `DependencyInjection`. |
-| [Afluent](https://github.com/Tyler-Keith-Thompson/Afluent) | Reactive operators over async/await: `DeferredTask` (a unit of work that yields one value) and `AsyncSequence` extensions with Combine's names (`map`, `flatMap`, `catch`, `retry`, `debounce`, `share`, …), plus `AfluentTesting` | Pipelines over async work where Combine would once have been used; a Combine replacement in new code. Products `Afluent` and, for test targets, `AfluentTesting`. |
+| [Grafluent](https://github.com/Tyler-Keith-Thompson/Grafluent) | A generic, high-performance graph library: copy-on-write representations (`AdjacencyList`, `CompressedSparseRow`, `AdjacencyMatrix`, pseudographs, stable graphs), graph classes with invariants (`DirectedAcyclicGraph`, `BipartiteGraph`, `Tree`) and algorithms (traversal, shortest paths, flows, matching, connectivity, isomorphism, layout) | Anything shaped like a graph or DAG: dependency orderings, scheduling, routing, state machines, reachability. Products are per module (`"grafluent/ShortestPaths"`); the umbrella is `grafluent/Grafluent`. |
+| [SwiftPRNG](https://github.com/Tyler-Keith-Thompson/SwiftPRNG) | Seeded random numbers that reproduce bit for bit on every platform and Swift release: generators as values (`Xoshiro256StarStar`, `Xoroshiro128Plus`, `SplitMix64`, with `jump()` for streams that never overlap), platform-stable draws (`uniform(in:)`, `integer(in:)`, `bernoulli(_:)`, with `checked` spellings), `SeedTree` (a seed per named decision, so adding a draw shifts nothing elsewhere, with overrides and `fitting` to search one subtree for a seed that meets a predicate) and `SeedSearch` (the smallest matching seed, concurrently) | Every seeded test, and any program whose randomness must replay: simulations, procedural generation, games, sampling. Never hand-write a generator. `Xoroshiro128Plus(seed:)` gives the same numbers as a hand-written `SeededRandomNumberGenerator` (xoroshiro128+ seeded by SplitMix64), so replacing one changes no pinned value. Products are per module (`"swiftprng/Generators"`: `Generators`, `Sampling`, `SeedTrees`, `SeedDiscovery`); the umbrella is `swiftprng/SwiftPRNG`. |
+| [DependencyInjection](https://github.com/Tyler-Keith-Thompson/DependencyInjection) | Swift 6 dependency injection: `Factory` values on `Container`, `@Injected` / `@LazyInjected` / `@ConstructorInjected`, unique, cached and shared scopes, hierarchical containers, and `withTestContainer` so concurrent tests never share state | Any seam a test needs to replace (clocks, network, storage). Tests wrap their body in `withTestContainer { }` and register doubles there. Product `"dependencyinjection/DependencyInjection"`. |
+| [Afluent](https://github.com/Tyler-Keith-Thompson/Afluent) | Reactive operators over async/await: `DeferredTask` (a unit of work that yields one value) and `AsyncSequence` extensions with Combine's names (`map`, `flatMap`, `catch`, `retry`, `debounce`, `share`, …), plus `AfluentTesting` | Pipelines over async work where Combine would once have been used; a Combine replacement in new code. Products `"afluent/Afluent"` and, for test targets, `"afluent/AfluentTesting"`. |
 
 Their conventions carry over: value types, typed errors, `checked:` spellings that throw where
 the plain spelling traps, tests with Swift Testing.
@@ -300,9 +317,9 @@ have.
    whose instruction and malloc counts moved less than compare's 5% threshold keeps its recorded
    entry. So the file changes only where a benchmark did, and pull requests that change different
    benchmarks of one target merge without a conflict. Resolve a conflict by re-recording after
-   the merge, never by hand. A benchmark whose mallocs drop to zero counts as moved. Harness
-   options (`--iterations`, `--filter`) measure uncached and write the same format, keeping the
-   entries that didn't move. To rewrite every entry (a change aimed at cache misses alone), delete
+   the merge, never by hand. A benchmark whose mallocs drop to zero, or that was measured over a
+   different number of iterations, counts as moved. Harness options (`--iterations`, `--filter`)
+   measure uncached and write the same format, keeping the entries that didn't move. To rewrite every entry (a change aimed at cache misses alone), delete
    the file first.
 5. **An explore page** (optional): a `soon` row of `Explore/web/contents.txt` turned into a page,
    per "Adding a page" in `Explore/README.md`.

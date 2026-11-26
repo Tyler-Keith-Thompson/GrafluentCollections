@@ -24,6 +24,3 @@ Differential/.build
 
 # The browser explorer is a SwiftPM package; its build directory can contain BUILD files.
 Explore
-
-# Overlays the bootstrap script copies over the template (server and embedded types); not built in place.
-templates

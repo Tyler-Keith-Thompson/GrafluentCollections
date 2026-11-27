@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interval trees · Explore GrafluentCollections</title>
+<meta name="description" content="Insert intervals into a real IntervalTree and ask which ones contain a point or overlap a range, watching the search skip whole subtrees.">
+<script>
+  // The theme the reader picked last time, before anything is drawn.
+  try { const t = localStorage.getItem("explore-theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+  // A new page opens at its top, even where the host keeps the previous page's scroll position.
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%231d4f9c%22/%3E%3Cpath d=%22M9 22L16 9l7 13z%22 fill=%22none%22 stroke=%22white%22 stroke-width=%222.5%22/%3E%3Ccircle cx=%229%22 cy=%2222%22 r=%223.5%22 fill=%22white%22/%3E%3Ccircle cx=%2216%22 cy=%229%22 r=%223.5%22 fill=%22white%22/%3E%3Ccircle cx=%2223%22 cy=%2222%22 r=%223.5%22 fill=%22white%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="explore.css">
+<link rel="modulepreload" href="index.js">
+<link rel="preload" href="Explore.wasm" as="fetch" type="application/wasm" crossorigin>
+</head>
+<body data-page="intervaltree">
+<div class="wrap">
+  <nav class="topbar" aria-label="Site">
+    <a class="home" href="./">Explore <b>GrafluentCollections</b></a>
+    <span class="spacer"></span>
+    <details class="menu"><summary><span class="burger" aria-hidden="true"></span><span class="mlabel">All pages</span></summary>
+      <nav class="mpanel" aria-label="All pages"><a class="mhome" href="./">Contents</a>
+        <div class="mgroup"><span>Search trees</span><a href="avl.html">AVL trees</a><a href="redblack.html">Red–black trees</a><a href="treap.html">Treaps</a><a href="splay.html">Splay trees</a><a href="btree.html">B-trees</a><a href="skiplist.html">Skip lists</a></div>
+        <div class="mgroup"><span>Strings</span><a href="trie.html">Tries and radix trees</a><a href="ahocorasick.html">Aho–Corasick</a><a href="suffix.html">Suffix arrays and trees</a></div>
+        <div class="mgroup"><span>Logic</span><a href="decisiondiagrams.html">Decision diagrams</a></div>
+        <div class="mgroup"><span>Ranges</span><a href="fenwick.html">Fenwick trees</a><a href="segmenttree.html">Segment trees</a><a href="intervaltree.html" aria-current="page">Interval trees</a></div>
+        <div class="mgroup"><span>Space</span><a href="kdtree.html">k-d trees and quadtrees</a></div>
+        <div class="mgroup"><span>Text</span><a href="rope.html">Ropes</a></div>
+        <div class="mgroup"><span>History</span><a href="persistent.html">Persistent trees</a><a href="lru.html">LRU caches</a></div>
+      </nav>
+    </details>
+    <a href="../documentation/">Docs</a>
+    <button type="button" class="theme" id="theme" aria-label="Switch between light and dark">◐<span class="tlabel"> Theme</span></button>
+  </nav>
+<header class="sign">
+  <h1>Interval trees</h1>
+  <p class="question">Which of these intervals touch this moment, without checking every one?</p>
+</header>
+<p class="example lead">Example: which intervals contain 27? The search starts at the root and goes left only into subtrees whose largest end is past 27. It goes right only past intervals that start before 28. It finds [10, 30) and [25, 40) and never looks at the intervals that end by 12.</p>
+
+<div id="app" data-loading aria-busy="true"><div><section class="panel controls" aria-label="Your operations"><label class="field" for="intervaltree-text">a-b to insert, -a-b to remove, ?p for the intervals containing p, ?a-b for those overlapping <input id="intervaltree-text" type="text" value="10-30 5-12 25-40 45-60 50-55 2-8 33-36 58-70 62-90 ?27 ?34-48 ?80 -25-40 ?27" maxlength="160" spellcheck="false" autocomplete="off"></label></section><section class="lab" aria-label="The interval tree"><div class="panel stage"><p class="empty">The tree starts empty. Press Step to run the first operation.</p><div class="legend"><span><i class="dot selected"></i>visited by the search</span><span><i class="dot current"></i>found, or just inserted</span></div><p class="legend">In each circle the largest end in that vertex’s subtree; under it the vertex’s own interval. Below, the intervals in the same order, with the query shaded.</p></div><div class="side"><div class="panel" aria-live="polite"><span class="label">Operation 0 of 14</span><p class="narration">The intervals are kept in a balanced search tree ordered by where they start. Each vertex also records the largest end anywhere in its subtree, which is what lets a search skip whole subtrees.</p></div><div class="panel"><span class="label">The tree</span><div class="stat"><div><span class="num">0</span>intervals</div><div class="good"><span class="num">0</span>vertices visited</div><div><span class="num">0</span>found</div></div></div></div></section><section class="panel controls" aria-label="Playback"><div class="buttons"><button type="button" aria-label="Step back">◀ Back</button><button type="button" class="primary">▶ Play</button><button type="button">Step ▶</button><button type="button">Reset</button></div><div class="timeline-scroll"><svg class="timeline" width="394" viewBox="0 0 394 64" aria-label="Timeline of events"><line x1="8" y1="32" x2="386" y2="32" class="axis" /><g class="marble future" data-step="0"><circle cx="22" cy="32" r="7.0" class="m-blue" /><text x="22" y="36" text-anchor="middle">10</text><title>Insert [10, 30). It goes where its start puts it in order, the tree rebalances like an AVL tree, and every vertex on the way up updates the largest end in its subtree.</title></g><g class="marble future" data-step="1"><circle cx="48" cy="32" r="7.0" class="m-blue" /><text x="48" y="36" text-anchor="middle">5</text><title>Insert [5, 12). It goes where its start puts it in order, the tree rebalances like an AVL tree, and every vertex on the way up updates the largest end in its subtree.</title></g><g class="marble future" data-step="2"><circle cx="74" cy="32" r="7.0" class="m-blue" /><text x="74" y="36" text-anchor="middle">25</text><title>Insert [25, 40). It goes where its start puts it in order, the tree rebalances like an AVL tree, and every vertex on the way up updates the largest end in its subtree.</title></g><g class="marble future" data-step="3"><circle cx="100" cy="32" r="7.0" class="m-blue" /><text x="100" y="36" text-anchor="middle">45</text><title>Insert [45, 60). It goes where its start puts it in order, the tree rebalances like an AVL tree, and every vertex on the way up updates the largest end in its subtree.</title></g><g class="marble future" data-step="4"><circle cx="126" cy="32" r="7.0" class="m-blue" /><text x="126" y="36" text-anchor="middle">50</text><title>Insert [50, 55). It goes where its start puts it in order, the tree rebalances like an AVL tree, and every vertex on the way up updates the largest end in its subtree.</title></g><g class="marble future" data-step="5"><circle cx="152" cy="32" r="7.0" class="m-blue" /><text x="152" y="36" text-anchor="middle">2</text><title>Insert [2, 8). It goes where its start puts it in order, the tree rebalances like an AVL tree, and every vertex on the way up updates the largest end in its subtree.</title></g><g class="marble future" data-step="6"><circle cx="178" cy="32" r="7.0" class="m-blue" /><text x="178" y="36" text-anchor="middle">33</text><title>Insert [33, 36). It goes where its start puts it in order, the tree rebalances like an AVL tree, and every vertex on the way up updates the largest end in its subtree.</title></g><g class="marble future" data-step="7"><circle cx="204" cy="32" r="7.0" class="m-blue" /><text x="204" y="36" text-anchor="middle">58</text><title>Insert [58, 70). It goes where its start puts it in order, the tree rebalances like an AVL tree, and every vertex on the way up updates the largest end in its subtree.</title></g><g class="marble future" data-step="8"><circle cx="230" cy="32" r="7.0" class="m-blue" /><text x="230" y="36" text-anchor="middle">62</text><title>Insert [62, 90). It goes where its start puts it in order, the tree rebalances like an AVL tree, and every vertex on the way up updates the largest end in its subtree.</title></g><g class="marble future" data-step="9"><circle cx="256" cy="32" r="9.0" class="m-green" /><text x="256" y="36" text-anchor="middle">27</text><title>Which intervals contain 27? The search visited 4 of 9 vertices and found [10, 30), [25, 40). It skipped 2 subtrees without looking inside: a subtree whose largest end is at or before the query’s start holds nothing that reaches it, and everything right of an interval starting at or after the query’s end starts too late.</title></g><g class="marble future" data-step="10"><circle cx="282" cy="32" r="9.0" class="m-green" /><text x="282" y="36" text-anchor="middle">34</text><title>Which intervals overlap [34, 48)? The search visited 6 of 9 vertices and found [25, 40), [33, 36), [45, 60). It skipped 2 subtrees without looking inside: a subtree whose largest end is at or before the query’s start holds nothing that reaches it, and everything right of an interval starting at or after the query’s end starts too late.</title></g><g class="marble future" data-step="11"><circle cx="308" cy="32" r="9.0" class="m-green" /><text x="308" y="36" text-anchor="middle">80</text><title>Which intervals contain 80? The search visited 4 of 9 vertices and found [62, 90). It skipped 3 subtrees without looking inside: a subtree whose largest end is at or before the query’s start holds nothing that reaches it, and everything right of an interval starting at or after the query’s end starts too late.</title></g><g class="marble future" data-step="12"><circle cx="334" cy="32" r="7.0" class="m-red" /><text x="334" y="36" text-anchor="middle">25</text><title>Remove [25, 40). The vertices above it update the largest end in their subtrees.</title></g><g class="marble future" data-step="13"><circle cx="360" cy="32" r="9.0" class="m-green" /><text x="360" y="36" text-anchor="middle">27</text><title>Which intervals contain 27? The search visited 3 of 8 vertices and found [10, 30). It skipped 2 subtrees without looking inside: a subtree whose largest end is at or before the query’s start holds nothing that reaches it, and everything right of an interval starting at or after the query’s end starts too late.</title></g><line x1="9" y1="8" x2="9" y2="56" class="playhead" /></svg></div><input id="scrub-intervaltree" class="scrub" type="range" min="0" max="14" value="0" aria-label="Scrub through the steps"><div class="tl-legend"><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-blue" /></svg>insert</span><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-green" /></svg>query</span><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-red" /></svg>remove</span></div></section></div></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>Overlaps, quickly</h2>
+  <p>An interval tree holds ranges, such as meetings, gene positions, memory regions or the spans of a timeline. It answers which ones contain a point, overlap a range, or lie inside it, in time that grows with the logarithm of the count plus the number found. Calendars, genome browsers, schedulers and collision checks all ask that question.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>Sort by start, remember the furthest end</h2>
+  <p>The intervals sit in a balanced search tree, ordered by where they start. That alone answers half the question: every interval in a right subtree starts after its parent’s start, so once an interval starts at or past the end of the query, everything to its right does too. For the other half, each vertex also records the largest end anywhere below it. A subtree whose largest end is at or before the query’s start can’t hold anything that reaches the query, so the search skips it whole.</p>
+  <p>Insertions and removals keep the tree balanced like an AVL tree and fix the recorded ends on their way back up. In the drawing, each circle shows that recorded end. The vertices’ own intervals appear below the circles, and again as bars on the number line.</p>
+
+  <h2><small>Where it breaks</small>Many answers, or many dimensions</h2>
+  <p>When a query overlaps most of the intervals, the search visits most of the tree; nothing can beat reading every answer. The tree also handles one dimension only. For boxes in the plane, an MX-CIF quadtree or a k-d tree does the same job.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The operations above, in GrafluentCollections</h2>
+  <pre id="code" data-loading aria-busy="true" aria-label="Swift code"><span><span class="k">import</span> <span class="t">RangeTrees</span>
+<span class="k">import</span> <span class="t">Trees</span>
+
+<span class="k">let</span> operations: [<span class="t">IntervalOperation</span>] = [.insert(<span class="n">10</span> ..&lt; <span class="n">30</span>), .insert(<span class="n">5</span> ..&lt; <span class="n">12</span>), .insert(<span class="n">25</span> ..&lt; <span class="n">40</span>), .insert(<span class="n">45</span> ..&lt; <span class="n">60</span>), .insert(<span class="n">50</span> ..&lt; <span class="n">55</span>), .insert(<span class="n">2</span> ..&lt; <span class="n">8</span>), .insert(<span class="n">33</span> ..&lt; <span class="n">36</span>), .insert(<span class="n">58</span> ..&lt; <span class="n">70</span>), .insert(<span class="n">62</span> ..&lt; <span class="n">90</span>), .containing(<span class="n">27</span>), .overlapping(<span class="n">34</span> ..&lt; <span class="n">48</span>), .containing(<span class="n">80</span>), .remove(<span class="n">25</span> ..&lt; <span class="n">40</span>), .containing(<span class="n">27</span>)]
+
+<span class="k">var</span> tree = <span class="t">IntervalTree</span>&lt;<span class="t">Int</span>, <span class="t">Int</span>&gt;()
+<span class="k">var</span> history = [tree]
+<span class="k">var</span> found: [[<span class="t">Int</span>]] = []
+<span class="k">for</span> (number, operation) <span class="k">in</span> operations.enumerated() {
+    <span class="k">switch</span> operation {
+    <span class="k">case</span> .insert(<span class="k">let</span> range):
+        tree.insert(range, value: number)
+        found.append([])
+    <span class="k">case</span> .remove(<span class="k">let</span> range):
+        _ = tree.remove(range)
+        found.append([])
+    <span class="k">case</span> .containing(<span class="k">let</span> point):
+        found.append(tree.containing(point).map(\.value))
+    <span class="k">case</span> .overlapping(<span class="k">let</span> range):
+        found.append(tree.overlapping(range).map(\.value))
+    }
+    history.append(tree)
+}
+<span class="k">let</span> count = tree.count  <span class="c">// 8</span>
+
+<span class="k">let</span> shape = <span class="t">BinaryTree</span>(tree)  <span class="c">// vertex i is the entry tree[i]</span>
+<span class="k">let</span> height = shape?.height  <span class="c">// 3</span>
+</span></pre>
+</section>
+<nav class="pager" aria-label="Pages"><a class="prev" href="segmenttree.html"><span>Previous</span>Segment trees</a><a class="next" href="kdtree.html"><span>Next</span>k-d trees and quadtrees</a></nav>
+</div>
+<script>
+  if (!location.hash) window.scrollTo(0, 0);
+  // Until the reader scrolls, keep the page at its top while the fonts and the interactive parts
+  // come in. `pinned` is read again once the interactive parts have mounted.
+  let pinned = !location.hash;
+  if (pinned) {
+    const release = () => { pinned = false; };
+    for (const kind of ["wheel", "touchstart", "keydown", "mousedown"]) addEventListener(kind, release, { once: true, passive: true });
+    const pin = new ResizeObserver(() => { if (pinned) window.scrollTo(0, 0); });
+    pin.observe(document.body);
+    setTimeout(() => { pinned = false; pin.disconnect(); }, 3000);
+  }
+  document.getElementById("theme").addEventListener("click", () => {
+    const root = document.documentElement;
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("explore-theme", root.dataset.theme); } catch {}
+  });
+</script>
+<script type="module">
+  // GrafluentCollections and the interface run as WebAssembly; this loads them.
+  import { init } from "./index.js";
+  // The page's first frame is already drawn; these views mount in its place. Return to the top
+  // once they are drawn, unless the link named a section or the reader has scrolled.
+  const toTop = () => { if (pinned) window.scrollTo(0, 0); };
+  init().then(() => requestAnimationFrame(() => requestAnimationFrame(toTop))).catch((error) => {
+    console.error("The explorer failed to start:", error);
+    for (const part of document.querySelectorAll("[data-loading]")) { part.removeAttribute("data-loading"); part.removeAttribute("aria-busy"); }
+    const app = document.getElementById("app");
+    if (app) app.textContent = "The interactive part of this page could not start in this browser.";
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Persistent trees · Explore GrafluentCollections</title>
+<meta name="description" content="Edit a real PersistentTreeSet and see each new version beside the one before, sharing every vertex the edit did not touch.">
+<script>
+  // The theme the reader picked last time, before anything is drawn.
+  try { const t = localStorage.getItem("explore-theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+  // A new page opens at its top, even where the host keeps the previous page's scroll position.
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%231d4f9c%22/%3E%3Cpath d=%22M9 22L16 9l7 13z%22 fill=%22none%22 stroke=%22white%22 stroke-width=%222.5%22/%3E%3Ccircle cx=%229%22 cy=%2222%22 r=%223.5%22 fill=%22white%22/%3E%3Ccircle cx=%2216%22 cy=%229%22 r=%223.5%22 fill=%22white%22/%3E%3Ccircle cx=%2223%22 cy=%2222%22 r=%223.5%22 fill=%22white%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="explore.css">
+<link rel="modulepreload" href="index.js">
+<link rel="preload" href="Explore.wasm" as="fetch" type="application/wasm" crossorigin>
+</head>
+<body data-page="persistent">
+<div class="wrap">
+  <nav class="topbar" aria-label="Site">
+    <a class="home" href="./">Explore <b>GrafluentCollections</b></a>
+    <span class="spacer"></span>
+    <details class="menu"><summary><span class="burger" aria-hidden="true"></span><span class="mlabel">All pages</span></summary>
+      <nav class="mpanel" aria-label="All pages"><a class="mhome" href="./">Contents</a>
+        <div class="mgroup"><span>Search trees</span><a href="avl.html">AVL trees</a><a href="redblack.html">Red–black trees</a><a href="treap.html">Treaps</a><a href="splay.html">Splay trees</a><a href="btree.html">B-trees</a><a href="skiplist.html">Skip lists</a></div>
+        <div class="mgroup"><span>Strings</span><a href="trie.html">Tries and radix trees</a><a href="ahocorasick.html">Aho–Corasick</a><a href="suffix.html">Suffix arrays and trees</a></div>
+        <div class="mgroup"><span>Logic</span><a href="decisiondiagrams.html">Decision diagrams</a></div>
+        <div class="mgroup"><span>Ranges</span><a href="fenwick.html">Fenwick trees</a><a href="segmenttree.html">Segment trees</a><a href="intervaltree.html">Interval trees</a></div>
+        <div class="mgroup"><span>Space</span><a href="kdtree.html">k-d trees and quadtrees</a></div>
+        <div class="mgroup"><span>Text</span><a href="rope.html">Ropes</a></div>
+        <div class="mgroup"><span>History</span><a href="persistent.html" aria-current="page">Persistent trees</a><a href="lru.html">LRU caches</a></div>
+      </nav>
+    </details>
+    <a href="../documentation/">Docs</a>
+    <button type="button" class="theme" id="theme" aria-label="Switch between light and dark">◐<span class="tlabel"> Theme</span></button>
+  </nav>
+<header class="sign">
+  <h1>Persistent trees</h1>
+  <p class="question">How do you keep every version of a set without copying it for each edit?</p>
+</header>
+<p class="example lead">Example: inserting 7 into a set of fourteen numbers makes version 1. It has five new vertices, the path from the root down to where 7 goes. Its other ten vertices are the very ones version 0 holds, and version 0 still reads as it did.</p>
+
+<div id="app" data-loading aria-busy="true"><div><section class="panel controls" aria-label="Your elements and edits"><label class="field" for="persistent-elements">Version 0's elements <input id="persistent-elements" type="text" value="8 3 12 1 5 10 14 2 4 6 9 11 13 15" maxlength="100" spellcheck="false" autocomplete="off"></label><label class="field" for="persistent-edits">+x inserts x, -x removes it, each making the next version <input id="persistent-edits" type="text" value="+7 -12 +16 -3 +12 -20" maxlength="100" spellcheck="false" autocomplete="off"></label></section><section class="lab" aria-label="The versions"><div class="panel stage"><span class="label">Version 0</span><svg class="canvas" viewBox="0 0 680 270" role="img" aria-label="Version 0 of the set"><g class="edge " data-edge="0"><path d="M79.1,170.9 L52.4,207.1" class="hit" /><path d="M79.1,170.9 L52.4,207.1" class="stroke" /></g><g class="edge " data-edge="1"><path d="M166.8,105.0 L101.8,149.0" class="hit" /><path d="M166.8,105.0 L101.8,149.0" class="stroke" /></g><g class="edge " data-edge="2"><path d="M98.1,170.9 L124.8,207.1" class="hit" /><path d="M98.1,170.9 L124.8,207.1" class="stroke" /></g><g class="edge " data-edge="3"><path d="M347.7,39.1 L195.2,90.9" class="hit" /><path d="M347.7,39.1 L195.2,90.9" class="stroke" /></g><g class="edge " data-edge="4"><path d="M261.9,170.9 L235.2,207.1" class="hit" /><path d="M261.9,170.9 L235.2,207.1" class="stroke" /></g><g class="edge " data-edge="5"><path d="M193.2,105.0 L258.2,149.0" class="hit" /><path d="M193.2,105.0 L258.2,149.0" class="stroke" /></g><g class="edge " data-edge="6"><path d="M280.9,170.9 L307.6,207.1" class="hit" /><path d="M280.9,170.9 L307.6,207.1" class="stroke" /></g><g class="edge " data-edge="7"><path d="M444.8,170.9 L418.1,207.1" class="hit" /><path d="M444.8,170.9 L418.1,207.1" class="stroke" /></g><g class="edge " data-edge="8"><path d="M532.5,105.0 L467.5,149.0" class="hit" /><path d="M532.5,105.0 L467.5,149.0" class="stroke" /></g><g class="edge " data-edge="9"><path d="M463.8,170.9 L490.5,207.1" class="hit" /><path d="M463.8,170.9 L490.5,207.1" class="stroke" /></g><g class="edge " data-edge="10"><path d="M378.0,39.1 L530.6,90.9" class="hit" /><path d="M378.0,39.1 L530.6,90.9" class="stroke" /></g><g class="edge " data-edge="11"><path d="M627.6,170.9 L600.9,207.1" class="hit" /><path d="M627.6,170.9 L600.9,207.1" class="stroke" /></g><g class="edge " data-edge="12"><path d="M559.0,105.0 L623.9,149.0" class="hit" /><path d="M559.0,105.0 L623.9,149.0" class="stroke" /></g><g class="node " data-node="0" tabindex="-1" role="presentation" aria-label="1"><circle cx="42.85714285714283" cy="220.0" r="14.0" /><text x="42.85714285714283" y="252.0" text-anchor="middle" class="name">1</text><text x="42.85714285714283" y="269.0" text-anchor="middle" class="note">v0</text></g><g class="node " data-node="1" tabindex="-1" role="presentation" aria-label="2"><circle cx="88.57142857142856" cy="158.0" r="14.0" /><text x="88.57142857142856" y="190.0" text-anchor="middle" class="name">2</text><text x="88.57142857142856" y="207.0" text-anchor="middle" class="note">v0</text></g><g class="node " data-node="2" tabindex="-1" role="presentation" aria-label="3"><circle cx="134.28571428571428" cy="220.0" r="14.0" /><text x="134.28571428571428" y="252.0" text-anchor="middle" class="name">3</text><text x="134.28571428571428" y="269.0" text-anchor="middle" class="note">v0</text></g><g class="node " data-node="3" tabindex="-1" role="presentation" aria-label="4"><circle cx="179.99999999999997" cy="96.0" r="14.0" /><text x="179.99999999999997" y="128.0" text-anchor="middle" class="name">4</text><text x="179.99999999999997" y="145.0" text-anchor="middle" class="note">v0</text></g><g class="node " data-node="4" tabindex="-1" role="presentation" aria-label="5"><circle cx="225.7142857142857" cy="220.0" r="14.0" /><text x="225.7142857142857" y="252.0" text-anchor="middle" class="name">5</text><text x="225.7142857142857" y="269.0" text-anchor="middle" class="note">v0</text></g><g class="node " data-node="5" tabindex="-1" role="presentation" aria-label="6"><circle cx="271.42857142857144" cy="158.0" r="14.0" /><text x="271.42857142857144" y="190.0" text-anchor="middle" class="name">6</text><text x="271.42857142857144" y="207.0" text-anchor="middle" class="note">v0</text></g><g class="node " data-node="6" tabindex="-1" role="presentation" aria-label="8"><circle cx="317.1428571428571" cy="220.0" r="14.0" /><text x="317.1428571428571" y="252.0" text-anchor="middle" class="name">8</text><text x="317.1428571428571" y="269.0" text-anchor="middle" class="note">v0</text></g><g class="node " data-node="7" tabindex="-1" role="presentation" aria-label="9"><circle cx="362.85714285714283" cy="34.0" r="14.0" /><text x="362.85714285714283" y="66.0" text-anchor="middle" class="name">9</text><text x="362.85714285714283" y="83.0" text-anchor="middle" class="note">v0</text></g><g class="node " data-node="8" tabindex="-1" role="presentation" aria-label="10"><circle cx="408.57142857142856" cy="220.0" r="14.0" /><text x="408.57142857142856" y="252.0" text-anchor="middle" class="name">10</text><text x="408.57142857142856" y="269.0" text-anchor="middle" class="note">v0</text></g><g class="node " data-node="9" tabindex="-1" role="presentation" aria-label="11"><circle cx="454.2857142857143" cy="158.0" r="14.0" /><text x="454.2857142857143" y="190.0" text-anchor="middle" class="name">11</text><text x="454.2857142857143" y="207.0" text-anchor="middle" class="note">v0</text></g><g class="node " data-node="10" tabindex="-1" role="presentation" aria-label="12"><circle cx="500.0" cy="220.0" r="14.0" /><text x="500.0" y="252.0" text-anchor="middle" class="name">12</text><text x="500.0" y="269.0" text-anchor="middle" class="note">v0</text></g><g class="node " data-node="11" tabindex="-1" role="presentation" aria-label="13"><circle cx="545.7142857142858" cy="96.0" r="14.0" /><text x="545.7142857142858" y="128.0" text-anchor="middle" class="name">13</text><text x="545.7142857142858" y="145.0" text-anchor="middle" class="note">v0</text></g><g class="node " data-node="12" tabindex="-1" role="presentation" aria-label="14"><circle cx="591.4285714285713" cy="220.0" r="14.0" /><text x="591.4285714285713" y="252.0" text-anchor="middle" class="name">14</text><text x="591.4285714285713" y="269.0" text-anchor="middle" class="note">v0</text></g><g class="node " data-node="13" tabindex="-1" role="presentation" aria-label="15"><circle cx="637.1428571428571" cy="158.0" r="14.0" /><text x="637.1428571428571" y="190.0" text-anchor="middle" class="name">15</text><text x="637.1428571428571" y="207.0" text-anchor="middle" class="note">v0</text></g></svg><div class="legend"><span><i class="dot selected"></i>a vertex this version made</span><span><i class="dot done"></i>a vertex shared with the version before</span></div><p class="legend">Under each vertex, the version that made it. Faded vertices in the version above are the ones the edit replaced; that version keeps them.</p><span class="label">Every version</span><table class="suffixes"><thead><tr><th>version</th><th>edit</th><th>elements</th><th>vertices made</th></tr></thead><tbody><tr class="found"><td>0</td><td>built</td><td class="suffix">1 2 3 4 5 6 8 9 10 11 12 13 14 15</td><td>14</td></tr><tr class=""><td>1</td><td>insert 7</td><td class="suffix">1 2 3 4 5 6 7 8 9 10 11 12 13 14 15</td><td>5</td></tr><tr class=""><td>2</td><td>remove 12</td><td class="suffix">1 2 3 4 5 6 7 8 9 10 11 13 14 15</td><td>3</td></tr><tr class=""><td>3</td><td>insert 16</td><td class="suffix">1 2 3 4 5 6 7 8 9 10 11 13 14 15 16</td><td>4</td></tr><tr class=""><td>4</td><td>remove 3</td><td class="suffix">1 2 4 5 6 7 8 9 10 11 13 14 15 16</td><td>3</td></tr><tr class=""><td>5</td><td>insert 12</td><td class="suffix">1 2 4 5 6 7 8 9 10 11 12 13 14 15 16</td><td>4</td></tr><tr class=""><td>6</td><td>remove 20</td><td class="suffix">1 2 4 5 6 7 8 9 10 11 12 13 14 15 16</td><td>0</td></tr></tbody></table></div><div class="side"><div class="panel" aria-live="polite"><span class="label">Edit 0 of 6</span><p class="narration">Each edit makes a new version and leaves the old one as it was. The new version makes vertices only on the path to the change and points at the old version’s vertices for everything else.</p></div><div class="panel"><span class="label">This version</span><div class="stat"><div><span class="num">14</span>elements</div><div class="good"><span class="num">14</span>vertices made</div><div><span class="num">0</span>shared</div></div></div></div></section><section class="panel controls" aria-label="Playback"><div class="buttons"><button type="button" aria-label="Step back">◀ Back</button><button type="button" class="primary">▶ Play</button><button type="button">Step ▶</button><button type="button">Reset</button></div><div class="timeline-scroll"><svg class="timeline" width="300" viewBox="0 0 300 64" aria-label="Timeline of events"><line x1="8" y1="32" x2="292" y2="32" class="axis" /><g class="marble future" data-step="0"><circle cx="22" cy="32" r="9.0" class="m-green" /><text x="22" y="36" text-anchor="middle">1</text><title>Insert 7 into version 0: 5 vertices made (4, 6, 7, 8, 9), the path from the root down to where 7 goes, rebalanced where needed. The other 10 are shared with version 0, which is unchanged.</title></g><g class="marble future" data-step="1"><circle cx="48" cy="32" r="9.0" class="m-red" /><text x="48" y="36" text-anchor="middle">2</text><title>Remove 12 from version 1. 3 vertices made (9, 11, 13) on the path down to 12, and the other 11 are shared with version 1, which still holds 12.</title></g><g class="marble future" data-step="2"><circle cx="74" cy="32" r="9.0" class="m-green" /><text x="74" y="36" text-anchor="middle">3</text><title>Insert 16 into version 2: 4 vertices made (9, 13, 15, 16), the path from the root down to where 16 goes, rebalanced where needed. The other 11 are shared with version 2, which is unchanged.</title></g><g class="marble future" data-step="3"><circle cx="100" cy="32" r="9.0" class="m-red" /><text x="100" y="36" text-anchor="middle">4</text><title>Remove 3 from version 3. 3 vertices made (2, 4, 9) on the path down to 3, and the other 11 are shared with version 3, which still holds 3.</title></g><g class="marble future" data-step="4"><circle cx="126" cy="32" r="9.0" class="m-green" /><text x="126" y="36" text-anchor="middle">5</text><title>Insert 12 into version 4: 4 vertices made (9, 11, 12, 13), the path from the root down to where 12 goes, rebalanced where needed. The other 11 are shared with version 4, which is unchanged.</title></g><g class="marble future" data-step="5"><circle cx="152" cy="32" r="9.0" class="m-red" /><text x="152" y="36" text-anchor="middle">6</text><title>Remove 20: it is not there, so version 6 is version 5 itself, every vertex shared.</title></g><line x1="9" y1="8" x2="9" y2="56" class="playhead" /></svg></div><input id="scrub-persistent" class="scrub" type="range" min="0" max="6" value="0" aria-label="Scrub through the steps"><div class="tl-legend"><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-green" /></svg>insert</span><span><svg width="16" height="16" viewBox="0 0 16 16" class="swatch"><circle cx="8" cy="8" r="6.0" class="m-red" /></svg>remove</span></div></section></div></div>
+
+<section class="prose purpose">
+  <h2><small>What it’s for</small>Undo, snapshots and safe sharing</h2>
+  <p>A persistent structure never changes a version once it exists: an edit returns a new version, and the old one stays readable. That gives undo and history for free, lets a reader keep a consistent snapshot while a writer moves on, and makes sharing across threads safe without locks. Functional languages build their maps and sets this way, and so do editors, version-control internals and databases that offer snapshots.</p>
+</section>
+
+<section class="prose">
+  <h2><small>The idea</small>Copy the path, share the rest</h2>
+  <p>In a search tree, an edit only changes the vertices on the path from the root to the change. So the new version copies just that path, with each copy pointing at the old version’s untouched subtrees, and a rebalance copies the few vertices it rotates. Each edit costs O(log <i>n</i>) new vertices, and a history of <i>n</i> edits takes O(<i>n</i> log <i>n</i>) space in all, not a whole tree per version.</p>
+  <p>GrafluentCollections balances by weight (Adams, 1993): no subtree holds more than three times its sibling’s elements. <code>elementsInSharedVertices(with:)</code> names the vertices two versions hold in common, and <code>BinaryTree(version)</code> gives each version’s shape.</p>
+
+  <h2><small>Where it breaks</small>Many small allocations</h2>
+  <p>Every edit allocates new vertices, and every vertex is a separate object, so a set that is only ever used in its latest version is faster as an ordinary sorted array or a mutable tree that changes in place. Versions also keep each other’s vertices alive, so holding on to old versions holds their memory.</p>
+</section>
+
+<section class="prose in-swift">
+  <h2><small>In Swift</small>The versions above, in GrafluentCollections</h2>
+  <pre id="code" data-loading aria-busy="true" aria-label="Swift code"><span><span class="k">import</span> <span class="t">PersistentTrees</span>
+<span class="k">import</span> <span class="t">Trees</span>
+
+<span class="c">/// One edit of the page's set.</span>
+<span class="k">enum</span> <span class="t">PersistentEdit</span>: <span class="t">Equatable</span> {
+    <span class="k">case</span> insert(<span class="t">Int</span>)
+    <span class="k">case</span> remove(<span class="t">Int</span>)
+}
+
+<span class="k">let</span> elements = [<span class="n">8</span>, <span class="n">3</span>, <span class="n">12</span>, <span class="n">1</span>, <span class="n">5</span>, <span class="n">10</span>, <span class="n">14</span>, <span class="n">2</span>, <span class="n">4</span>, <span class="n">6</span>, <span class="n">9</span>, <span class="n">11</span>, <span class="n">13</span>, <span class="n">15</span>]
+<span class="k">let</span> edits: [<span class="t">PersistentEdit</span>] = [.insert(<span class="n">7</span>), .remove(<span class="n">12</span>), .insert(<span class="n">16</span>), .remove(<span class="n">3</span>), .insert(<span class="n">12</span>), .remove(<span class="n">20</span>)]
+
+<span class="k">var</span> versions = [<span class="t">PersistentTreeSet</span>(elements)]
+<span class="k">var</span> shared: [[<span class="t">Int</span>]] = [[]]
+<span class="k">for</span> edit <span class="k">in</span> edits {
+    <span class="k">let</span> latest = versions[versions.count - <span class="n">1</span>]
+    <span class="k">let</span> next = <span class="k">switch</span> edit {
+    <span class="k">case</span> .insert(<span class="k">let</span> element): latest.inserting(element)
+    <span class="k">case</span> .remove(<span class="k">let</span> element): latest.removing(element)
+    }
+    shared.append(next.elementsInSharedVertices(with: latest))
+    versions.append(next)
+}
+<span class="k">let</span> latest = <span class="t">Array</span>(versions[versions.count - <span class="n">1</span>])  <span class="c">// [1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]</span>
+
+<span class="k">let</span> shape = <span class="t">BinaryTree</span>(version)
+<span class="k">let</span> height = shape?.height  <span class="c">// 4</span>
+</span></pre>
+</section>
+<nav class="pager" aria-label="Pages"><a class="prev" href="rope.html"><span>Previous</span>Ropes</a><a class="next" href="lru.html"><span>Next</span>LRU caches</a></nav>
+</div>
+<script>
+  if (!location.hash) window.scrollTo(0, 0);
+  // Until the reader scrolls, keep the page at its top while the fonts and the interactive parts
+  // come in. `pinned` is read again once the interactive parts have mounted.
+  let pinned = !location.hash;
+  if (pinned) {
+    const release = () => { pinned = false; };
+    for (const kind of ["wheel", "touchstart", "keydown", "mousedown"]) addEventListener(kind, release, { once: true, passive: true });
+    const pin = new ResizeObserver(() => { if (pinned) window.scrollTo(0, 0); });
+    pin.observe(document.body);
+    setTimeout(() => { pinned = false; pin.disconnect(); }, 3000);
+  }
+  document.getElementById("theme").addEventListener("click", () => {
+    const root = document.documentElement;
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("explore-theme", root.dataset.theme); } catch {}
+  });
+</script>
+<script type="module">
+  // GrafluentCollections and the interface run as WebAssembly; this loads them.
+  import { init } from "./index.js";
+  // The page's first frame is already drawn; these views mount in its place. Return to the top
+  // once they are drawn, unless the link named a section or the reader has scrolled.
+  const toTop = () => { if (pinned) window.scrollTo(0, 0); };
+  init().then(() => requestAnimationFrame(() => requestAnimationFrame(toTop))).catch((error) => {
+    console.error("The explorer failed to start:", error);
+    for (const part of document.querySelectorAll("[data-loading]")) { part.removeAttribute("data-loading"); part.removeAttribute("aria-busy"); }
+    const app = document.getElementById("app");
+    if (app) app.textContent = "The interactive part of this page could not start in this browser.";
+  });
+</script>
+</body>
+</html>

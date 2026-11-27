@@ -256,7 +256,12 @@ package struct _TrieCore<Symbol: Hashable, Value> {
 
     /// Where `symbol` goes in the sorted chain of `parent`'s children: between `previous` and
     /// `next`, −1 for the chain's ends. `Order` is `Symbol`, found to be `Comparable` at run time.
-    @inlinable
+    // Transparent rather than inlinable: Swift 6.4.3's SILCombine asserts (Linux toolchains,
+    // `isConcrete()` in ProtocolConformanceRef) when it rewrites this call on the opened
+    // `any Comparable.Type` once a client specializes `Symbol` to `Character`. Inlined during the
+    // mandatory passes, the call is gone before SILCombine runs. Back to `@inlinable` once a
+    // release fixes it.
+    @_transparent @usableFromInline
     func _insertionPoint<Order: Comparable>(
         of symbol: Symbol,
         under parent: Int32,

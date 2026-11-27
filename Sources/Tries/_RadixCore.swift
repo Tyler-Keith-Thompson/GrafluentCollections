@@ -335,7 +335,8 @@ package struct _RadixCore<Symbol: Hashable, Value> {
     /// Where a child starting with `symbol` goes in the sorted chain of `parent`'s children:
     /// between `previous` and `next`, −1 for the chain's ends. `Order` is `Symbol`, found to be
     /// `Comparable` at run time.
-    @inlinable
+    // Transparent for the Swift 6.4.3 SILCombine assertion _TrieCore._insertionPoint describes.
+    @_transparent @usableFromInline
     func _insertionPoint<Order: Comparable>(
         of symbol: Symbol,
         under parent: Int32,

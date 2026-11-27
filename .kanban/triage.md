@@ -1,7 +1,7 @@
 # GrafluentCollections: triage charter
 
 ## What it is
-GrafluentCollections is a library of graph-shaped collections for Swift 6.3: balanced search
+GrafluentCollections is a library of graph-shaped collections for Swift 6.4: balanced search
 trees, tries, suffix structures, decision diagrams and the other data structures whose shape is a
 tree or a graph, as copy-on-write value types with the API shape of the standard library and Swift
 Collections, built on Grafluent's protocols and tree types, for Swift developers on Apple
@@ -72,7 +72,7 @@ of a hand-written loop over arrays.
 - API shape follows swift-collections: `Sequence`/`Collection` conformances with the standard
   members, `ExpressibleByArrayLiteral`/`ExpressibleByDictionaryLiteral`, `Equatable` over
   elements (not shape), `Hashable`, `Codable`, `Sendable` where elements are, `description`.
-- Swift 6.3 minimum. Must build and pass on macOS, Linux arm64 and in 32-bit `Int` (wasm32):
+- Swift 6.4 minimum. Must build and pass on macOS, Linux arm64 and in 32-bit `Int` (wasm32):
   width-dependent bounds are comparisons on `Int64` or `Int.max`, never `1 << 32` on an `Int`.
   `Package.swift` stays free of Foundation.
 - Grafluent is the only first-party dependency; swift-collections may be added when a module
@@ -305,7 +305,7 @@ of a hand-written loop over arrays.
 - D25. Fuzz and differential harnesses follow Grafluent's layout, with local corpora
   (2026-11-01): `Fuzz/` holds one libFuzzer target per module (not per structure: a module's
   structures share a target, chosen by the first byte), each checking every public answer
-  against a naive model after every operation, built with swiftly's 6.3.3 toolchain and
+  against a naive model after every operation, built with swiftly's 6.4.3 toolchain and
   AddressSanitizer by `scripts/fuzz.py` (`just fuzz`, `just fuzz-regress`, `just fuzz-repro`).
   Corpora stay local, as in Grafluent, rather than committed: thousands of inputs per target
   would churn the history, and a crash is kept as a regression test instead. `Differential/` is
@@ -326,7 +326,7 @@ of a hand-written loop over arrays.
   `--dependency` archives (it reports no external resolver), and a topic group takes only doc
   links, so the module list is the overview's table rather than a Topics group. The
   `docc convert` rule discards docc's output, so its warnings are checked by running docc by
-  hand in the `swift:6.3` image; the umbrella catalog has none.
+  hand in the `swift:6.4` image; the umbrella catalog has none.
 - D27. In-order iteration walks the tree with an inline spine stack, not slot order or threads
   (2026-11-01): the iterator keeps its first 64 spine entries in a fixed tuple, which holds the
   whole spine of any AVL or red–black tree, and spills deeper entries of a treap or splay tree

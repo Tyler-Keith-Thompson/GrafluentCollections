@@ -36,20 +36,20 @@ contents and the menu without a link.
 
 ## Requirements
 
-- [swiftly](https://www.swift.org/install/) with the Swift 6.3.3 toolchain:
-  `swiftly install 6.3.3`.
+- [swiftly](https://www.swift.org/install/) with the Swift 6.4.3 toolchain:
+  `swiftly install 6.4.3`.
 - The matching Swift SDK for WebAssembly from swift.org:
 
   ```sh
   swiftly run swift sdk install \
-      https://download.swift.org/swift-6.3.3-release/wasm-sdk/swift-6.3.3-RELEASE/swift-6.3.3-RELEASE_wasm.artifactbundle.tar.gz \
-      --checksum cabfa08b73bb8ac783927ecd15fa386e99d0c139c5f232445067bcf58379cae7 +6.3.3
+      https://download.swift.org/swift-6.4.3-release/wasm-sdk/swift-6.4.3-RELEASE/swift-6.4.3-RELEASE_wasm.artifactbundle.tar.gz \
+      --checksum cabfa08b73bb8ac783927ecd15fa386e99d0c139c5f232445067bcf58379cae7 +6.4.3
   ```
 
 - `wasm-opt` from binaryen (`brew install binaryen`) to optimize the binary. The build still
   works without it, with a larger `.wasm`.
 
-Without swiftly, `build.sh` uses the `swift` on `PATH`, which must be 6.3.3.
+Without swiftly, `build.sh` uses the `swift` on `PATH`, which must be 6.4.3.
 
 ## Build
 

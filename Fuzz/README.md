@@ -38,8 +38,8 @@ deleted.
 ## Toolchain
 
 Xcode's toolchain does not include the libFuzzer runtime; the swift.org toolchains do. The
-scripts build with `swiftly run swift build +6.3.3` (override with
-`GRAFLUENTCOLLECTIONS_FUZZ_SWIFT`), so install it once with `swiftly install 6.3.3`. Targets are
+scripts build with `swiftly run swift build +6.4.3` (override with
+`GRAFLUENTCOLLECTIONS_FUZZ_SWIFT`), so install it once with `swiftly install 6.4.3`. Targets are
 built in release mode with AddressSanitizer: preconditions stay on, and unsafe buffer code is
 checked for out-of-bounds access.
 

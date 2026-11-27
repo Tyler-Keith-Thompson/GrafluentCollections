@@ -19,7 +19,7 @@ example you can edit, beside the Swift code that runs it.
 
 ## Installation
 
-GrafluentCollections requires Swift 6.3 and supports macOS 15, iOS 18, tvOS 18, watchOS 11 and
+GrafluentCollections requires Swift 6.4 and supports macOS 15, iOS 18, tvOS 18, watchOS 11 and
 visionOS 2 or later.
 
 ```swift
